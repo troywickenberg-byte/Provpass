@@ -69,6 +69,14 @@ button:focus-visible,input:focus-visible,label:focus-within{outline:3px solid va
 .countdown{display:flex;flex-direction:column;gap:8px}
 .countdown .big{font-family:var(--f-display);font-size:40px;font-weight:800;line-height:1}
 .countdown input{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink)}
+.pdstats{display:grid;gap:12px;margin-top:8px;padding-top:12px;border-top:1px solid var(--line)}
+.pdgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pdtile{display:grid;align-content:start;gap:2px;padding:10px 12px;border-radius:8px;background:var(--paper);border:1px solid var(--line)}
+.pdtile b{font-family:var(--f-display);font-size:26px;font-weight:800;line-height:1.1}
+.pdtile.time b{font-size:20px}
+.pdtile.sr{border-color:var(--quant);background:var(--quant-tint)}
+.pdtile.time:not(.sr){border-color:var(--form);background:var(--form-tint)}
+.pdstats .catlist{margin-top:4px}
 
 .drop{margin-top:24px;border:2px dashed var(--line);border-radius:var(--r);padding:22px;background:var(--sheet);display:grid;gap:10px;justify-items:start}
 .drop.over{border-color:var(--form);background:var(--form-tint)}
@@ -125,6 +133,8 @@ table.log td.n,table.log th.n{text-align:right;font-family:var(--f-mono);font-va
 .pages.two{grid-template-columns:repeat(2,minmax(0,1fr))}
 .pg{background:#fff;border:1px solid var(--line);border-radius:6px;overflow:hidden;min-height:200px;display:grid;place-items:center;color:#5A6275;font-size:14px}
 .pg canvas{display:block;width:100%;height:auto}
+.pg.crop{place-items:start center;padding:8px 0}
+.pg.crop canvas{width:auto;max-width:100%}
 .side{position:sticky;top:calc(12px + env(safe-area-inset-top,0px));background:var(--sheet);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:14px}
 .clock{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .clock .big{font-family:var(--f-mono);font-size:30px;font-weight:500;font-variant-numeric:tabular-nums}
@@ -183,10 +193,12 @@ table.log td.n,table.log th.n{text-align:right;font-family:var(--f-mono);font-va
 @media (max-width:420px){.grid{grid-template-columns:minmax(0,1fr)}.bub{width:40px}}
 
 /* flikar */
-.tabs{display:flex;gap:4px;margin-left:auto}
-.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:6px 10px;font-family:var(--f-display);font-weight:700;font-size:16px;color:var(--soft)}
-.tabs button.on{color:var(--ink);border-bottom-color:var(--form)}
-.tabs button:hover{color:var(--ink)}
+.tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:640px;margin:24px auto 4px}
+.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:104px;padding:16px 12px;border:2px solid var(--line);border-radius:16px;background:var(--sheet);font-family:var(--f-display);font-weight:800;font-size:clamp(17px,2.4vw,21px);color:var(--soft);transition:border-color .15s,background .15s,transform .15s}
+.tabs button svg{width:36px;height:36px}
+.tabs button:hover{color:var(--ink);border-color:var(--soft);transform:translateY(-1px)}
+#tab-prov.on{color:var(--form);border-color:var(--form);background:var(--form-tint)}
+#tab-sr.on{color:var(--quant);border-color:var(--quant);background:var(--quant-tint)}
 
 /* snabbräkning */
 .subnav{display:flex;gap:6px;flex-wrap:wrap;margin:22px 0 4px}
@@ -197,6 +209,50 @@ table.log td.n,table.log th.n{text-align:right;font-family:var(--f-mono);font-va
 .bignums{display:flex;gap:28px;flex-wrap:wrap;margin:10px 0 16px}
 .bignums div{display:grid}
 .bignums b{font-family:var(--f-display);font-size:44px;font-weight:800;line-height:1}
+.catgroup + .catgroup{margin-top:22px}
+.catgroup h3{font-size:18px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--quant)}
+.catitems{display:grid;gap:8px}
+.catitem{border:1px solid var(--line);border-radius:10px;background:var(--paper);overflow:hidden}
+.catitem.open{border-color:var(--quant)}
+.cathead{display:flex;align-items:center;gap:12px;padding:4px 6px 4px 12px}
+.catname{flex:1;display:flex;justify-content:space-between;align-items:center;gap:10px;background:none;border:0;padding:12px 6px;text-align:left;font-weight:700;font-size:16px;min-height:44px}
+.chev{color:var(--soft);font-size:14px}
+input.sw{appearance:none;-webkit-appearance:none;flex:none;width:40px;height:24px;border-radius:999px;background:var(--line);position:relative;cursor:pointer;margin:0;transition:background .15s}
+input.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:left .15s}
+input.sw:checked{background:var(--quant)}
+input.sw:checked::after{left:19px}
+.catbody{padding:4px 14px 14px;border-top:1px solid var(--line);background:var(--sheet)}
+.panebtns{display:flex;gap:8px;margin:12px 0}
+.panebtns button{flex:1;max-width:200px;border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:8px 14px;font-weight:700}
+.panebtns button.on{background:var(--quant);border-color:var(--quant);color:var(--paper)}
+.catpane{display:grid;gap:8px}
+.catpane .prow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line)}
+.catpane input[type=number]{width:72px;font:inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink)}
+.catpane .note{margin:0}
+.tasklist{list-style:none;margin:0;padding:0;display:grid;max-height:420px;overflow:auto}
+.tasklist li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+.tasklist li.off .tq{opacity:.5;text-decoration:line-through}
+.tq{display:grid;font-family:var(--f-mono);font-size:14px}
+.tq small{font-family:var(--f-body);font-size:12px}
+.tbtns{display:flex;gap:6px;flex:none}
+.tg{border:1px solid var(--line);background:transparent;border-radius:999px;padding:4px 10px;font-size:13px;white-space:nowrap}
+.tg.star.on{background:var(--warn-tint);border-color:var(--warn);color:var(--warn)}
+.tg.off.on{background:var(--bad-tint);border-color:var(--bad);color:var(--bad)}
+.tg:disabled{opacity:.4;cursor:not-allowed}
+.focus{display:grid;gap:10px;margin:12px 0 6px}
+.focusseg{display:flex;gap:4px;padding:4px;border-radius:999px;background:var(--paper);border:1px solid var(--line);width:fit-content;max-width:100%}
+.focusseg button{border:0;background:transparent;border-radius:999px;padding:7px 14px;font-weight:700;font-size:14px;color:var(--soft)}
+.focusseg button.on{background:var(--ink);color:var(--paper)}
+.focuschips{display:flex;flex-wrap:wrap;gap:6px}
+.fchip{border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:5px 12px;font-size:13px}
+.fchip.on{border-color:var(--quant);background:var(--quant-tint);color:var(--quant);font-weight:700}
+.hrpanel{margin-top:20px;border-top:3px solid var(--quant)}
+.hrhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+.hrcols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:10px}
+.hrcols h3{font-size:17px}
+.hrcols .bignums{margin:8px 0 12px}
+.hrpanel select{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink)}
+@media (max-width:700px){.hrcols{grid-template-columns:minmax(0,1fr)}}
 .catlist{display:grid;gap:6px;margin:0;padding:0;list-style:none}
 .catlist li{display:flex;justify-content:space-between;gap:10px;font-size:14px;border-bottom:1px solid var(--line);padding:4px 0}
 .drill{max-width:640px;margin:26px auto 0;display:grid;gap:16px}
@@ -231,18 +287,22 @@ table.log td.n,table.log th.n{text-align:right;font-family:var(--f-mono);font-va
 .setgrid label{display:grid;gap:4px;font-size:14px}
 .setgrid input,.setgrid select{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink)}
 .copybox{width:100%;min-height:160px;font-family:var(--f-mono);font-size:12px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px}
-@media (max-width:700px){.today{grid-template-columns:minmax(0,1fr)}.setrow{grid-template-columns:auto minmax(0,1fr)}.tabs{margin-left:0;order:3;width:100%}}
+@media (max-width:700px){.today{grid-template-columns:minmax(0,1fr)}.setrow{grid-template-columns:auto minmax(0,1fr)}.tabs button{min-height:88px}}
 </style>
 
 <div class="wrap">
   <header class="mast">
     <button class="brand" id="home-btn" type="button" aria-label="Till startsidan"><h1>Provpass HP</h1><span class="tag">gamla prov</span></button>
-    <nav class="tabs" aria-label="Delar av appen">
-      <button type="button" id="tab-prov" class="on" aria-current="page">Gamla prov</button>
-      <button type="button" id="tab-sr">Snabbräkning</button>
-    </nav>
     <div class="status"><span class="dot" id="sdot"></span><span id="stext">Sparas på den här enheten</span></div>
   </header>
+  <nav class="tabs" aria-label="Delar av appen">
+    <button type="button" id="tab-prov" class="on" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H19v-3"/><path d="M8 7h7M8 10.5h7M8 14h4"/></svg>
+      <span>Gamla prov</span></button>
+    <button type="button" id="tab-sr">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+      <span>Snabbräkning</span></button>
+  </nav>
   <main id="app"></main>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -270,8 +330,9 @@ const factorStr = n => { const f=primeFactors(n), c={}; f.forEach(p=>c[p]=(c[p]|
 // ---------- Kategorier. Lägg till en ny genom att anropa cat(...) med fasta kort och/eller mallar. ----------
 // limits = [Lätt under s, Bra under s]; långsammare än Bra blir Svårt.
 const CATS = [];
-function cat(id, name, limits, build){
-  const c = {id, name, limits, cards:[]};
+// group: 'sr' = Snabbräkning (dagens repetition), 'hr' = Huvudräkning (egen kortlek och snabbtest)
+function cat(id, name, limits, build, group='sr'){
+  const c = {id, name, limits, group, cards:[]};
   const add = o => { o.cat = id; o.id = id+':'+o.id; c.cards.push(o); };
   build(add); CATS.push(c); return c;
 }
@@ -571,6 +632,45 @@ cat('decimal','Decimaltal i kvadrat',[3,6], add=>{
     add({id:`rt${x}`, kind:'num', q:`√${fmtN(Number((x*x).toPrecision(8)))}`, ans:x, show:fmtN(x), ex:`${fmtN(x)}² = ${fmtN(x*x)}. Antalet decimaler halveras.`});
 });
 
+// ================= Huvudräkning: egen kortlek (group 'hr') =================
+cat('hr-sex','De sex svåra',[2,4], add=>{
+  const TIP = {'7*8':'5, 6, 7, 8: 56 = 7 · 8.','8*8':'8 · 8 = 64.','7*7':'7 · 7 = 49.','6*6':'6 · 6 = 36.','6*7':'6 · 6 = 36, plus 6 = 42.','6*8':'Dubbla 6 · 4 = 24: 6 · 8 = 48.'};
+  for (const [a,b] of [[7,8],[8,8],[7,7],[6,6],[6,7],[6,8]])
+    add({id:`${a}*${b}`, kind:'num', q:`${a} · ${b}`, qf: a===b ? null : ()=> Math.random()<0.5 ? `${a} · ${b}` : `${b} · ${a}`, ans:a*b, show:String(a*b), ex:TIP[a+'*'+b]});
+}, 'hr');
+cat('hr-kvad','Kvadrater 2²–15²',[2.5,5], add=>{
+  for (let n=2;n<=15;n++){
+    const ex = n===15 ? 'Slutar på 5: 1 · 2 = 2, sätt 25 efter: 225.' : n>12 ? `${n}² = (10 + ${n-10})² = 100 + ${20*(n-10)} + ${(n-10)**2} = ${n*n}.` : `${n} · ${n} = ${n*n}.`;
+    add({id:`sq${n}`, kind:'num', q:`${n}²`, ans:n*n, show:String(n*n), ex});
+  }
+}, 'hr');
+cat('hr-rot','Kvadratrötter √4–√225',[2.5,5], add=>{
+  for (let n=2;n<=15;n++) add({id:`r${n}`, kind:'num', q:`√${n*n}`, ans:n, show:String(n), ex:`${n}² = ${n*n}.`});
+}, 'hr');
+cat('hr-pct','Bråk ↔ procent (en decimal)',[3,6], add=>{
+  const pct1 = (p,q) => Math.round(1000*p/q)/10;          // en decimal: 1/3 → 33,3
+  const tip = (p,q) => q===8 ? `1/8 = 12,5 %, så ${p}/8 = ${p} · 12,5 = ${fmtN(pct1(p,8))} %.` : q===3 ? `1/3 = 33,33… ≈ 33,3 %.`+(p===2?' 2/3 ≈ 66,7 %.':'') : `1/4 = 25 %, så ${p}/4 = ${fmtN(pct1(p,4))} %.`;
+  const seen = new Set();
+  for (const q of [8,3,4]) for (let p=1;p<q;p++){
+    const P = pct1(p,q), g = gcd(p,q);
+    add({id:`${p}/${q}>pct`, kind:'pct', q:`${p}/${q} i procent`, ans:P, show:fmtN(P)+' %', tol:0, ex:tip(p,q)+' Svara med en decimal, t.ex. 33,3.'});
+    // åt andra hållet: ett kort per procentvärde, svaret ska vara fullt förkortat
+    if (g===1 && !seen.has(P)){ seen.add(P); add({id:`pct>${p}/${q}`, kind:'reduced', q:`${fmtN(P)} % som bråk`, ans:p/q, show:`${p}/${q}`, ex:tip(p,q)+' Svara med minsta möjliga bråk.'}); }
+  }
+  if (!seen.has(50)) add({id:'pct>1/2', kind:'reduced', q:'50 % som bråk', ans:1/2, show:'1/2', ex:'Hälften: 1/2.'});
+}, 'hr');
+cat('hr-fork','Förkorta bråk',[4,8], add=>{
+  for (const [a,b] of [[48,64],[45,120],[91,208],[36,96],[72,256],[60,144],[84,180],[112,256],[75,225],[56,98],[96,128],[39,65],[121,143],[105,150],[64,240],[126,162],[85,119],[132,176],[54,81],[95,133],[160,256],[144,192],[98,112],[120,216]]){
+    const g = gcd(a,b);
+    add({id:`${a}/${b}`, kind:'reduced', q:`Förkorta ${a}/${b}`, ans:a/b, show:`${a/g}/${b/g}`, ex:`Största gemensamma delaren är ${g}: ${a}/${g} = ${a/g} och ${b}/${g} = ${b/g}.`});
+  }
+  add({id:'gen', tpl:true, name:'Förkorta (slumpat, nämnare ≤ 256)', gen(){
+    let p,q; do { q=ri(3,20); p=ri(1,q-1); } while (gcd(p,q)!==1);
+    const k = ri(2, Math.min(16, Math.floor(256/q)));
+    return {kind:'reduced', q:`Förkorta ${p*k}/${q*k}`, ans:p/q, show:`${p}/${q}`, ex:`Dela täljare och nämnare med ${k}: ${p}/${q}.`};
+  }});
+}, 'hr');
+
 const CARDS = {}; for (const c of CATS) for (const k of c.cards) CARDS[k.id] = k;
 const CATBY = Object.fromEntries(CATS.map(c=>[c.id,c]));
 
@@ -722,11 +822,37 @@ function schedule(c, g, now, ret){
 
 // ---------- Lagring: schemat i ett dokument, försöken i ett dokument per dag ----------
 const LKEY = 'provpass-sr-v1';
-const defSettings = () => ({active:Object.fromEntries(CATS.map(c=>[c.id,true])), newPerDay:15, passMode:'cards', passCards:20, passMin:5, retention:0.9, limits:{}, tol:{}, auto:true, updated:0});
+// Standardval: dessa kategorier är avstängda, och i "Förkorta bråk" är bråk med täljare > 30 och
+// nämnare > 50 samt den slumpade mallen avstängda. Allt går att slå på igen under Kategorier.
+const DEFAULT_OFF_CATS = ['primtal','konjtal','tripplar'];
+const DEFAULTS_V = 3;
+// bråk med täljare > 30 och nämnare > 50, plus den slumpade mallen, i en förkortningskategori
+function bigFractionCards(catId){
+  const out = {};
+  for (const k of CATBY[catId].cards){
+    if (k.tpl){ out[k.id] = true; continue; }
+    const [a,b] = k.id.split(':')[1].split('/').map(Number);
+    if (a > 30 && b > 50) out[k.id] = true;
+  }
+  return out;
+}
+const defaultOffCards = () => Object.assign(bigFractionCards('forkorta'), bigFractionCards('hr-fork'));
+const defSettings = () => ({active:Object.fromEntries(CATS.map(c=>[c.id, !DEFAULT_OFF_CATS.includes(c.id)])), newPerDay:15, passMode:'cards', passCards:20, passMin:5, retention:0.9, limits:{}, tol:{}, star:{}, off:defaultOffCards(), quizN:20,
+  focusMode:{sr:'all', hr:'all'}, focus:{sr:[], hr:[]}, auto:true, defaultsV:DEFAULTS_V, updated:0});
+// Sparade inställningar från en äldre version får standardvalen en gång. Ändrar du dem sedan behålls dina val.
+function applyDefaultsOnce(st){
+  const v = st.defaultsV||0;
+  if (v >= DEFAULTS_V) return;
+  // varje version tillämpas bara en gång, så att det du själv slagit på igen inte stängs av på nytt
+  if (v < 2){ for (const id of DEFAULT_OFF_CATS) st.active[id] = false; st.off = Object.assign({}, st.off, bigFractionCards('forkorta')); }
+  if (v < 3) st.off = Object.assign({}, st.off, bigFractionCards('hr-fork'));
+  st.focusMode = Object.assign({sr:'all', hr:'all'}, st.focusMode); st.focus = Object.assign({sr:[], hr:[]}, st.focus);
+  st.defaultsV = DEFAULTS_V; st.updated = Date.now();
+}
 const S = {state:{cards:{}, settings:defSettings(), newDays:{}}, log:[], mode:'local', db:null, uid:null, attached:false, loaded:false, stateTimer:null, logTimer:null, chain:Promise.resolve(), dirtyDays:new Set(), error:null};
 function loadLocal(){
   try{ const raw = localStorage.getItem(LKEY); if (!raw) return; const o = JSON.parse(raw);
-    if (o.state){ S.state.cards = o.state.cards||{}; S.state.newDays = o.state.newDays||{}; S.state.settings = Object.assign(defSettings(), o.state.settings||{}); S.state.settings.active = Object.assign(defSettings().active, (o.state.settings||{}).active||{}); }
+    if (o.state){ S.state.cards = o.state.cards||{}; S.state.newDays = o.state.newDays||{}; S.state.settings = Object.assign(defSettings(), o.state.settings||{}); S.state.settings.active = Object.assign(defSettings().active, (o.state.settings||{}).active||{}); S.state.settings.defaultsV = (o.state.settings||{}).defaultsV||0; applyDefaultsOnce(S.state.settings); if (o.state.timeMs!=null) S.state.timeMs = o.state.timeMs; }
     if (Array.isArray(o.log)) S.log = o.log;
   }catch(e){}
 }
@@ -741,7 +867,8 @@ function mergeState(into, other){
   if (!other) return into;
   for (const [id,c] of Object.entries(other.cards||{})){ const mine = into.cards[id]; if (!mine || (c.last||0) > (mine.last||0)) into.cards[id] = c; }
   for (const [d,n] of Object.entries(other.newDays||{})) into.newDays[d] = Math.max(into.newDays[d]||0, n);
-  if (other.settings && (other.settings.updated||0) > (into.settings.updated||0)){ into.settings = Object.assign(defSettings(), other.settings); into.settings.active = Object.assign(defSettings().active, other.settings.active||{}); }
+  if (other.timeMs!=null) into.timeMs = Math.max(into.timeMs||0, other.timeMs);
+  if (other.settings && (other.settings.updated||0) > (into.settings.updated||0)){ into.settings = Object.assign(defSettings(), other.settings); into.settings.active = Object.assign(defSettings().active, other.settings.active||{}); into.settings.defaultsV = other.settings.defaultsV||0; applyDefaultsOnce(into.settings); }
   return into;
 }
 function mergeLog(list){ const have = new Map(S.log.map(a=>[a.id,a])); for (const a of list){ const m = have.get(a.id); if (!m) { have.set(a.id, a); } else if (a.s) m.s = 1; } S.log = [...have.values()].sort((a,b)=>a.t-b.t); }
@@ -796,15 +923,27 @@ document.addEventListener('visibilitychange', ()=>{ if (document.visibilityState
 const set = () => S.state.settings;
 const limitsOf = catId => set().limits[catId] || CATBY[catId].limits;
 const tolOf = card => card.tpl && card.tol!=null ? (set().tol[card.id] ?? card.tol) : null;
-const activeCards = () => CATS.filter(c=>set().active[c.id]).flatMap(c=>c.cards);
-function dueList(){ const end = endOfToday(); return activeCards().filter(k=>{ const c=S.state.cards[k.id]; return c && c.st!=='new' && c.due<=end; }).sort((a,b)=>S.state.cards[a.id].due - S.state.cards[b.id].due); }
-function newList(){
-  const per = CATS.filter(c=>set().active[c.id]).map(c=>c.cards.filter(k=>!S.state.cards[k.id]));
+// per uppgift: "oftare" (stjärna) och "avstängd"
+const isStar = k => !!set().star[k.id], isOff = k => !!set().off[k.id];
+const groupOf = card => CATBY[card.cat].group;
+const activeCats = (group='sr') => CATS.filter(c=>c.group===group && set().active[c.id]);
+// kategorierna som passen hämtar från: alla aktiva, eller bara de du valt för just den här träningen
+const passCats = (group='sr') => set().focusMode?.[group]==='pick' ? CATS.filter(c=>c.group===group && (set().focus?.[group]||[]).includes(c.id)) : activeCats(group);
+const activeCards = (group='sr') => passCats(group).flatMap(c=>c.cards).filter(k=>!isOff(k));
+function dueList(group='sr'){
+  const end = endOfToday();
+  return activeCards(group).filter(k=>{ const c=S.state.cards[k.id]; return c && c.st!=='new' && c.due<=end; })
+    .sort((a,b)=> (isStar(b)-isStar(a)) || S.state.cards[a.id].due - S.state.cards[b.id].due);   // oftare-markerade först
+}
+function newList(group='sr'){
+  const per = passCats(group).map(c=>c.cards.filter(k=>!S.state.cards[k.id] && !isOff(k)).sort((a,b)=>isStar(b)-isStar(a)));
   const out = []; let i = 0;
   while (per.some(l=>l.length)){ const l = per[i % per.length]; if (l.length) out.push(l.shift()); i++; }
   return out;
 }
-const newToday = () => S.state.newDays[dayKey()] || 0;
+const newKey = group => group==='sr' ? dayKey() : dayKey()+'|'+group;
+const newToday = (group='sr') => S.state.newDays[newKey(group)] || 0;
+const shuffleS = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
 function makeInst(card){
   const base = card.tpl ? card.gen() : Object.assign({}, card, {q: card.qf ? card.qf() : card.q});
   const inst = Object.assign({}, base, {id:card.id, cat:card.cat, tpl:!!card.tpl, tol: card.tpl ? tolOf(card) ?? base.tol : base.tol});
@@ -812,16 +951,26 @@ function makeInst(card){
   return inst;
 }
 let pass = null, view = 'today';
-function startPass(extraNew=0){
-  const due = dueList();
-  const room = Math.max(0, set().newPerDay + extraNew - newToday());
-  const fresh = newList().slice(0, room);
+function startPass(extraNew=0, group='sr'){
+  const due = dueList(group);
+  const room = Math.max(0, set().newPerDay + extraNew - newToday(group));
+  const fresh = newList(group).slice(0, room);
   const queue = [...due, ...fresh];
   if (!queue.length){ toast('Inga kort att repetera just nu.'); return; }
-  pass = {queue, pending:[], done:[], start:Date.now(), extraNew, cur:null};
+  pass = {queue, pending:[], done:[], start:Date.now(), extraNew, group, quiz:0, cur:null};
+  view = 'pass'; nextCard();
+}
+// Snabbtest: n slumpade kort ur Huvudräkning, oberoende av schemat. Oftare-markerade väger dubbelt.
+function startQuiz(n){
+  const pool = activeCards('hr');
+  if (!pool.length){ toast('Inga aktiva uppgifter i Huvudräkning. Slå på någon kategori under Kategorier.'); return; }
+  const picked = pool.map(k=>({k, r: Math.pow(Math.random(), 1/(isStar(k)?2:1))})).sort((a,b)=>b.r-a.r).map(x=>x.k);
+  const queue = []; while (queue.length < n) queue.push(...(queue.length ? shuffleS(picked) : picked));
+  pass = {queue: queue.slice(0,n), pending:[], done:[], start:Date.now(), extraNew:0, group:'hr', quiz:n, cur:null};
   view = 'pass'; nextCard();
 }
 function passOver(){
+  if (pass.quiz) return pass.done.length >= pass.quiz;
   const s = set();
   return s.passMode==='cards' ? pass.done.length >= s.passCards : (Date.now()-pass.start) >= s.passMin*60e3;
 }
@@ -844,8 +993,12 @@ function answer(raw, display){
   const [easy, good] = limitsOf(cur.card.cat);
   const g = !res.ok ? 1 : ms < easy*1000 ? 4 : ms < good*1000 ? 3 : 2;
   const now = Date.now(), prev = S.state.cards[cur.card.id];
-  if (!prev) S.state.newDays[dayKey()] = newToday() + 1;
+  // tid i passet: sedan förra svaret (högst 3 min, så att en paus inte räknas)
+  S.state.timeMs = srTime() + Math.min(now - (pass.mark || pass.start), 180e3); pass.mark = now;
+  if (!prev && !pass.quiz){ const grp = groupOf(cur.card); S.state.newDays[newKey(grp)] = newToday(grp) + 1; }
   const next = schedule(prev, g, now, set().retention);
+  // "oftare": halva intervallet till nästa repetition
+  if (isStar(cur.card) && next.st==='review') next.due = now + Math.max(DAY, (next.due - now)/2);
   S.state.cards[cur.card.id] = next;
   const count = S.log.filter(a=>a.day===dayKey(now)).length;
   const att = {id: now.toString(36)+Math.random().toString(36).slice(2,6), t:now, day:dayKey(now), c:Math.floor(count/700), cat:cur.card.cat, card:cur.card.id, q:cur.inst.q, a:display ?? String(raw), ans:cur.inst.show, ok:res.ok?1:0, ms, g, next:next.due};
@@ -854,7 +1007,7 @@ function answer(raw, display){
   queueState(); queueLog();
   cur.answered = {ok:res.ok, g, ms, note:res.note, mine: display ?? String(raw), next:next.due};
   pass.done.push(att);
-  if (next.due - now < 20*60e3) pass.pending.push(cur.card);
+  if (!pass.quiz && next.due - now < 20*60e3) pass.pending.push(cur.card);
   rerender();
   if (res.ok && g>=3 && set().auto){ const me = cur; setTimeout(()=>{ if (pass && pass.cur===me) nextCard(); }, 650); }
 }
@@ -955,25 +1108,61 @@ function render(r){
   if (view==='data') return renderData(r);
   renderToday(r);
 }
+// Två val: träna på alla aktiva kategorier, eller bara på de kategorier du väljer här (utan att stänga av något)
+function focusPicker(group){
+  const s = set(); s.focusMode ||= {sr:'all', hr:'all'}; s.focus ||= {sr:[], hr:[]};
+  const mode = s.focusMode[group] || 'all', chosen = s.focus[group] || [];
+  const save = () => { s.updated = Date.now(); queueState(); rerender(); };
+  const seg = (m, txt) => el('button',{type:'button',class:mode===m?'on':'','aria-pressed':mode===m?'true':'false',onclick:()=>{ s.focusMode[group]=m; save(); }}, txt);
+  return el('div',{class:'focus'},
+    el('div',{class:'focusseg',role:'group','aria-label':'Vilka kategorier passet hämtar från'}, seg('all','Alla aktiva kategorier'), seg('pick','Välj kategorier')),
+    mode==='pick' ? el('div',{class:'focuschips'},
+      CATS.filter(c=>c.group===group).map(c=>{ const on = chosen.includes(c.id);
+        return el('button',{type:'button',class:'fchip'+(on?' on':''),'aria-pressed':on?'true':'false',onclick:()=>{ s.focus[group] = on ? chosen.filter(x=>x!==c.id) : [...chosen, c.id]; save(); }}, (on?'✓ ':'')+c.name); }),
+      !chosen.length ? el('p',{class:'note',style:'margin:0;flex-basis:100%'}, 'Välj minst en kategori. Valet gäller bara träningen här, inget stängs av.') : null) : null);
+}
 function renderToday(r){
   const due = dueList().length, room = Math.max(0, set().newPerDay - newToday()), fresh = Math.min(room, newList().length);
-  const st = catStats().filter(x=>set().active[x.c.id]);
+  const pickSr = set().focusMode?.sr==='pick', srIds = new Set(passCats('sr').map(c=>c.id));
+  const st = catStats().filter(x=>x.c.group==='sr' && srIds.has(x.c.id));
   const today = S.log.filter(a=>a.day===dayKey());
+  // Huvudräkning: egen repetition + snabbtest med valfritt antal kort (10–30)
+  const hDue = dueList('hr').length, hFresh = Math.min(Math.max(0, set().newPerDay - newToday('hr')), newList('hr').length);
+  const hCats = passCats('hr');
+  const quizSel = el('select',{id:'quizn','aria-label':'Antal kort i snabbtestet',onchange:e=>{ set().quizN=+e.target.value; set().updated=Date.now(); queueState(); }},
+    [10,15,20,25,30].map(n=>el('option',{value:n,selected:(set().quizN||20)===n}, n+' kort')));
+  const hr = el('section',{class:'panel hrpanel'},
+    el('div',{class:'hrhead'}, el('h2',{style:'font-size:22px'}, 'Huvudräkning'), el('span',{class:'note'}, 'De sex svåra · kvadrater och rötter · bråk ↔ procent · förkortning')),
+    focusPicker('hr'),
+    el('div',{class:'hrcols'},
+      el('div',{},
+        el('h3',{}, 'Repetition'),
+        el('div',{class:'bignums'},
+          el('div',{}, el('b',{class:'mono'}, String(hDue)), el('span',{class:'note'},'förfallna')),
+          el('div',{}, el('b',{class:'mono'}, String(hFresh)), el('span',{class:'note'},'nya'))),
+        el('button',{class:'btn primary',type:'button',disabled:!hDue && !hFresh,onclick:()=>startPass(0,'hr')}, !hCats.length ? 'Välj kategorier först' : hDue||hFresh ? 'Starta repetition' : 'Klart för idag')),
+      el('div',{},
+        el('h3',{}, 'Snabbtest'),
+        el('p',{class:'note'}, 'Slumpade kort ur de valda kategorierna, oberoende av schemat. Uppgifter markerade "oftare" dyker upp oftare.'),
+        el('div',{class:'row'}, quizSel, el('button',{class:'btn primary',type:'button',disabled:!hCats.length,onclick:()=>startQuiz(set().quizN||20)}, 'Starta snabbtest')))),
+    !hCats.length && set().focusMode?.hr!=='pick' ? el('p',{class:'note'}, 'Alla kategorier i Huvudräkning är avstängda. Slå på dem under Kategorier, eller välj kategorier ovan.') : null);
   put(r, nav(), storageNote(),
     el('section',{class:'today'},
       el('div',{class:'panel'},
         el('h2',{style:'font-size:24px'}, 'Dagens repetition'),
+        focusPicker('sr'),
         el('div',{class:'bignums'},
           el('div',{}, el('b',{class:'mono'}, String(due)), el('span',{class:'note'},'förfallna kort')),
           el('div',{}, el('b',{class:'mono'}, String(fresh)), el('span',{class:'note'},`nya kort (max ${set().newPerDay} per dag)`)),
           el('div',{}, el('b',{class:'mono'}, String(today.length)), el('span',{class:'note'},'svar idag'))),
         el('p',{class:'note'}, `Ett pass är ${set().passMode==='cards' ? set().passCards+' kort' : set().passMin+' minuter'}. Förfallna kort kommer först. Betyget sätts efter hur snabbt du svarar rätt.`),
         el('div',{class:'row'},
-          el('button',{class:'btn primary',type:'button',disabled:!due && !fresh,onclick:()=>startPass(0)}, due||fresh ? 'Starta pass' : 'Klart för idag'),
+          el('button',{class:'btn primary',type:'button',disabled:!due && !fresh,onclick:()=>startPass(0)}, pickSr && !srIds.size ? 'Välj kategorier först' : due||fresh ? 'Starta pass' : 'Klart för idag'),
           el('button',{class:'btn ghost small',type:'button',disabled:!newList().length,onclick:()=>startPass(10)},'Ta 10 extra nya kort'))),
-      el('div',{class:'panel'}, el('h3',{},'Aktiva kategorier'),
-        st.length ? el('ul',{class:'catlist'}, st.map(x=>el('li',{}, el('span',{}, x.c.name), el('span',{class:'note mono'}, `${x.due} förf. · ${x.fresh} nya`)))) : el('p',{class:'empty'},'Inga kategorier är aktiva. Välj några under Kategorier.'),
-        el('div',{class:'row',style:'margin-top:10px'}, el('button',{class:'link',type:'button',onclick:()=>{view='cats';rerender();}},'Välj kategorier')))));
+      el('div',{class:'panel'}, el('h3',{}, pickSr ? 'Valda kategorier' : 'Aktiva kategorier'),
+        st.length ? el('ul',{class:'catlist'}, st.map(x=>el('li',{}, el('span',{}, x.c.name), el('span',{class:'note mono'}, `${x.due} förf. · ${x.fresh} nya`)))) : el('p',{class:'empty'}, pickSr ? 'Inga kategorier valda. Välj några ovan.' : 'Inga kategorier är aktiva. Välj några under Kategorier.'),
+        el('div',{class:'row',style:'margin-top:10px'}, el('button',{class:'link',type:'button',onclick:()=>{view='cats';rerender();}},'Välj kategorier')))),
+    hr);
 }
 function insertAt(input, txt){
   const s = input.selectionStart ?? input.value.length, e = input.selectionEnd ?? input.value.length;
@@ -983,9 +1172,9 @@ function insertAt(input, txt){
 function renderCard(r){
   const cur = pass.cur, inst = cur.inst, a = cur.answered, s = set();
   const [easy, good] = limitsOf(cur.card.cat);
-  const progress = s.passMode==='cards' ? `Kort ${Math.min(pass.done.length + (a?0:1), s.passCards)} av ${s.passCards}` : `${fmtTime(Math.max(0, s.passMin*60e3 - (Date.now()-pass.start)))} kvar`;
+  const progress = pass.quiz ? `Snabbtest · kort ${Math.min(pass.done.length + (a?0:1), pass.quiz)} av ${pass.quiz}` : s.passMode==='cards' ? `Kort ${Math.min(pass.done.length + (a?0:1), s.passCards)} av ${s.passCards}` : `${fmtTime(Math.max(0, s.passMin*60e3 - (Date.now()-pass.start)))} kvar`;
   const top = el('div',{class:'drill-top'},
-    el('span',{class:'chip '+(['tabell','potenser','rotter','primtal','decimal'].includes(cur.card.cat)?'k':'v')}, CATBY[cur.card.cat].name),
+    el('span',{class:'chip '+(['tabell','potenser','rotter','primtal','decimal'].includes(cur.card.cat) || groupOf(cur.card)==='hr' ?'k':'v')}, CATBY[cur.card.cat].name),
     el('span',{class:'label'}, progress),
     el('button',{class:'link',type:'button',onclick:()=>{ view='summary'; rerender(); }},'Avsluta passet'));
   const qtext = el('div',{class:'qtext'+(inst.q.length>26?' long':'')}, inst.q);
@@ -1043,34 +1232,65 @@ function renderSummary(r){
   const done = pass ? pass.done : [];
   const ok = done.filter(a=>a.ok).length, gc = [1,2,3,4].map(g=>done.filter(a=>a.g===g).length);
   const med = median(done.filter(a=>a.ok).map(a=>a.ms));
-  const left = dueList().length + Math.min(Math.max(0,set().newPerDay-newToday()), newList().length);
+  const grp = pass?.group || 'sr', quiz = pass?.quiz || 0;
+  const left = dueList(grp).length + Math.min(Math.max(0,set().newPerDay-newToday(grp)), newList(grp).length);
   const wrong = done.filter(a=>!a.ok);
   put(r, nav(), storageNote(),
     el('section',{class:'result-top'},
-      el('div',{class:'panel'}, el('span',{class:'label'},'Passet är klart'),
+      el('div',{class:'panel'}, el('span',{class:'label'}, quiz ? 'Snabbtestet är klart' : grp==='hr' ? 'Huvudräkningen är klar' : 'Passet är klart'),
         el('div',{class:'score mono'}, String(ok), el('small',{},` / ${done.length}`)),
         el('p',{}, `Mediantid för rätta svar: ${fmtS(med)}.`),
         el('div',{class:'row'}, [1,2,3,4].map(g=>el('span',{class:'grade g'+g}, `${GRADE[g]}: ${gc[g-1]}`))),
         el('div',{class:'row',style:'margin-top:14px'},
-          el('button',{class:'btn primary',type:'button',disabled:!left,onclick:()=>startPass(0)}, left ? `Fortsätt (${left} kvar idag)` : 'Inget kvar idag'),
+          quiz ? el('button',{class:'btn primary',type:'button',onclick:()=>startQuiz(quiz)}, `Nytt snabbtest (${quiz} kort)`)
+            : el('button',{class:'btn primary',type:'button',disabled:!left,onclick:()=>startPass(0, grp)}, left ? `Fortsätt (${left} kvar idag)` : 'Inget kvar idag'),
           el('button',{class:'btn ghost',type:'button',onclick:()=>{ pass=null; view='today'; rerender(); }},'Klar'))),
       el('div',{class:'panel'}, el('h3',{},'Fel i passet'),
         wrong.length ? el('div',{class:'tbl-wrap'}, el('table',{class:'log'}, el('thead',{}, el('tr',{}, el('th',{},'Fråga'), el('th',{},'Ditt svar'), el('th',{},'Rätt svar'))),
           el('tbody',{}, wrong.map(a=>el('tr',{}, el('td',{},a.q), el('td',{},a.a), el('td',{},a.ans)))))) : el('p',{class:'empty'},'Inga fel. Snyggt!'))));
 }
+let catOpen = {id:null, pane:'params'};   // vilken kategori som är utfälld och vilken flik (parametrar/uppgifter)
 function renderCats(r){
   const s = set();
   const num = (val, min, max, step, onch, label) => el('input',{type:'number',min,max,step,value:val,'aria-label':label,onchange:e=>{ const v=parseFloat(String(e.target.value).replace(',','.')); if (isFinite(v) && v>=min && v<=max){ onch(v); s.updated=Date.now(); queueState(); } else e.target.value = val; }});
-  const rows = CATS.map(c=>{
+  // Hopfällbara kategorier: bara namnet syns, ett klick visar knapparna Parametrar och Uppgifter.
+  const toggle = (map, id) => { if (map[id]) delete map[id]; else map[id] = true; s.updated=Date.now(); queueState(); rerender(); };
+  const catItem = c => {
+    const open = catOpen.id===c.id;
     const [e,g] = limitsOf(c.id), tpls = c.cards.filter(k=>k.tpl && k.tol!=null);
-    return el('div',{class:'setrow'},
-      el('input',{type:'checkbox',id:'act-'+c.id,checked:!!s.active[c.id],onchange:ev=>{ s.active[c.id]=ev.target.checked; s.updated=Date.now(); queueState(); }}),
-      el('label',{for:'act-'+c.id}, el('strong',{}, c.name), el('span',{class:'note'}, ` · ${c.cards.filter(k=>!k.tpl).length} fasta kort`+(c.cards.some(k=>k.tpl)?`, ${c.cards.filter(k=>k.tpl).length} mallar`:''))),
-      el('span',{class:'note'},'Lätt under'), el('span',{}, num(e, 0.5, 120, 0.5, v=>{ s.limits[c.id] = [v, Math.max(v+0.5, limitsOf(c.id)[1])]; rerender(); }, `Lätt-gräns för ${c.name} i sekunder`), ' s'),
-      el('div',{class:'sub'}, 'Bra under', num(g, 1, 240, 0.5, v=>{ s.limits[c.id] = [Math.min(limitsOf(c.id)[0], v-0.5), v]; rerender(); }, `Bra-gräns för ${c.name} i sekunder`), 's. Långsammare rätt svar blir Svårt.',
-        s.limits[c.id] ? el('button',{class:'link',type:'button',onclick:()=>{ delete s.limits[c.id]; s.updated=Date.now(); queueState(); rerender(); }},'Återställ') : null),
-      tpls.length ? el('div',{class:'sub'}, tpls.map(k=>el('span',{}, `${k.name}: ±`, num(Math.round((s.tol[k.id] ?? k.tol)*1000)/10, 0.5, 50, 0.5, v=>{ s.tol[k.id]=v/100; }, `Tolerans för ${k.name} i procent`), ' %'))) : null);
-  });
+    const nStar = c.cards.filter(isStar).length, nOff = c.cards.filter(isOff).length;
+    const head = el('div',{class:'cathead'+(open?' open':'')},
+      el('input',{type:'checkbox',class:'sw',id:'act-'+c.id,checked:!!s.active[c.id],'aria-label':`${c.name} ingår i passen`,title:'Ingår i passen',onchange:ev=>{ s.active[c.id]=ev.target.checked; s.updated=Date.now(); queueState(); }}),
+      el('button',{type:'button',class:'catname','aria-expanded':open?'true':'false',onclick:()=>{ catOpen = open ? {id:null, pane:catOpen.pane} : {id:c.id, pane:'params'}; rerender(); }},
+        el('span',{}, c.name), el('span',{class:'chev','aria-hidden':'true'}, open ? '▴' : '▾')));
+    if (!open) return el('div',{class:'catitem'}, head);
+    const paneBtn = (id, txt) => el('button',{type:'button',class:catOpen.pane===id?'on':'','aria-pressed':catOpen.pane===id?'true':'false',onclick:()=>{ catOpen.pane=id; rerender(); }}, txt);
+    let pane;
+    if (catOpen.pane==='params'){
+      pane = el('div',{class:'catpane'},
+        el('div',{class:'prow'}, el('span',{}, 'Lätt under'), el('span',{}, num(e, 0.5, 120, 0.5, v=>{ s.limits[c.id] = [v, Math.max(v+0.5, limitsOf(c.id)[1])]; rerender(); }, `Lätt-gräns för ${c.name} i sekunder`), ' s')),
+        el('div',{class:'prow'}, el('span',{}, 'Bra under'), el('span',{}, num(g, 1, 240, 0.5, v=>{ s.limits[c.id] = [Math.min(limitsOf(c.id)[0], v-0.5), v]; rerender(); }, `Bra-gräns för ${c.name} i sekunder`), ' s')),
+        el('p',{class:'note'}, 'Rätt svar snabbare än "Lätt" blir Lätt, snabbare än "Bra" blir Bra, annars Svårt. Det styr när kortet kommer tillbaka.'),
+        tpls.map(k=>el('div',{class:'prow'}, el('span',{}, `Felmarginal: ${k.name}`), el('span',{}, '± ', num(Math.round((s.tol[k.id] ?? k.tol)*1000)/10, 0.5, 50, 0.5, v=>{ s.tol[k.id]=v/100; }, `Tolerans för ${k.name} i procent`), ' %'))),
+        s.limits[c.id] ? el('button',{class:'link',type:'button',onclick:()=>{ delete s.limits[c.id]; s.updated=Date.now(); queueState(); rerender(); }},'Återställ tidsgränserna') : null);
+    } else {
+      const end = endOfToday();
+      pane = el('div',{class:'catpane'},
+        el('p',{class:'note'}, `${c.cards.length} uppgifter`+(nStar?` · ${nStar} visas oftare`:'')+(nOff?` · ${nOff} avstängda`:'')+'. "Oftare" ger halva tiden till nästa repetition och förtur i passen. Avstängda uppgifter visas inte alls.'),
+        el('ul',{class:'tasklist'}, c.cards.map(k=>{
+          const st = S.state.cards[k.id], off = isOff(k), star = isStar(k);
+          const status = off ? 'Avstängd' : !st ? 'Ny' : st.due<=end ? 'Förfallen idag' : 'Nästa: '+whenTxt(st.due);
+          return el('li',{class:off?'off':''},
+            el('span',{class:'tq'}, k.tpl ? k.name : k.q, el('small',{class:'note'}, status)),
+            el('span',{class:'tbtns'},
+              el('button',{type:'button',class:'tg star'+(star?' on':''),'aria-pressed':star?'true':'false',disabled:off,title:'Visa oftare',onclick:()=>toggle(s.star, k.id)}, star ? '★ Oftare' : '☆ Oftare'),
+              el('button',{type:'button',class:'tg off'+(off?' on':''),'aria-pressed':off?'true':'false',title:'Stäng av uppgiften',onclick:()=>toggle(s.off, k.id)}, off ? 'Avstängd' : 'Stäng av')));
+        })));
+    }
+    return el('div',{class:'catitem open'}, head, el('div',{class:'catbody'}, el('div',{class:'panebtns',role:'group','aria-label':c.name}, paneBtn('params','Parametrar'), paneBtn('tasks','Uppgifter')), pane));
+  };
+  const groups = [['sr','Snabbräkning'],['hr','Huvudräkning']].map(([gid, title])=>el('div',{class:'catgroup'},
+    el('h3',{}, title), el('div',{class:'catitems'}, CATS.filter(c=>c.group===gid).map(catItem))));
   put(r, nav(), storageNote(),
     el('section',{class:'panel',style:'margin-top:18px'}, el('h3',{},'Inställningar'),
       el('div',{class:'setgrid'},
@@ -1080,7 +1300,7 @@ function renderCats(r){
         s.passMode==='cards' ? el('label',{}, 'Kort per pass', num(s.passCards, 5, 200, 1, v=>{ s.passCards=Math.round(v); }, 'Kort per pass')) : el('label',{}, 'Minuter per pass', num(s.passMin, 1, 60, 1, v=>{ s.passMin=v; }, 'Minuter per pass')),
         el('label',{}, 'Målsäkerhet (FSRS)', el('select',{id:'ret',onchange:e=>{ s.retention=+e.target.value; s.updated=Date.now(); queueState(); }}, [0.8,0.85,0.9,0.95].map(v=>el('option',{value:v,selected:s.retention===v}, Math.round(v*100)+' %')))),
         el('label',{style:'grid-auto-flow:column;justify-content:start;align-items:center;gap:8px'}, el('input',{type:'checkbox',id:'auto',checked:s.auto,onchange:e=>{ s.auto=e.target.checked; s.updated=Date.now(); queueState(); }}), 'Gå vidare automatiskt efter snabbt rätt svar'))),
-    el('section',{class:'panel',style:'margin-top:16px'}, el('h3',{},'Kategorier och tidsgränser'), rows));
+    el('section',{class:'panel',style:'margin-top:16px'}, el('p',{class:'note',style:'margin:0 0 6px'}, 'Brytaren till vänster styr om kategorin ingår i passen. Tryck på namnet för parametrar och uppgifter.'), groups));
 }
 function renderStats(r){
   const st = catStats(), w = weakest();
@@ -1117,7 +1337,16 @@ document.addEventListener('keydown', e=>{
 function canLeave(){ return true; }
 
 loadLocal();
-return {render, attach, canLeave, _test:{check, parse, ev, CATS, CARDS, makeInst, schedule, S, csv, backup}};
+// för rutan Provdag: total tid i snabbräkningen och antal dagar i rad med minst ett svar
+function srTime(){ if (S.state.timeMs==null) S.state.timeMs = S.log.reduce((a,x)=>a+(x.ms||0),0); return S.state.timeMs; }
+function streak(){
+  const days = new Set(S.log.map(a=>a.day)); const d = new Date(); let n = 0;
+  if (!days.has(dayKey(d.getTime()))) d.setDate(d.getDate()-1);
+  while (days.has(dayKey(d.getTime()))){ n++; d.setDate(d.getDate()-1); }
+  return n;
+}
+const summary = () => ({ms: srTime(), streak: streak(), today: S.log.some(a=>a.day===dayKey())});
+return {render, attach, canLeave, summary, _test:{check, parse, ev, CATS, CARDS, makeInst, schedule, S, csv, backup}};
 })();
 </script>
 <script>
@@ -1269,7 +1498,7 @@ async function findQuestionPages(doc){
   return out;
 }
 async function parseFile(f){
-  const doc = await pdfjsLib.getDocument({data:new Uint8Array(f.buf.slice(0)), isEvalSupported:false, useSystemFonts:true}).promise;
+  const doc = await pdfjsLib.getDocument({data:new Uint8Array(f.buf.slice(0)), isEvalSupported:false, useSystemFonts:true, verbosity:0}).promise;
   const t1 = await pageText(doc, 1);
   const date = (t1.str.match(/(\d{4}-\d{2}-\d{2})/)||[])[1];
   if (/Facit/i.test(t1.str) && !/Svarsh/i.test(t1.str)){
@@ -1334,6 +1563,91 @@ function pageBox(test, p, cssWidth){
   const box = el('div',{class:'pg'}, el('span',{class:'busy'}, el('span',{class:'spin'}), 'Sidan ritas…'));
   renderPage(test, p, cssWidth).then(c=>{ const img = c.cloneNode(); img.getContext('2d').drawImage(c,0,0); img.setAttribute('aria-label',`Sida ${p} i provhäftet`); img.setAttribute('role','img'); put(box, img); }).catch(()=>put(box, 'Sidan kunde inte visas.'));
   return box;
+}
+
+// ---------- Beskärning: varje uppgift visas för sig ----------
+// Rutan går från uppgiftens nummer ned till nästa uppgift i samma kolumn. Text som hör till alla
+// uppgifter på sidan (t.ex. LÄS-texten ovanför "Uppgifter") följer med överst. Vridna sidor (DTK)
+// och sidor med bara en uppgift visas hela.
+const CROP = { on: (()=>{ try{ return localStorage.getItem('provpass-crop')!=='off'; }catch(e){ return true; } })(),
+  set(v){ this.on=v; try{ localStorage.setItem('provpass-crop', v?'on':'off'); }catch(e){} } };
+const QMARK = /^\s*(\d{1,2})\.(\s|$)/;
+async function questionCrop(test, n){
+  test.crops ||= {};
+  if (n in test.crops) return test.crops[n];
+  let crop = null;
+  try{
+    const p = test.qpage[n];
+    const onPage = new Set(Object.entries(test.qpage).filter(([,q])=>q===p).map(([k])=>+k));
+    if (p && onPage.size>1){
+      const page = await test.doc.getPage(p);
+      const [L,B,R,T] = page.view, W = R-L;
+      const items = (await page.getTextContent()).items.filter(i=>typeof i.str==='string' && i.str.trim());
+      const rotated = items.some(i=>Math.abs(i.transform[1])>0.01 || Math.abs(i.transform[2])>0.01);
+      if (!rotated){
+        const by = {};
+        for (const it of items){
+          const m = it.str.match(QMARK); if (!m || !onPage.has(+m[1])) continue;
+          const k = {n:+m[1], x:it.transform[4], y:it.transform[5]}, b = by[k.n];
+          if (!b || k.x < b.x-2 || (Math.abs(k.x-b.x)<=2 && k.y > b.y)) by[k.n] = k;
+        }
+        const me = by[n], marks = Object.values(by);
+        if (me && marks.length>1){
+          const cols = []; for (const x of marks.map(m=>m.x).sort((a,b)=>a-b)) if (!cols.length || x-cols[cols.length-1] > 40) cols.push(x);
+          const ci = cols.findIndex((x,i)=> me.x >= x-1 && (i===cols.length-1 || me.x < cols[i+1]-1));
+          const inCol = m => m.x >= cols[ci]-1 && (ci===cols.length-1 || m.x < cols[ci+1]-1);
+          const below = marks.filter(m=>inCol(m) && m.y < me.y-4).sort((a,b)=>b.y-a.y)[0];
+          // kolumngränser: undvik grannkolumnens text och skiljelinjen mellan kolumnerna
+          const box = { x0: Math.max(L, cols[ci]-(ci>0 ? 26 : 40)), x1: ci<cols.length-1 ? cols[ci+1]-34 : R-16,
+                        top: Math.min(T, me.y+24), bottom: below ? below.y+16 : B+56 };
+          // gemensam text ovanför uppgifterna: rubriken "Uppgifter", annars innehåll ovanför första uppgiften
+          const topMark = Math.max(...marks.map(m=>m.y));
+          const head = items.filter(i=>/^\s*Uppgifter\s*$/.test(i.str) && i.transform[5] > me.y).sort((a,b)=>a.transform[5]-b.transform[5])[0];
+          // räknas bara om det finns minst tre rader text där (inte bara en avsnittsrubrik)
+          const linesAbove = b => { const ys = items.map(i=>i.transform[5]).filter(y=> y > b && y < T-30).sort((a,c)=>c-a); return ys.filter((y,i)=> i===0 || ys[i-1]-y > 6).length; };
+          let ctxBottom = head ? head.transform[5]+16 : topMark+24;
+          if (linesAbove(ctxBottom) < 3) ctxBottom = null;
+          crop = {p, L, T, W, box, ctx: ctxBottom!=null && ctxBottom > me.y+12 ? {x0:L, x1:R, top:T-6, bottom:ctxBottom} : null};
+          if (crop.ctx) crop.box.top = Math.min(crop.box.top, ctxBottom);
+        }
+      }
+    }
+  }catch(e){ crop = null; }
+  return (test.crops[n] = crop);
+}
+function cropBox(test, n, p, cssWidth){
+  const box = el('div',{class:'pg crop'}, el('span',{class:'busy'}, el('span',{class:'spin'}), 'Uppgiften ritas…'));
+  (async()=>{
+    const crop = await questionCrop(test, n);
+    // förstora uppgiften så att den fyller bredden (främst på mobil), men högst till 1000 px sidbredd
+    let pageCss = cssWidth;
+    if (crop && crop.p===p){ const cw = Math.max(...[crop.box, crop.ctx].filter(Boolean).map(r=>r.x1-r.x0)); pageCss = Math.max(cssWidth, Math.min(1000, cssWidth*crop.W/cw)); }
+    const c = await renderPage(test, p, pageCss);
+    cssWidth = pageCss;
+    if (!crop || crop.p!==p){ const img = c.cloneNode(); img.getContext('2d').drawImage(c,0,0); img.setAttribute('aria-label',`Sida ${p} i provhäftet`); img.setAttribute('role','img'); box.classList.remove('crop'); put(box, img); return; }
+    const s = c.width / crop.W, gap = Math.round(14*s);
+    const parts = crop.ctx ? [crop.ctx, crop.box] : [crop.box];
+    const hs = parts.map(r=>Math.max(1, Math.round((r.top-r.bottom)*s)));
+    const out = document.createElement('canvas');
+    out.width = Math.round(Math.max(...parts.map(r=>r.x1-r.x0))*s);
+    out.height = hs.reduce((a,b)=>a+b,0) + gap*(parts.length-1);
+    const g = out.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0,0,out.width,out.height);
+    let y = 0;
+    parts.forEach((r,i)=>{
+      const sw = Math.round((r.x1-r.x0)*s);
+      g.drawImage(c, Math.round((r.x0-crop.L)*s), Math.round((crop.T-r.top)*s), sw, hs[i], 0, y, sw, hs[i]);
+      y += hs[i];
+      if (i<parts.length-1){ g.fillStyle = '#DCDFE6'; g.fillRect(Math.round(16*s), y+Math.round(gap/2), out.width-Math.round(32*s), Math.max(1,Math.round(s))); y += gap; }
+    });
+    out.style.width = Math.round(out.width * cssWidth / c.width)+'px';
+    out.setAttribute('role','img'); out.setAttribute('aria-label',`Uppgift ${n}, sida ${p} i provhäftet`);
+    put(box, out);
+  })().catch(()=>put(box, 'Uppgiften kunde inte visas.'));
+  return box;
+}
+// sidorna för en uppgift: uppgiftens egen sida beskärs, en tillhörande textsida (LÄS/DTK) visas hel
+function taskBoxes(test, n, pages, cssWidth){
+  return pages.map(p => CROP.on && p===test.qpage[n] ? cropBox(test, n, p, cssWidth) : pageBox(test, p, cssWidth));
 }
 
 // ---------- Claude-förklaringar (rätt svar kommer alltid från facit) ----------
@@ -1427,7 +1741,12 @@ function submit(){
     } else if (r.status==='ok' && at>=0){ P.mistakes[at].fixed = true; P.mistakes[at].fixedD = new Date().toISOString(); }
   }
   P.mistakes = P.mistakes.slice(0, 800);
-  if (graded.length) P.sessions.unshift({d:new Date().toISOString(), label:s.label, tk:s.tk||null, sec:s.sec||null, n:graded.length, c:correct, ms:used, bySec});
+  if (graded.length){
+    const tt = provTotals();   // räknas före unshift, så att passet inte räknas två gånger
+    tt.ms += used;
+    if (s.tk && !s.sec){ tt.full++; if (!tt.passes.includes(s.tk)) tt.passes.push(s.tk); } else tt.sec++;
+    P.sessions.unshift({d:new Date().toISOString(), label:s.label, tk:s.tk||null, sec:s.sec||null, n:graded.length, c:correct, ms:used, bySec});
+  }
   P.sessions = P.sessions.slice(0,60);
   store.save();
   result = {label:s.label, rows, correct, graded:graded.length, used, nofacit: rows.filter(r=>r.status==='nofacit')};
@@ -1481,6 +1800,42 @@ function render(){
   else if (view==='quiz') renderQuiz();
   else if (view==='result') renderResult();
 }
+// Provets namn efter termin: januari–juni är våren, juli–december hösten
+const examSeason = date => { const [y,m] = String(date).split("-").map(Number); return (m<=6 ? "våren" : "hösten")+" "+y; };
+const examName = date => "Prov från "+examSeason(date);
+const examShort = date => { const s = examSeason(date); return s[0].toUpperCase()+s.slice(1); };
+// Totaler för gamla prov. Passhistoriken sparar bara de 60 senaste, så totalerna sparas för sig
+// (första gången räknas de fram ur den historik som finns).
+function provTotals(){
+  if (!P.totals){
+    const t = {ms:0, full:0, sec:0, passes:[]};
+    for (const s of P.sessions){ t.ms += s.ms||0; if (s.tk && !s.sec){ t.full++; if (!t.passes.includes(s.tk)) t.passes.push(s.tk); } else t.sec++; }
+    P.totals = t;
+  }
+  return P.totals;
+}
+const fmtDur = ms => { const m = Math.round((ms||0)/60000); if (m < 60) return m+' min'; const h = Math.floor(m/60), r = m%60; return h+' h'+(r ? ' '+r+' min' : ''); };
+function provdagStats(){
+  const t = provTotals(), sr = SR.summary();
+  // gjorda prov: hela provpass grupperade per provtillfälle
+  const byDate = {};
+  for (const k of t.passes){ const [d,p] = k.split('|'); (byDate[d] ||= new Set()).add(p); }
+  const exams = Object.keys(byDate).sort().reverse().map(d=>{
+    const loaded = Object.values(LIB.tests).filter(x=>x.date===d).length;
+    return el('li',{}, el('span',{}, examShort(d)), el('span',{class:'note mono'}, loaded ? `${byDate[d].size} av ${loaded} pass` : `${byDate[d].size} pass`));
+  });
+  const tile = (big, small, cls='') => el('div',{class:'pdtile '+cls}, el('b',{class:'mono'}, big), el('span',{class:'note'}, small));
+  return el('div',{class:'pdstats'},
+    el('div',{class:'pdgrid'},
+      tile(String(t.full), t.full===1 ? 'helt provpass' : 'hela provpass'),
+      tile(String(t.sec), t.sec===1 ? 'delövning' : 'delövningar'),
+      tile(String(exams.length), exams.length===1 ? 'gammalt prov' : 'gamla prov'),
+      tile(String(sr.streak), (sr.streak===1 ? 'dag' : 'dagar')+' i rad med snabbräkning'+(sr.streak && !sr.today ? ' (öva idag för att hålla sviten)' : ''), 'sr')),
+    exams.length ? el('div',{}, el('span',{class:'label'},'Gjorda prov'), el('ul',{class:'catlist'}, exams)) : null,
+    el('div',{class:'pdgrid two'},
+      tile(fmtDur(t.ms), 'på gamla prov', 'time'),
+      tile(fmtDur(sr.ms), 'på snabbräkning', 'time sr')));
+}
 function daysLeft(){
   if (!P.examDate) return null;
   const d = new Date(P.examDate+'T08:00:00'); if (isNaN(d)) return null;
@@ -1516,10 +1871,10 @@ function renderHome(){
   const byDate = {};
   for (const t of tests) (byDate[t.date] ||= []).push(t);
   const doneBest = key => { let best=null; for (const s of P.sessions) if (s.tk===key && (!best || s.c/s.n > best.c/best.n)) best=s; return best; };
-  const orphanFacit = Object.entries(LIB.facits).flatMap(([d,ps])=>Object.keys(ps).filter(p=>!LIB.tests[d+'|'+p]).map(p=>`${d} provpass ${p}`));
+  const orphanFacit = Object.entries(LIB.facits).flatMap(([d,ps])=>Object.keys(ps).filter(p=>!LIB.tests[d+'|'+p]).map(p=>`${examShort(d)} provpass ${p}`));
   const lib = tests.length ? el('section',{class:'lib'},
     Object.entries(byDate).map(([date, ts])=>el('div',{class:'panel exam'},
-      el('h3',{}, 'Högskoleprovet '+date, el('span',{class:'label'}, ts.length+' provpass')),
+      el('h3',{}, examName(date), el('span',{class:'label'}, date+' · '+ts.length+' provpass')),
       el('div',{class:'passes'}, ts.map(t=>{
         const items = itemsFor(t);
         const secs = [...new Set(items.map(i=>i.sec))];
@@ -1530,7 +1885,7 @@ function renderHome(){
           el('div',{class:'pass-head'}, el('strong',{}, `Provpass ${t.pass} · ${t.kind==='v'?'Verbal':'Kvantitativ'}`),
             t.facit ? el('span',{class:'chip okc'}, nf ? `Facit saknas för ${nf} uppg.` : 'Facit finns') : el('span',{class:'chip missing'},'Facit saknas')),
           el('span',{class:'note'}, `${items.length} uppgifter`+(missingSecs.length?` · ${missingSecs.join(', ')} finns inte i filen`:'')+(best?` · bästa: ${best.c}/${best.n}`:'')),
-          !t.facit ? el('span',{class:'note'}, 'Utan facit kan passet inte rättas. Lägg till facit-filen för '+t.date+'.') : null,
+          !t.facit ? el('span',{class:'note'}, 'Utan facit kan passet inte rättas. Lägg till facit-filen för '+examSeason(t.date)+' ('+t.date+').') : null,
           el('div',{class:'chips'},
             el('button',{class:'btn small primary',type:'button',onclick:()=>startPass(t)},'Hela passet, 55 min'),
             secs.map(c=>el('button',{class:'chip '+SEC[c].part,type:'button',title:SEC[c].name,onclick:()=>startSec(t,c)}, c))));
@@ -1577,7 +1932,8 @@ function renderHome(){
         el('span',{class:'big mono'}, dl==null ? '–' : dl<0 ? 'Klart' : String(dl)),
         el('span',{class:'note'}, dl==null ? 'Ange datumet för ditt provtillfälle.' : dl<0 ? 'Datumet har passerat.' : dl===1?'dag kvar':'dagar kvar'),
         el('label',{for:'exam',class:'note'},'Datum för provet'),
-        el('input',{id:'exam',type:'date',value:P.examDate||'',onchange:e=>{P.examDate=e.target.value; store.save(); render();}}))),
+        el('input',{id:'exam',type:'date',value:P.examDate||'',onchange:e=>{P.examDate=e.target.value; store.save(); render();}}),
+        provdagStats())),
     drop, lib,
     part('v','Verbal del','ORD · LÄS · MEK · ELF'),
     part('k','Kvantitativ del','XYZ · KVA · NOG · DTK'),
@@ -1590,12 +1946,12 @@ function leastPractised(tests, c){
 }
 function startPass(t){
   if (!t.facit) toast('Facit saknas för det här passet. Du kan göra det, men det kan inte rättas.');
-  startSession(itemsFor(t), `${t.date} · provpass ${t.pass}`);
+  startSession(itemsFor(t), `${examShort(t.date)} · provpass ${t.pass}`);
   if (session) session.tk = t.key;
 }
 function startSec(t, c){
   if (!t.facit) toast('Facit saknas för det här passet. Du kan göra det, men det kan inte rättas.');
-  startSession(itemsFor(t, c), `${c} · ${t.date} pass ${t.pass}`);
+  startSession(itemsFor(t, c), `${c} · ${examShort(t.date)} pass ${t.pass}`);
   if (session){ session.tk = t.key; session.sec = c; }
 }
 
@@ -1604,17 +1960,26 @@ function renderQuiz(){
   const pages = pagesFor(test, it.n);
   const viewer = el('section',{class:'viewer'});
   const holder = el('div',{class:'pages'+(pages.length>1?' two':'')});
-  const wide = Math.max(320, Math.min(1100, (document.querySelector('.wrap')?.clientWidth||900) - 360));
-  let shown = pages.slice();
-  const draw = () => { holder.className = 'pages'+(shown.length>1?' two':''); put(holder, ...shown.map(p=>pageBox(test, p, shown.length>1 ? wide/2 : wide))); pinfo.textContent = 'Sida '+shown.join(' och ')+' av '+test.pages; };
+  const wrapW = document.querySelector('.wrap')?.clientWidth||900;
+  const wide = innerWidth <= 980 ? Math.max(280, wrapW - 36) : Math.max(320, Math.min(1100, wrapW - 360));
+  let shown = pages.slice(), onTask = true;
+  const cropBtn = el('button',{class:'btn ghost small',type:'button',onclick:()=>{ CROP.set(!CROP.on); shown=pages.slice(); onTask=true; draw(); }});
+  const draw = () => {
+    const w = shown.length>1 && innerWidth > 980 ? wide/2 : wide;
+    holder.className = 'pages'+(shown.length>1?' two':'');
+    put(holder, ...(onTask ? taskBoxes(test, it.n, shown, w) : shown.map(p=>pageBox(test, p, w))));
+    pinfo.textContent = 'Sida '+shown.join(' och ')+' av '+test.pages;
+    cropBtn.textContent = CROP.on ? 'Visa hela sidan' : 'Visa bara uppgiften';
+    cropBtn.hidden = !onTask;
+  };
   const pinfo = el('span',{class:'note'});
   viewer.append(
     el('div',{class:'vbar'},
-      el('span',{class:'label'}, `${test.date} · provpass ${test.pass}`),
-      el('div',{class:'row'}, pinfo,
-        el('button',{class:'btn ghost small',type:'button',onclick:()=>{ const f=shown[0]-1; if (f>=1){ shown=[f]; draw(); } }},'Föregående sida'),
-        el('button',{class:'btn ghost small',type:'button',onclick:()=>{ const l=shown[shown.length-1]+1; if (l<=test.pages){ shown=[l]; draw(); } }},'Nästa sida'),
-        el('button',{class:'link',type:'button',onclick:()=>{ shown=pages.slice(); draw(); }},'Tillbaka till uppgiften'))),
+      el('span',{class:'label'}, `${examShort(test.date)} · provpass ${test.pass}`),
+      el('div',{class:'row'}, pinfo, cropBtn,
+        el('button',{class:'btn ghost small',type:'button',onclick:()=>{ const f=shown[0]-1; if (f>=1){ shown=[f]; onTask=false; draw(); } }},'Föregående sida'),
+        el('button',{class:'btn ghost small',type:'button',onclick:()=>{ const l=shown[shown.length-1]+1; if (l<=test.pages){ shown=[l]; onTask=false; draw(); } }},'Nästa sida'),
+        el('button',{class:'link',type:'button',onclick:()=>{ shown=pages.slice(); onTask=true; draw(); }},'Tillbaka till uppgiften'))),
     holder);
   draw();
   const side = el('aside',{class:'side',id:'side'});
@@ -1710,7 +2075,7 @@ function itemCard(x){
       x.tag ? el('span',{class:'tag '+(x.tag==='skipped'?'norm':x.tag)}, TAGTXT[x.tag]) : null,
       el('span',{class:'note mono'}, `Ditt svar: ${x.chosen||'–'} · Facit: ${x.answer||'saknas'} · ${fmtTime(x.ms)} (riktm. ${fmtTime(x.pace)})`)),
     el('div',{class:'row'},
-      test ? el('button',{class:'btn ghost small',type:'button',onclick:e=>{ thumbWrap.hidden=!thumbWrap.hidden; if(!thumbWrap.hidden && !thumbWrap.childNodes.length) thumbWrap.append(...pagesFor(test,x.n).map(p=>pageBox(test,p,520))); e.currentTarget.textContent = thumbWrap.hidden?'Visa uppgiften':'Dölj uppgiften'; }},'Visa uppgiften') : null,
+      test ? el('button',{class:'btn ghost small',type:'button',onclick:e=>{ thumbWrap.hidden=!thumbWrap.hidden; if(!thumbWrap.hidden && !thumbWrap.childNodes.length) thumbWrap.append(...taskBoxes(test, x.n, pagesFor(test,x.n), 520)); e.currentTarget.textContent = thumbWrap.hidden?'Visa uppgiften':'Dölj uppgiften'; }},'Visa uppgiften') : null,
       x.answer && sampleFn && sampleImages ? el('button',{class:'btn ghost small',type:'button',onclick:async()=>{ box.hidden=false; const t = await explain(x, box); if (t){ x.ex=t; saveEx(key,t); box.prepend(el('span',{class:'src'},'Claudes förklaring av facitsvaret')); } }}, saved?'Förklara igen':'Förklara') : null),
     thumbWrap, box);
 }
@@ -1733,7 +2098,7 @@ function renderMistakes(){
   const rows = P.mistakes.map(m=>({tk:m.tk, n:m.n, sec:m.sec, chosen:m.chosen, answer:m.answer, ms:m.ms, tag:m.tag, status:m.chosen?'bad':'blank', pace:SEC[m.sec].pace*1000, ex:m.ex, fixed:m.fixed, times:m.times, d:m.d}));
   put(app, 
     el('div',{class:'part-head',style:'margin-top:24px'}, el('h3',{},`Sparade fel (${rows.length})`), el('button',{class:'btn ghost small',type:'button',onclick:()=>{view='home';render();}},'Till startsidan')),
-    el('div',{class:'items'}, rows.map(x=>{ const c = itemCard(x); c.querySelector('.item-head').append(el('span',{class:'note'}, `${x.tk.replace('|',' · pass ')} · fel ${x.times||1} gång${(x.times||1)>1?'er':''}`+(x.fixed?' · klarad senare':''))); return c; })));
+    el('div',{class:'items'}, rows.map(x=>{ const c = itemCard(x); c.querySelector('.item-head').append(el('span',{class:'note'}, `${examShort(x.tk.split('|')[0])} · pass ${x.tk.split('|')[1]} · fel ${x.times||1} gång${(x.times||1)>1?'er':''}`+(x.fixed?' · klarad senare':''))); return c; })));
 }
 
 document.addEventListener('keydown', e=>{

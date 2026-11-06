@@ -1,6 +1,6 @@
 // Provpass HP service worker: cachar appens filer så att den fungerar offline.
 // Höj VERSION när du publicerar en ny version, så hämtas filerna på nytt.
-const VERSION = 'provpass-v1';
+const VERSION = 'provpass-v2';
 const FILES = [
   './', './index.html', './manifest.webmanifest',
   './vendor/pdf.min.js', './vendor/pdf.worker.min.js',
@@ -21,7 +21,7 @@ const FILES = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
@@ -38,7 +38,7 @@ self.addEventListener('fetch', e => {
   // Själva sidan: nätet först (så att uppdateringar syns direkt), cachen när du är offline.
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req).then(res => {
+      fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' }).then(res => {
         if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put('./index.html', copy)); }
         return res;
       }).catch(() => caches.match('./index.html'))
