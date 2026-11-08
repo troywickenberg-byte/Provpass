@@ -193,18 +193,21 @@ table.log td.n,table.log th.n{text-align:right;font-family:var(--f-mono);font-va
 @media (max-width:420px){.grid{grid-template-columns:minmax(0,1fr)}.bub{width:40px}}
 
 /* flikar */
-.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;max-width:780px;margin:24px auto 4px}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;max-width:960px;margin:24px auto 4px}
 .tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:104px;padding:16px 12px;border:2px solid var(--line);border-radius:16px;background:var(--sheet);font-family:var(--f-display);font-weight:800;font-size:clamp(17px,2.4vw,21px);color:var(--soft);transition:border-color .15s,background .15s,transform .15s}
 .tabs button svg{width:36px;height:36px}
 .tabs button:hover{color:var(--ink);border-color:var(--soft);transform:translateY(-1px)}
 #tab-prov.on{color:var(--form);border-color:var(--form);background:var(--form-tint)}
-#tab-sr.on{color:var(--quant);border-color:var(--quant);background:var(--quant-tint)}
+#tab-rt.on{color:var(--warn);border-color:var(--warn);background:var(--warn-tint)}
+#tab-hr.on{color:var(--quant);border-color:var(--quant);background:var(--quant-tint)}
 #tab-fr.on{color:var(--ok);border-color:var(--ok);background:var(--ok-tint)}
 
 /* snabbräkning */
 .subnav{display:flex;gap:6px;flex-wrap:wrap;margin:22px 0 4px}
 .subnav button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 14px;font-size:14px}
 .subnav button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.subnav button.subtle{margin-left:auto;border-style:dashed;font-size:13px;color:var(--soft)}
+.subnav button.subtle.on{color:var(--paper)}
 .warnbox{margin-top:14px;background:var(--warn-tint);color:var(--warn);border-radius:8px;padding:10px 14px;font-size:14px}
 .today{margin-top:18px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px}
 .bignums{display:flex;gap:28px;flex-wrap:wrap;margin:10px 0 16px}
@@ -247,6 +250,51 @@ input.sw:checked::after{left:19px}
 .focuschips{display:flex;flex-wrap:wrap;gap:6px}
 .fchip{border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:5px 12px;font-size:13px}
 .fchip.on{border-color:var(--quant);background:var(--quant-tint);color:var(--quant);font-weight:700}
+/* Riktad träning */
+.rtpage{display:grid;gap:16px;margin-top:22px}
+.rtintro h2{font-size:24px}
+.rtintro .note{max-width:70ch;margin:6px 0 0}
+.rtarea h3{font-size:18px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+.rtgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.rtcat{display:grid;gap:8px;text-align:left;padding:14px;border:1.5px solid var(--line);border-radius:12px;background:var(--sheet);transition:transform .15s,border-color .15s}
+.rtcat:not(:disabled):hover{transform:translateY(-1px);border-color:var(--soft)}
+.rtcat:disabled{opacity:.55;cursor:not-allowed}
+.rthead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rthead h2{font-size:22px}
+.rtnums{display:flex;gap:18px}
+.rtnums span{display:grid}
+.rtnums b{font-family:var(--f-display);font-size:24px;font-weight:800;line-height:1.1}
+.rtnums.big b{font-size:32px}
+.rtnums small{font-size:12px;color:var(--soft)}
+.dots{display:inline-flex;align-items:center;gap:5px;font-family:var(--f-mono);font-size:14px}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-left:6px}
+.dots .dot:first-child{margin-left:0}
+.dot.g{background:var(--ok)} .dot.o{background:var(--warn)} .dot.r{background:var(--bad)}
+.facitwarn{border-left:4px solid var(--warn);display:grid;gap:6px;justify-items:start}
+.facitwarn .note{margin:0}
+.rtstart{display:grid;gap:12px}
+.rtmodes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:8px}
+.rtmode{display:grid;gap:3px;text-align:left;padding:14px;border:2px solid var(--line);border-radius:12px;background:var(--paper)}
+.rtmode strong{font-size:16px}
+.rtmode small{color:var(--soft);font-size:13px}
+.rtmode.on{border-color:var(--warn);background:var(--warn-tint)}
+.rtmode:disabled{opacity:.5;cursor:not-allowed}
+.rtcounts{display:flex;gap:8px;flex-wrap:wrap}
+.rtcounts .fchip{min-width:46px;font-size:15px;padding:7px 12px}
+.rtcheck{display:flex;align-items:center;gap:8px;margin:14px 0 4px;font-size:15px}
+.rtpage .btn.primary{justify-self:start}
+.clock.mini{display:grid;grid-template-columns:auto 1fr;align-items:baseline;gap:0 10px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);text-align:left;width:100%}
+.clock.mini .big{font-size:18px;text-align:right}
+.clock.mini .pace{grid-column:1/-1;font-size:11px;color:var(--soft)}
+.clock.mini.over .big{color:var(--warn)}
+.clock.mini.hid .big{visibility:hidden}
+.bub.right{background:var(--ok);border-color:var(--ok);color:#fff;opacity:1}
+.bub.wrong{background:var(--bad);border-color:var(--bad);color:#fff;opacity:1}
+.bub:disabled:not(.right):not(.wrong){opacity:.45}
+.verdictbox{display:grid;gap:6px;justify-items:start;padding:10px 12px;border-radius:8px;border:1.5px solid}
+.verdictbox.green{border-color:var(--ok);background:var(--ok-tint)} .verdictbox.orange{border-color:var(--warn);background:var(--warn-tint)} .verdictbox.red{border-color:var(--bad);background:var(--bad-tint)}
+.chart .bar.green{fill:var(--ok)} .chart .bar.orange{fill:var(--warn)} .chart .bar.red{fill:var(--bad)} .chart .bar.nf{fill:var(--line)}
+.tasksecs{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
 /* Framsteg */
 .frpage{display:grid;gap:16px;margin-top:22px}
 .frpage h2{font-size:22px}
@@ -330,7 +378,7 @@ td.acts{white-space:nowrap;text-align:right}
 .setgrid label{display:grid;gap:4px;font-size:14px}
 .setgrid input,.setgrid select{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink)}
 .copybox{width:100%;min-height:160px;font-family:var(--f-mono);font-size:12px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px}
-@media (max-width:700px){.today{grid-template-columns:minmax(0,1fr)}.setrow{grid-template-columns:auto minmax(0,1fr)}.tabs{gap:8px}.tabs button{min-height:84px;padding:12px 6px;font-size:15px}.tabs button svg{width:30px;height:30px}}
+@media (max-width:700px){.today{grid-template-columns:minmax(0,1fr)}.setrow{grid-template-columns:auto minmax(0,1fr)}.tabs{gap:8px;grid-template-columns:repeat(2,minmax(0,1fr))}.tabs button{min-height:76px;padding:10px 6px;font-size:15px}.tabs button svg{width:30px;height:30px}}
 </style>
 
 <div class="wrap">
@@ -342,9 +390,12 @@ td.acts{white-space:nowrap;text-align:right}
     <button type="button" id="tab-prov" class="on" aria-current="page">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H19v-3"/><path d="M8 7h7M8 10.5h7M8 14h4"/></svg>
       <span>Gamla prov</span></button>
-    <button type="button" id="tab-sr">
+    <button type="button" id="tab-rt">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>
+      <span>Riktad träning</span></button>
+    <button type="button" id="tab-hr">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
-      <span>Snabbräkning</span></button>
+      <span>Huvudräkning</span></button>
     <button type="button" id="tab-fr">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/><path d="M16 7h4v4"/></svg>
       <span>Framsteg</span></button>
@@ -1134,15 +1185,16 @@ async function restore(file, box){
 
 // ---------- Vyer ----------
 let root = null;
-function rerender(){ if (root && tab==='sr') render(root); }
+function rerender(){ if (root && tab==='hr') render(root); }
 function rerenderStatus(){ const w = document.getElementById('srwarn'); if (w) w.textContent = S.error || ''; }
 function nav(){
-  const b = (id, txt) => el('button',{type:'button',class:view===id||(id==='today'&&['pass','summary'].includes(view))?'on':'',onclick:()=>{ if (!canLeave()) return; view=id; pass=null; rerender(); }}, txt);
-  return el('div',{class:'subnav',role:'tablist','aria-label':'Snabbräkning'}, b('today','Idag'), b('cats','Kategorier'), b('stats','Statistik'), b('data','Säkerhetskopia'));
+  const inPass = ['pass','summary'].includes(view), pg = pass?.group || 'hr';
+  const b = (id, txt, cls='') => el('button',{type:'button',class:(view===id||(inPass && ((id==='today' && pg==='hr') || (id==='claude' && pg==='sr')))?'on ':'')+cls,onclick:()=>{ if (!canLeave()) return; view=id; pass=null; rerender(); }}, txt);
+  return el('div',{class:'subnav',role:'tablist','aria-label':'Huvudräkning'}, b('today','Idag'), b('cats','Kategorier'), b('stats','Statistik'), b('data','Säkerhetskopia'), b('claude','Snabbräkna med Claude','subtle'));
 }
 function storageNote(){
   if (!S.loaded) return el('div',{class:'warnbox',id:'srwarn'},'Hämtar dina framsteg…');
-  if (S.mode!=='db') return el('div',{class:'warnbox',id:'srwarn'}, S.error || 'Snabbräkningen sparas på den här enheten. Gör regelbundet en säkerhetskopia, så kan du också flytta dina framsteg mellan telefon och dator.');
+  if (S.mode!=='db') return el('div',{class:'warnbox',id:'srwarn'}, S.error || 'Huvudräkningen sparas på den här enheten. Gör regelbundet en säkerhetskopia, så kan du också flytta dina framsteg mellan telefon och dator.');
   return el('div',{class:'warnbox',id:'srwarn',hidden:!S.error}, S.error||'');
 }
 function render(r){
@@ -1192,10 +1244,13 @@ function renderToday(r){
         el('p',{class:'note'}, 'Slumpade kort ur de valda kategorierna, oberoende av schemat. Uppgifter markerade "oftare" dyker upp oftare.'),
         el('div',{class:'row'}, quizSel, el('button',{class:'btn primary',type:'button',disabled:!hCats.length,onclick:()=>startQuiz(set().quizN||20)}, 'Starta snabbtest')))),
     !hCats.length && set().focusMode?.hr!=='pick' ? el('p',{class:'note'}, 'Alla kategorier i Huvudräkning är avstängda. Slå på dem under Kategorier, eller välj kategorier ovan.') : null);
+  // Idag = Huvudräkning; "Snabbräkna med Claude" = de tidigare snabbräkningskorten
+  if (view!=='claude') return put(r, nav(), storageNote(), hr);
   put(r, nav(), storageNote(),
     el('section',{class:'today'},
       el('div',{class:'panel'},
-        el('h2',{style:'font-size:24px'}, 'Dagens repetition'),
+        el('h2',{style:'font-size:24px'}, 'Snabbräkna med Claude'),
+        el('p',{class:'note'}, 'Räknekort med repetition med mellanrum: bråk, procent, potenser, enheter med mera.'),
         focusPicker('sr'),
         el('div',{class:'bignums'},
           el('div',{}, el('b',{class:'mono'}, String(due)), el('span',{class:'note'},'förfallna kort')),
@@ -1207,8 +1262,7 @@ function renderToday(r){
           el('button',{class:'btn ghost small',type:'button',disabled:!newList().length,onclick:()=>startPass(10)},'Ta 10 extra nya kort'))),
       el('div',{class:'panel'}, el('h3',{}, pickSr ? 'Valda kategorier' : 'Aktiva kategorier'),
         st.length ? el('ul',{class:'catlist'}, st.map(x=>el('li',{}, el('span',{}, x.c.name), el('span',{class:'note mono'}, `${x.due} förf. · ${x.fresh} nya`)))) : el('p',{class:'empty'}, pickSr ? 'Inga kategorier valda. Välj några ovan.' : 'Inga kategorier är aktiva. Välj några under Kategorier.'),
-        el('div',{class:'row',style:'margin-top:10px'}, el('button',{class:'link',type:'button',onclick:()=>{view='cats';rerender();}},'Välj kategorier')))),
-    hr);
+        el('div',{class:'row',style:'margin-top:10px'}, el('button',{class:'link',type:'button',onclick:()=>{view='cats';rerender();}},'Välj kategorier')))));
 }
 function insertAt(input, txt){
   const s = input.selectionStart ?? input.value.length, e = input.selectionEnd ?? input.value.length;
@@ -1290,7 +1344,7 @@ function renderSummary(r){
         el('div',{class:'row',style:'margin-top:14px'},
           quiz ? el('button',{class:'btn primary',type:'button',onclick:()=>startQuiz(quiz)}, `Nytt snabbtest (${quiz} kort)`)
             : el('button',{class:'btn primary',type:'button',disabled:!left,onclick:()=>startPass(0, grp)}, left ? `Fortsätt (${left} kvar idag)` : 'Inget kvar idag'),
-          el('button',{class:'btn ghost',type:'button',onclick:()=>{ pass=null; view='today'; rerender(); }},'Klar'))),
+          el('button',{class:'btn ghost',type:'button',onclick:()=>{ view = grp==='sr' ? 'claude' : 'today'; pass=null; rerender(); }},'Klar'))),
       el('div',{class:'panel'}, el('h3',{},'Fel i passet'),
         wrong.length ? el('div',{class:'tbl-wrap'}, el('table',{class:'log'}, el('thead',{}, el('tr',{}, el('th',{},'Fråga'), el('th',{},'Ditt svar'), el('th',{},'Rätt svar'))),
           el('tbody',{}, wrong.map(a=>el('tr',{}, el('td',{},a.q), el('td',{},a.a), el('td',{},a.ans)))))) : el('p',{class:'empty'},'Inga fel. Snyggt!'))));
@@ -1335,7 +1389,7 @@ function renderCats(r){
     }
     return el('div',{class:'catitem open'}, head, el('div',{class:'catbody'}, el('div',{class:'panebtns',role:'group','aria-label':c.name}, paneBtn('params','Parametrar'), paneBtn('tasks','Uppgifter')), pane));
   };
-  const groups = [['sr','Snabbräkning'],['hr','Huvudräkning']].map(([gid, title])=>el('div',{class:'catgroup'},
+  const groups = [['hr','Huvudräkning'],['sr','Snabbräkna med Claude']].map(([gid, title])=>el('div',{class:'catgroup'},
     el('h3',{}, title), el('div',{class:'catitems'}, CATS.filter(c=>c.group===gid).map(catItem))));
   put(r, nav(), storageNote(),
     el('section',{class:'panel',style:'margin-top:18px'}, el('h3',{},'Inställningar'),
@@ -1392,7 +1446,7 @@ function streak(){
   return n;
 }
 const summary = () => ({ms: srTime(), streak: streak(), today: S.log.some(a=>a.day===dayKey())});
-return {render, attach, canLeave, summary, _test:{check, parse, ev, CATS, CARDS, makeInst, schedule, S, csv, backup}};
+return {render, attach, canLeave, summary, schedule, _test:{check, parse, ev, CATS, CARDS, makeInst, schedule, S, csv, backup}};
 })();
 </script>
 <script>
@@ -1742,26 +1796,38 @@ function itemsFor(test, secFilter){
   }
   return out;
 }
-function startSession(items, label){
+// extra: t.ex. {rt:{sec, instant}, deadline} för Riktad träning (sätts före första renderingen)
+function startSession(items, label, extra={}){
   if (!items.length){ toast('Det finns inga uppgifter att öva på här.'); return; }
   const now = Date.now();
-  session = {label, items, chosen:{}, times:{}, cur:0, start:now, last:now, deadline: now + TIME_LIMIT};
+  session = Object.assign({label, items, chosen:{}, times:{}, lock:{}, cur:0, start:now, last:now, deadline: now + TIME_LIMIT}, extra);
   view='quiz'; render(); window.scrollTo(0,0);
   clearInterval(tick); tick = setInterval(onTick, 1000);
 }
-function accrue(){ const s=session, now=Date.now(); s.times[s.cur]=(s.times[s.cur]||0)+(now-s.last); s.last=now; }
+// tiden räknas inte vidare på en uppgift som redan är besvarad med "Visa svaret direkt"
+function accrue(){ const s=session, now=Date.now(); if (!s.lock?.[s.cur]) s.times[s.cur]=(s.times[s.cur]||0)+(now-s.last); s.last=now; }
 function goTo(i){ const s=session; if (i<0||i>=s.items.length||i===s.cur) return; accrue(); s.cur=i; renderQuiz(); window.scrollTo({top:0}); }
-function pick(L){ const s=session; if (s.chosen[s.cur]===L) delete s.chosen[s.cur]; else s.chosen[s.cur]=L; renderSide(); }
+function pick(L){
+  const s=session;
+  if (s.rt?.instant){ if (s.lock[s.cur]) return; accrue(); s.chosen[s.cur]=L; s.lock[s.cur]=true; renderSide(); return; }
+  if (s.chosen[s.cur]===L) delete s.chosen[s.cur]; else s.chosen[s.cur]=L; renderSide();
+}
 function onTick(){
   if (view!=='quiz' || !session) return;
   const left = session.deadline - Date.now();
-  const c = $('#clock'); if (c){ c.querySelector('.big').textContent = fmtTime(left); c.classList.toggle('low', left < 5*60*1000); }
-  const q = $('#qtime'); if (q) q.textContent = 'Tid på uppgiften: ' + fmtTime((session.times[session.cur]||0) + (Date.now()-session.last));
-  if (left <= 0){ toast('Tiden är slut. Passet har lämnats in.'); submit(); }
+  const c = $('#clock');
+  if (c){
+    // Riktad träning: tiden får gå över, då visas "+m:ss" i orange i stället för att passet lämnas in
+    c.querySelector('.big').textContent = left >= 0 ? fmtTime(left) : '+'+fmtTime(-left);
+    c.classList.toggle('low', !session.rt && left < 5*60*1000); c.classList.toggle('over', !!session.rt && left < 0);
+  }
+  const q = $('#qtime'); if (q) q.textContent = 'Tid på uppgiften: ' + fmtTime((session.times[session.cur]||0) + (session.lock?.[session.cur] ? 0 : Date.now()-session.last));
+  if (left <= 0 && !session.rt){ toast('Tiden är slut. Passet har lämnats in.'); submit(); }
 }
 function submit(){
   const s = session; if (!s) return;
   accrue(); clearInterval(tick);
+  tasks();   // uppgiftsloggen fylls på med äldre fel innan det här passet räknas in
   const rows = s.items.map((it,i)=>{
     const chosen = s.chosen[i] || null, ms = s.times[i] || 0, pace = SEC[it.sec].pace*1000;
     const status = !it.answer ? 'nofacit' : !chosen ? 'blank' : chosen===it.answer ? 'ok' : 'bad';
@@ -1771,7 +1837,8 @@ function submit(){
   });
   const graded = rows.filter(r=>r.status!=='nofacit');
   const correct = graded.filter(r=>r.status==='ok').length;
-  const used = Math.min(TIME_LIMIT, Date.now()-s.start);
+  const used = s.rt ? Date.now()-s.start : Math.min(TIME_LIMIT, Date.now()-s.start);
+  { const now = Date.now(); for (const r of graded) logTask(r, now); }
   // spara statistik, pass och alla felsvar
   const bySec = {};
   for (const r of graded){
@@ -1801,7 +1868,7 @@ function submit(){
   }
   P.sessions = P.sessions.slice(0,60);
   store.save();
-  result = {label:s.label, rows, correct, graded:graded.length, used, nofacit: rows.filter(r=>r.status==='nofacit')};
+  result = {label:s.label, rows, correct, graded:graded.length, used, plan: s.deadline - s.start, rt: s.rt||null, nofacit: rows.filter(r=>r.status==='nofacit')};
   session = null; view='result'; render(); window.scrollTo(0,0);
   autoExplain();
 }
@@ -1836,20 +1903,29 @@ function analyse(rows){
 const TAGTXT = {fast:'Snabbt fel · risk för slarv', slow:'Långsamt fel · risk för lucka', norm:'Normal tid', skipped:'Ej besvarad'};
 
 // ---------- Vyer ----------
+// Fyra flikar: prov = Gamla prov, rt = Riktad träning, hr = Huvudräkning (kortleken), fr = Framsteg
 let tab = 'prov';
+const TABS = [['tab-prov','prov'],['tab-rt','rt'],['tab-hr','hr'],['tab-fr','fr']];
 function setTab(t){
   if (t===tab) return;
-  if (tab==='prov' && view==='quiz' && session){ toast('Lämna in eller avbryt provpasset först.'); return; }
-  if (tab==='sr' && !SR.canLeave()) return;
+  if ((tab==='prov' || tab==='rt') && view==='quiz' && session){ toast(tab==='rt' ? 'Lämna in eller avbryt träningen först.' : 'Lämna in eller avbryt provpasset först.'); return; }
+  if (tab==='hr' && !SR.canLeave()) return;
   tab = t;
-  for (const [id,name] of [['tab-prov','prov'],['tab-sr','sr'],['tab-fr','fr']]){ const b=$('#'+id); b.classList.toggle('on', tab===name); if (tab===name) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); }
+  // ett avslutat pass hör till fliken där det gjordes
+  if (view==='result' && result && !!result.rt !== (tab==='rt')) view = 'home';
+  for (const [id,name] of TABS){ const b=$('#'+id); b.classList.toggle('on', tab===name); if (tab===name) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); }
   try{ localStorage.setItem('provpass-tab', tab); }catch(e){}
   render(); window.scrollTo(0,0);
 }
 function render(){
-  if (tab==='sr') return SR.render($('#app'));
+  if (tab==='hr') return SR.render($('#app'));
   if (tab==='fr') return renderProgress();
-  if (view==='home') renderHome();
+  if (tab==='rt'){
+    if (view==='quiz' && session?.rt) return renderQuiz();
+    if (view==='result' && result?.rt) return renderResult();
+    return renderRT();
+  }
+  if (view==='home' || (view==='quiz' && !session) || (view==='result' && result?.rt)) renderHome();
   else if (view==='quiz') renderQuiz();
   else if (view==='result') renderResult();
 }
@@ -1918,11 +1994,11 @@ function provdagStats(){
       tile(String(t.full), t.full===1 ? 'helt provpass' : 'hela provpass'),
       tile(String(t.sec), t.sec===1 ? 'delövning' : 'delövningar'),
       tile(String(exams.length), exams.length===1 ? 'gammalt prov' : 'gamla prov'),
-      tile(String(sr.streak), (sr.streak===1 ? 'dag' : 'dagar')+' i rad med snabbräkning'+(sr.streak && !sr.today ? ' (öva idag för att hålla sviten)' : ''), 'sr')),
+      tile(String(sr.streak), (sr.streak===1 ? 'dag' : 'dagar')+' i rad med huvudräkning'+(sr.streak && !sr.today ? ' (öva idag för att hålla sviten)' : ''), 'sr')),
     exams.length ? el('div',{}, el('span',{class:'label'},'Gjorda prov'), el('ul',{class:'catlist'}, exams)) : null,
     el('div',{class:'pdgrid two'},
       tile(fmtDur(t.ms), 'på gamla prov', 'time'),
-      tile(fmtDur(sr.ms), 'på snabbräkning', 'time sr')));
+      tile(fmtDur(sr.ms), 'på huvudräkning', 'time sr')));
 }
 function daysLeft(){
   if (!P.examDate) return null;
@@ -2222,8 +2298,191 @@ function renderProgress(){
       el('button',{class:'btn small',type:'button',onclick:()=>exportCsv('fellogg')}, 'Fellogg (CSV)')));
 
   const y = window.scrollY;
-  put(app, el('div',{class:'frpage'}, seed, overview, suggest, secTable, examSec, logSec, errSec, exp));
+  put(app, el('div',{class:'frpage'}, seed, overview, suggest, secTable, taskLogSection(), examSec, logSec, errSec, exp));
   window.scrollTo(0, y);
+}
+// ================= Uppgiftslogg: färg per uppgift + repetition med mellanrum =================
+// grön = rätt inom 1,5 × riktmärket, orange = rätt men långsamt, röd = fel eller obesvarad.
+// Varje uppgift får också ett FSRS-schema (samma algoritm som korten i Huvudräkning), så att
+// "Träna på tidigare fel" tar de uppgifter som är på väg att glömmas först.
+const SLOW = 1.5;
+const taskColor = (ok, ms, pace) => !ok ? 'red' : ms > SLOW*pace ? 'orange' : 'green';
+function tasks(){
+  if (!P.tasks){
+    P.tasks = {};
+    for (const m of P.mistakes) P.tasks[m.key] = {tk:m.tk, n:m.n, sec:m.sec, st:m.fixed ? 'green' : 'red', tries:m.times||1, last:Date.parse(m.d)||Date.now(), ms:m.ms, fs:null, hist:[]};
+  }
+  return P.tasks;
+}
+function logTask(r, now){
+  const T = tasks(), key = r.tk+'|'+r.n, ok = r.status==='ok', pace = SEC[r.sec].pace*1000;
+  const st = taskColor(ok, r.ms, pace);
+  const g = !ok ? 1 : r.ms > SLOW*pace ? 2 : r.ms < 0.5*pace ? 4 : 3;   // Igen / Svårt / Lätt / Bra
+  const t = T[key] || (T[key] = {tk:r.tk, n:r.n, sec:r.sec, tries:0, hist:[], fs:null});
+  t.tries++; t.st = st; t.last = now; t.ms = r.ms;
+  t.hist = [...(t.hist||[]), {d:now, c:st, ms:r.ms}].slice(-10);
+  try{ t.fs = SR.schedule(t.fs, g, now, 0.9); }catch(e){}
+}
+const AREAS = [['Matematik',['XYZ','KVA','NOG','DTK']], ['Svenska',['ORD','LÄS','MEK']], ['Engelska',['ELF']]];
+// alla uppgifter i ett delprov som har facit
+function availableItems(sec){
+  const out = [];
+  for (const t of Object.values(LIB.tests)){
+    if (!t.facit) continue;
+    for (let n=1;n<=40;n++) if (t.qpage[n] && secOf(t.kind, n)===sec && t.facit[n-1]) out.push({tk:t.key, n, sec, answer:t.facit[n-1]});
+  }
+  return out;
+}
+function secStats(sec){
+  const rows = delprovRows().filter(r=>r.sec===sec), T = Object.values(tasks()).filter(t=>t.sec===sec);
+  const c = rows.reduce((a,r)=>a+r.c,0), n = rows.reduce((a,r)=>a+r.n,0);
+  return {ms: rows.reduce((a,r)=>a+(r.ms||0),0), c, n, pct: n ? Math.round(100*c/n) : null,
+    green: T.filter(t=>t.st==='green').length, orange: T.filter(t=>t.st==='orange').length, red: T.filter(t=>t.st==='red').length};
+}
+// färgton: ju lägre % rätt (under 75 %), desto mörkare orange → röd
+function tintStyle(pct){
+  if (pct==null || pct>=75) return '';
+  const t = Math.min(1, (75-pct)/40), mixRed = Math.round(t*100), strength = 16 + Math.round(t*34);
+  return `--tint:color-mix(in srgb, var(--bad) ${mixRed}%, var(--warn));background:color-mix(in srgb, var(--tint) ${strength}%, var(--sheet));border-color:var(--tint)`;
+}
+const dots = s => el('span',{class:'dots','aria-label':`${s.green} klarade, ${s.orange} långsamma, ${s.red} fel`},
+  el('span',{class:'dot g'}), s.green, el('span',{class:'dot o'}), s.orange, el('span',{class:'dot r'}), s.red);
+let rtPage = {sec:null, mode:'new'};
+const rtPrefs = () => (P.rtPrefs ||= {n:10, instant:false});
+function facitWarning(){
+  const missing = Object.values(LIB.tests).filter(t=>!t.facit);
+  if (!missing.length) return null;
+  const byDate = {}; for (const t of missing) (byDate[t.date] ||= []).push(t.pass);
+  return el('section',{class:'panel facitwarn'},
+    el('strong',{}, 'Facit saknas'),
+    el('p',{class:'note'}, 'Uppgifter utan facit kan inte rättas och tas inte med: '+Object.entries(byDate).map(([d,ps])=>`${examShort(d)} (pass ${ps.sort().join(', ')})`).join(' · ')+'. Ladda upp facit-filen för de proven.'),
+    el('label',{class:'btn small primary filebtn'}, 'Ladda upp facit', el('input',{type:'file',accept:'application/pdf,.pdf',multiple:true,onchange:e=>onPick(e.target.files)})));
+}
+function renderRT(){
+  if (rtPage.sec) return renderRTCat(rtPage.sec);
+  const app = $('#app'), loaded = Object.keys(LIB.tests).length;
+  const tile = sec => {
+    const s = secStats(sec), avail = availableItems(sec).length, S = SEC[sec];
+    const why = avail ? `${avail} uppgifter med facit` : !loaded ? 'Läs in prov först' : sec==='ELF' ? 'ELF finns inte i dina filer' : 'Facit saknas';
+    return el('button',{type:'button',class:'rtcat '+S.part+(s.pct!=null && s.pct<75 ? ' tinted' : ''),style:tintStyle(s.pct),disabled:!avail,onclick:()=>{ rtPage = {sec, mode:'new'}; renderRT(); window.scrollTo(0,0); }},
+      el('span',{class:'rthead'}, el('span',{class:'chip '+S.part}, sec), el('strong',{}, S.name)),
+      el('span',{class:'rtnums'},
+        el('span',{}, el('b',{class:'mono'}, s.pct!=null ? s.pct+' %' : '–'), el('small',{}, 'rätt')),
+        el('span',{}, el('b',{class:'mono'}, String(Math.round(s.ms/60000))), el('small',{}, 'min övat'))),
+      dots(s),
+      el('small',{class:'note'}, why));
+  };
+  put(app, el('div',{class:'rtpage'},
+    el('section',{class:'rtintro'}, el('h2',{}, 'Riktad träning'),
+      el('p',{class:'note'}, 'Välj ett delprov och träna på riktiga uppgifter ur gamla prov. Delprov med låg andel rätt är färgade, ju mörkare desto större behov. Prickarna visar uppgifter du klarat (grön), som tog lång tid (orange) och som blev fel (röd).')),
+    LIB.loading ? el('div',{class:'busy'}, el('span',{class:'spin'}), 'Läser in filerna…') : null,
+    !loaded ? el('section',{class:'panel'}, el('p',{}, 'Inga prov är inlästa än. Läs in provhäften och facit under Gamla prov, eller här:'),
+      el('label',{class:'btn small primary filebtn'}, 'Välj PDF-filer', el('input',{type:'file',accept:'application/pdf,.pdf',multiple:true,onchange:e=>onPick(e.target.files)}))) : null,
+    facitWarning(),
+    AREAS.map(([area, secs])=>el('section',{class:'rtarea'}, el('h3',{}, area), el('div',{class:'rtgrid'}, secs.map(tile))))));
+}
+function pickItems(sec, mode, n){
+  const T = tasks(), pool = availableItems(sec), key = i => i.tk+'|'+i.n;
+  let list;
+  if (mode==='err'){
+    // tidigare fel: de som är på väg att glömmas (förfallna enligt schemat) först
+    list = pool.filter(i=>['red','orange'].includes(T[key(i)]?.st)).sort((a,b)=>(T[key(a)].fs?.due||0) - (T[key(b)].fs?.due||0));
+  } else {
+    // nya: aldrig gjorda först (slumpade), sedan de du gjort minst antal gånger
+    const unseen = shuffle(pool.filter(i=>!T[key(i)])), seen = pool.filter(i=>T[key(i)]).sort((a,b)=>(T[key(a)].tries-T[key(b)].tries) || (T[key(a)].last-T[key(b)].last));
+    list = [...unseen, ...seen];
+  }
+  // samma provhäfte och ordning i följd, så att uppgifter som delar text (LÄS, DTK) hamnar efter varandra
+  return list.slice(0, n).sort((a,b)=> a.tk===b.tk ? a.n-b.n : a.tk.localeCompare(b.tk));
+}
+function startRT(sec, mode, n, instant){
+  const items = pickItems(sec, mode, n);
+  if (!items.length){ toast(mode==='err' ? 'Inga tidigare fel att träna på i '+sec+'.' : 'Inga uppgifter med facit i '+sec+'.'); return; }
+  const plan = items.reduce((a,i)=>a+SEC[i.sec].pace*1000, 0);
+  tab==='rt' || setTab('rt');
+  startSession(items, `Riktad träning · ${sec}`+(mode==='err' ? ' · tidigare fel' : ''), {rt:{sec, mode, n, instant}, sec, deadline: Date.now()+plan});
+}
+function renderRTCat(sec){
+  const app = $('#app'), S = SEC[sec], s = secStats(sec), T = tasks(), pool = availableItems(sec), pr = rtPrefs();
+  const key = i => i.tk+'|'+i.n, now = Date.now();
+  const unseen = pool.filter(i=>!T[key(i)]).length;
+  const errs = pool.filter(i=>['red','orange'].includes(T[key(i)]?.st)), due = errs.filter(i=>(T[key(i)].fs?.due||0) <= now).length;
+  if (rtPage.mode==='err' && !errs.length) rtPage.mode = 'new';
+  const avail = rtPage.mode==='err' ? errs.length : pool.length, n = Math.min(pr.n, avail);
+  const plan = n*S.pace*1000;
+  const seg = (m, title, sub) => el('button',{type:'button',class:'rtmode'+(rtPage.mode===m?' on':''),disabled:m==='err' && !errs.length,'aria-pressed':rtPage.mode===m?'true':'false',onclick:()=>{ rtPage.mode=m; renderRT(); }},
+    el('strong',{}, title), el('small',{}, sub));
+  put(app, el('div',{class:'rtpage'},
+    el('button',{class:'link',type:'button',onclick:()=>{ rtPage = {sec:null, mode:'new'}; renderRT(); }}, '← Alla delprov'),
+    el('section',{class:'panel rtstart '+S.part, style:tintStyle(s.pct)},
+      el('div',{class:'rthead'}, el('span',{class:'chip '+S.part}, sec), el('h2',{}, S.name)),
+      el('div',{class:'rtnums big'},
+        el('span',{}, el('b',{class:'mono'}, s.pct!=null ? s.pct+' %' : '–'), el('small',{}, 'rätt')),
+        el('span',{}, el('b',{class:'mono'}, String(Math.round(s.ms/60000))), el('small',{}, 'minuter övat')),
+        el('span',{}, el('b',{class:'mono'}, String(pool.length)), el('small',{}, 'uppgifter med facit'))),
+      dots(s)),
+    facitWarning(),
+    el('section',{class:'panel'},
+      el('h3',{}, 'Vad vill du träna på?'),
+      el('div',{class:'rtmodes'},
+        seg('new','Nya uppgifter', unseen ? `${unseen} som du inte gjort än` : 'Alla är gjorda – de du gjort minst kommer först'),
+        seg('err','Träna på tidigare fel', errs.length ? `${errs.length} orange och röda`+(due ? ` · ${due} att repetera idag` : '') : 'Inga orange eller röda uppgifter')),
+      el('h3',{class:'sub'}, 'Antal uppgifter'),
+      el('div',{class:'rtcounts'}, [5,10,15,20,25,30].map(k=>el('button',{type:'button',class:'fchip'+(pr.n===k?' on':''),'aria-pressed':pr.n===k?'true':'false',onclick:()=>{ pr.n=k; store.save(); renderRT(); }}, String(k)))),
+      avail < pr.n ? el('p',{class:'note'}, `Det finns bara ${avail} ${rtPage.mode==='err' ? 'tidigare fel' : 'uppgifter'} här, så du får ${avail}.`) : null,
+      el('label',{class:'rtcheck'}, el('input',{type:'checkbox',checked:pr.instant,onchange:e=>{ pr.instant=e.target.checked; store.save(); }}), ' Visa svaret direkt efter varje uppgift'),
+      el('p',{class:'note'}, `Tid: ${n} × ${S.pace} s = ${fmtTime(plan)}. Timern är liten och du får fortsätta om tiden går ut.`),
+      el('button',{class:'btn primary',type:'button',disabled:!n,onclick:()=>startRT(sec, rtPage.mode, pr.n, pr.instant)}, n ? `Starta ${n} uppgifter` : 'Inga uppgifter att träna på'))));
+}
+// liten timer för Riktad träning; ett tryck döljer siffrorna
+function miniClock(s, left, sec){
+  const hidden = !!s.rt.hideClock;
+  return el('button',{type:'button',class:'clock mini'+(left<0?' over':'')+(hidden?' hid':''),id:'clock',title:hidden?'Visa tiden':'Dölj tiden',onclick:()=>{ s.rt.hideClock = !hidden; renderSide(); }},
+    el('span',{class:'label'}, hidden ? 'Tid (dold)' : 'Tid kvar'), el('span',{class:'big'}, left>=0 ? fmtTime(left) : '+'+fmtTime(-left)),
+    el('span',{class:'pace'}, `≈ ${sec.pace} s per uppgift`));
+}
+function instantVerdict(s, it){
+  const ok = s.chosen[s.cur]===it.answer, ms = s.times[s.cur]||0, pace = SEC[it.sec].pace*1000, c = taskColor(ok, ms, pace);
+  return el('div',{class:'verdictbox '+c},
+    el('strong',{}, ok ? (c==='orange' ? 'Rätt, men det tog lång tid' : 'Rätt!') : `Fel – rätt svar är ${it.answer}`),
+    el('span',{class:'note'}, `${fmtTime(ms)} (riktmärke ${fmtTime(pace)})`),
+    s.cur < s.items.length-1 ? el('button',{class:'btn primary small',type:'button',onclick:()=>goTo(s.cur+1)}, 'Nästa uppgift') : el('button',{class:'btn primary small',type:'button',onclick:submit}, 'Se resultatet'));
+}
+// tid per uppgift jämfört med riktmärket
+function timePanel(rows){
+  const W=640, H=200, L=34, R=8, T=14, B=30, n=rows.length, bw=(W-L-R)/Math.max(n,1);
+  const max = Math.max(...rows.map(r=>r.ms), ...rows.map(r=>r.pace*1.6), 1);
+  const y = v => T + (1-v/max)*(H-T-B);
+  const svg = [`<svg viewBox="0 0 ${W} ${H}" class="chart" role="img" aria-label="Tid per uppgift jämfört med riktmärket">`];
+  const paceY = y(rows[0]?.pace||0);
+  rows.forEach((r,i)=>{ const c = r.status==='nofacit' ? 'nf' : taskColor(r.status==='ok', r.ms, r.pace), x = L+i*bw;
+    svg.push(`<rect x="${x+bw*0.15}" y="${y(r.ms)}" width="${bw*0.7}" height="${Math.max(1,y(0)-y(r.ms))}" rx="2" class="bar ${c}"/>`);
+    if (n<=20 || i%2===0) svg.push(`<text x="${x+bw/2}" y="${H-B+16}" text-anchor="middle" class="ax">${i+1}</text>`); });
+  svg.push(`<line x1="${L}" x2="${W-R}" y1="${paceY}" y2="${paceY}" class="goal"/><text x="${W-R}" y="${paceY-5}" text-anchor="end" class="goaltxt">Riktmärke ${fmtTime(rows[0]?.pace||0)}</text>`);
+  svg.push(`<text x="${L-6}" y="${y(max)+10}" text-anchor="end" class="ax">${Math.round(max/1000)} s</text></svg>`);
+  const d = el('div',{class:'chartwrap'}); d.innerHTML = svg.join('');
+  const cnt = c => rows.filter(r=>r.status!=='nofacit' && taskColor(r.status==='ok', r.ms, r.pace)===c).length;
+  return el('section',{class:'panel'}, el('h3',{}, 'Tid per uppgift'),
+    el('p',{class:'note'}, `Grön: rätt i tid (${cnt('green')}). Orange: rätt men mer än 1,5 × riktmärket (${cnt('orange')}). Röd: fel eller obesvarad (${cnt('red')}).`), d);
+}
+// Framsteg: uppgiftslogg med färger
+function taskLogSection(){
+  const T = tasks(), all = Object.values(T), now = Date.now();
+  const bad = all.filter(t=>t.st!=='green').sort((a,b)=>(a.fs?.due||0)-(b.fs?.due||0));
+  const perSec = CODES.map(sec=>({sec, ...secStats(sec)})).filter(s=>s.green+s.orange+s.red);
+  return el('section',{class:'panel'}, el('h2',{}, 'Uppgiftslogg'),
+    el('p',{class:'note'}, 'Varje uppgift du gjort, med färg efter senaste försöket. Orange och röda uppgifter tränar du under Riktad träning → "Träna på tidigare fel". De kommer tillbaka med repetition med mellanrum tills du klarar dem i tid.'),
+    perSec.length ? el('div',{class:'tasksecs'}, perSec.map(s=>el('button',{type:'button',class:'fchip',onclick:()=>{ rtPage = {sec:s.sec, mode:s.orange+s.red ? 'err' : 'new'}; setTab('rt'); }}, el('strong',{}, s.sec+' '), dots(s)))) : el('p',{class:'empty'}, 'Inga uppgifter loggade än.'),
+    bad.length ? el('div',{class:'tbl-wrap'}, el('table',{class:'log'},
+      el('thead',{}, el('tr',{}, ['','Uppgift','Delprov','Senaste tid','Försök','Repetera'].map((h,i)=>el('th',{class:i>=3?'n':''}, h)))),
+      el('tbody',{}, bad.slice(0,40).map(t=>el('tr',{},
+        el('td',{}, el('span',{class:'dot '+(t.st==='red'?'r':'o')})),
+        el('td',{}, `${examShort(t.tk.split('|')[0])} · pass ${t.tk.split('|')[1]} · uppg. ${t.n}`),
+        el('td',{}, el('span',{class:'chip '+SEC[t.sec].part}, t.sec)),
+        el('td',{class:'n'}, t.ms!=null ? `${fmtTime(t.ms)} / ${fmtTime(SEC[t.sec].pace*1000)}` : '–'),
+        el('td',{class:'n'}, t.tries),
+        el('td',{class:'n'}, !t.fs || t.fs.due<=now ? 'nu' : t.fs.due < new Date().setHours(24,0,0,0) ? 'idag' : fmtDay(t.fs.due))))))) : null,
+    bad.length>40 ? el('p',{class:'note'}, `Visar 40 av ${bad.length}.`) : null);
 }
 function leastPractised(tests, c){
   const count = t => P.sessions.filter(s=>s.tk===t.key && s.sec===c).length;
@@ -2280,15 +2539,19 @@ function renderSide(){
   let lastSec = null;
   s.items.forEach((x,i)=>{
     if (x.sec!==lastSec){ sheet.append(el('span',{class:'secsep'}, x.sec)); lastSec=x.sec; }
-    sheet.append(el('button',{type:'button',class:[s.chosen[i]?'done':'', i===s.cur?'cur':'', x.answer?'':'nf'].join(' '),'aria-label':`Uppgift ${x.n}`+(s.chosen[i]?`, svar ${s.chosen[i]}`:', ej besvarad'),onclick:()=>goTo(i)}, String(x.n), el('span',{class:'a'}, s.chosen[i]||'')));
+    sheet.append(el('button',{type:'button',class:[s.chosen[i]?'done':'', i===s.cur?'cur':'', x.answer?'':'nf'].join(' '),'aria-label':`Uppgift ${x.n}`+(s.chosen[i]?`, svar ${s.chosen[i]}`:', ej besvarad'),onclick:()=>goTo(i)}, String(s.rt ? i+1 : x.n), el('span',{class:'a'}, s.chosen[i]||'')));
   });
   const answered = Object.keys(s.chosen).length;
   side.className = 'side '+(sec.part==='k'?'kq':'');
   put(side, 
-    el('div',{class:'clock'+(left<5*60*1000?' low':''),id:'clock'}, el('span',{class:'label'},'Tid kvar'), el('span',{class:'big'}, fmtTime(left))),
-    el('div',{class:'qhead'}, el('span',{class:'chip '+sec.part}, it.sec), el('strong',{}, `Uppgift ${it.n}`), el('span',{class:'note'}, `${s.cur+1} av ${s.items.length}`)),
+    s.rt ? miniClock(s, left, sec)
+      : el('div',{class:'clock'+(left<5*60*1000?' low':''),id:'clock'}, el('span',{class:'label'},'Tid kvar'), el('span',{class:'big'}, fmtTime(left))),
+    el('div',{class:'qhead'}, el('span',{class:'chip '+sec.part}, it.sec), el('strong',{}, `Uppgift ${it.n}`), el('span',{class:'note'}, `${s.cur+1} av ${s.items.length}`+(s.rt ? ` · ${examShort(it.tk.split('|')[0])} pass ${it.tk.split('|')[1]}` : ''))),
     !it.answer ? el('span',{class:'chip missing'},'Facit saknas för den här uppgiften') : null,
-    el('div',{class:'bubbles',role:'group','aria-label':'Ditt svar'}, LET.slice(0,opts).map(L=>el('button',{type:'button',class:'bub'+(s.chosen[s.cur]===L?' on':''),'aria-pressed':s.chosen[s.cur]===L?'true':'false',onclick:()=>pick(L)}, L))),
+    el('div',{class:'bubbles',role:'group','aria-label':'Ditt svar'}, LET.slice(0,opts).map(L=>{ const locked = s.lock?.[s.cur], mine = s.chosen[s.cur]===L;
+      const fbc = locked && it.answer ? (L===it.answer ? ' right' : mine ? ' wrong' : '') : '';
+      return el('button',{type:'button',class:'bub'+(mine?' on':'')+fbc,disabled:!!locked,'aria-pressed':mine?'true':'false',onclick:()=>pick(L)}, L); })),
+    s.lock?.[s.cur] && it.answer ? instantVerdict(s, it) : null,
     el('span',{class:'qtime',id:'qtime'}, 'Tid på uppgiften: '+fmtTime((s.times[s.cur]||0)+(Date.now()-s.last))),
     el('div',{class:'row'},
       el('button',{class:'btn ghost small',type:'button',disabled:s.cur===0,onclick:()=>goTo(s.cur-1)},'Föregående'),
@@ -2331,14 +2594,15 @@ function renderResult(){
       el('div',{class:'panel'},
         el('span',{class:'label'}, r.label),
         el('div',{class:'score mono'}, String(r.correct), el('small',{},` / ${r.graded}`)),
-        el('p',{}, r.graded ? `${pct(r.correct,r.graded)} % rätt. Tid: ${fmtTime(r.used)} av 55:00.` : 'Inga uppgifter kunde rättas.'),
+        el('p',{}, r.graded ? `${pct(r.correct,r.graded)} % rätt. Tid: ${fmtTime(r.used)} av ${r.rt ? fmtTime(r.plan) : '55:00'}.` : 'Inga uppgifter kunde rättas.'),
         r.nofacit.length ? el('p',{class:'chip missing'}, `Facit saknas för ${r.nofacit.length} uppgifter (${r.nofacit.map(x=>x.sec+' '+x.n).join(', ')}). De har inte rättats.`) : null,
         el('p',{class:'note'}, 'Alla fel och obesvarade uppgifter är sparade under "Sparade fel".'),
-        el('div',{class:'row'}, el('button',{class:'btn primary',type:'button',onclick:()=>{view='home';render();}},'Till startsidan'))),
+        el('div',{class:'row'}, r.rt ? [el('button',{class:'btn primary',type:'button',onclick:()=>startRT(r.rt.sec, r.rt.mode, r.rt.n, r.rt.instant)},'Ny omgång'), el('button',{class:'btn ghost',type:'button',onclick:()=>{view='home';render();}},`Tillbaka till ${r.rt.sec}`)] : el('button',{class:'btn primary',type:'button',onclick:()=>{view='home';render();}},'Till startsidan'))),
       el('div',{class:'panel'}, el('h3',{},'Per delprov'),
         el('div',{class:'tbl-wrap'}, el('table',{class:'log'},
           el('thead',{}, el('tr',{}, el('th',{},'Delprov'), el('th',{class:'n'},'Rätt'), el('th',{class:'n'},'Snitt / uppg'), el('th',{class:'n'},'Riktmärke'), el('th',{class:'n'},'Snabba fel'), el('th',{class:'n'},'Långsamma fel'))),
           el('tbody',{}, secs.map(b=>el('tr',{}, el('td',{}, b.sec), el('td',{class:'n'}, `${b.c}/${b.n}`), el('td',{class:'n'}, fmtTime(b.ms/b.n)), el('td',{class:'n'}, fmtTime(b.pace)), el('td',{class:'n'}, b.fast), el('td',{class:'n'}, b.slow)))))))),
+    r.rt ? timePanel(r.rows) : null,
     el('section',{class:'panel pattern'}, el('h3',{},'Mönster i felen'), el('ul',{class:'insights'}, out.map(t=>el('li',{},t))),
       el('p',{class:'note'}, 'Snabbt fel: mindre än halva riktmärket. Långsamt fel: mer än 1,5 gånger riktmärket. Riktmärket kommer från provhäftenas rekommenderade provtid per delprov.')),
     el('section',{}, el('div',{class:'part-head',style:'margin-top:28px'}, el('h3',{},'Rättning'),
@@ -2401,14 +2665,12 @@ document.addEventListener('keydown', e=>{
   else if (e.key==='ArrowLeft'){ e.preventDefault(); goTo(session.cur-1); }
 });
 $('#home-btn').addEventListener('click', ()=>{
-  if (tab==='sr'){ setTab('prov'); return; }
   if (view==='quiz' && session){ toast('Lämna in passet först, eller vänta tills tiden tar slut.'); return; }
+  if (tab!=='prov'){ setTab('prov'); return; }
   view='home'; render();
 });
-$('#tab-prov').addEventListener('click', ()=>setTab('prov'));
-$('#tab-sr').addEventListener('click', ()=>setTab('sr'));
-$('#tab-fr').addEventListener('click', ()=>setTab('fr'));
-try{ const t = location.hash==='#snabbrakning' ? 'sr' : localStorage.getItem('provpass-tab'); if (t==='sr' || t==='fr'){ tab='prov'; setTab(t); } }catch(e){}
+for (const [id,name] of TABS) $('#'+id).addEventListener('click', ()=>setTab(name));
+try{ let t = location.hash==='#snabbrakning' ? 'hr' : localStorage.getItem('provpass-tab'); if (t==='sr') t='hr'; if (['rt','hr','fr'].includes(t)){ tab='prov'; setTab(t); } }catch(e){}
 
 render();
 store.init();
