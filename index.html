@@ -184,6 +184,12 @@ table.log td.n,table.log th.n{text-align:right;font-family:var(--f-mono);font-va
 .item-head strong{font-family:var(--f-display)}
 .expl{font-size:15px;white-space:pre-wrap;background:var(--paper);border-radius:8px;padding:12px 14px;max-width:80ch}
 .expl .src{display:block;font-size:12px;color:var(--soft);margin-bottom:6px;white-space:normal}
+.explain{display:grid;gap:8px;margin-top:10px;padding:14px 16px;border-radius:10px;background:var(--ok-tint);border-left:4px solid var(--ok);max-width:80ch;font-size:15px;line-height:1.55}
+.explain p{margin:0}
+.explain .label{color:var(--ok)}
+.explain .trick strong{color:var(--accent,var(--quant))}
+.explain .trap strong{color:var(--bad)}
+.verdictexpl{display:grid;gap:6px;justify-items:start;width:100%}
 .thumb{max-width:520px}
 .filters{display:flex;gap:8px;flex-wrap:wrap}
 .filters button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:4px 12px;font-size:14px}
@@ -539,6 +545,7 @@ input.sw:checked{background:var(--accent)}
 </div>
 <div class="toast" id="toast" hidden></div>
 
+<script src="forklaringar.js"></script>
 <script src="vendor/pdf.min.js"></script>
 <script>if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.js';</script>
 <script>
@@ -2581,6 +2588,8 @@ function instantVerdict(s, it){
   return el('div',{class:'verdictbox '+c},
     el('strong',{}, ok ? (c==='orange' ? 'Rätt, men det tog lång tid' : 'Rätt!') : `Fel – rätt svar är ${it.answer}`),
     el('span',{class:'note'}, `${fmtTime(ms)} (riktmärke ${fmtTime(pace)})`),
+    hasExpl(it.tk, it.n) ? (()=>{ const wrap = el('div',{hidden:!s.rt.showExpl?.[s.cur]}, explBox(it.tk, it.n, s.chosen[s.cur]));
+      return el('div',{class:'verdictexpl'}, el('button',{class:'link',type:'button',onclick:e=>{ wrap.hidden=!wrap.hidden; (s.rt.showExpl ||= {})[s.cur] = !wrap.hidden; e.currentTarget.textContent = wrap.hidden ? 'Visa förklaring' : 'Dölj förklaring'; }}, s.rt.showExpl?.[s.cur] ? 'Dölj förklaring' : 'Visa förklaring'), wrap); })() : null,
     s.cur < s.items.length-1 ? el('button',{class:'btn primary small',type:'button',onclick:()=>goTo(s.cur+1)}, 'Nästa uppgift') : el('button',{class:'btn primary small',type:'button',onclick:submit}, 'Se resultatet'));
 }
 // tid per uppgift jämfört med riktmärket
@@ -2764,9 +2773,21 @@ function itemCard(x){
       x.tag ? el('span',{class:'tag '+(x.tag==='skipped'?'norm':x.tag)}, TAGTXT[x.tag]) : null,
       el('span',{class:'note mono'}, `Ditt svar: ${x.chosen||'–'} · Facit: ${x.answer||'saknas'} · ${fmtTime(x.ms)} (riktm. ${fmtTime(x.pace)})`)),
     el('div',{class:'row'},
-      test ? el('button',{class:'btn ghost small',type:'button',onclick:e=>{ thumbWrap.hidden=!thumbWrap.hidden; if(!thumbWrap.hidden && !thumbWrap.childNodes.length) thumbWrap.append(...taskBoxes(test, x.n, pagesFor(test,x.n), 520)); e.currentTarget.textContent = thumbWrap.hidden?'Visa uppgiften':'Dölj uppgiften'; }},'Visa uppgiften') : null,
+      test ? el('button',{class:'btn ghost small',type:'button',onclick:e=>{ thumbWrap.hidden=!thumbWrap.hidden; if(!thumbWrap.hidden && !thumbWrap.childNodes.length) thumbWrap.append(...taskBoxes(test, x.n, pagesFor(test,x.n), 520), ...[explBox(x.tk, x.n, x.chosen)].filter(Boolean)); e.currentTarget.textContent = thumbWrap.hidden ? (hasExpl(x.tk,x.n) ? 'Visa uppgift och förklaring' : 'Visa uppgiften') : 'Dölj uppgiften'; }}, hasExpl(x.tk,x.n) ? 'Visa uppgift och förklaring' : 'Visa uppgiften') : null,
       x.answer && sampleFn && sampleImages ? el('button',{class:'btn ghost small',type:'button',onclick:async()=>{ box.hidden=false; const t = await explain(x, box); if (t){ x.ex=t; saveEx(key,t); box.prepend(el('span',{class:'src'},'Claudes förklaring av facitsvaret')); } }}, saved?'Förklara igen':'Förklara') : null),
     errBox, thumbWrap, box);
+}
+// ---------- Förklaringar skrivna i förväg (forklaringar.js): nyckel "datum|pass|uppgift" ----------
+// s = lösning (kortaste vägen), t = trick, f = fälla, w = kommentar till ett visst felsvar
+const hasExpl = (tk, n) => !!(window.EXPL||{})[tk+'|'+n];
+function explBox(tk, n, chosen){
+  const e = (window.EXPL||{})[tk+'|'+n]; if (!e) return null;
+  return el('div',{class:'explain'},
+    el('span',{class:'label'}, 'Så löser du den'),
+    el('p',{}, el('strong',{},'Lösning. '), e.s),
+    e.t ? el('p',{class:'trick'}, el('strong',{},'Trick. '), e.t) : null,
+    e.f ? el('p',{class:'trap'}, el('strong',{},'Fälla. '), e.f) : null,
+    chosen && e.w?.[chosen] ? el('p',{class:'trap'}, el('strong',{},`Om du svarade ${chosen}. `), e.w[chosen]) : null);
 }
 function saveEx(key, text){ const m = P.mistakes.find(m=>m.key===key); if (m){ m.ex = text; store.save(); } }
 async function autoExplain(){

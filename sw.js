@@ -1,9 +1,10 @@
 // Provpass HP service worker: cachar appens filer så att den fungerar offline.
 // Höj VERSION när du publicerar en ny version, så hämtas filerna på nytt.
-const VERSION = 'provpass-v3';
+const VERSION = 'provpass-v4';
 const FILES = [
   './', './index.html', './manifest.webmanifest',
   './vendor/pdf.min.js', './vendor/pdf.worker.min.js',
+  './forklaringar.js',
   './fonts/fonts.css',
   './fonts/f1.woff2',
   './fonts/f10.woff2',
@@ -38,12 +39,14 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
   // Själva sidan: nätet först (så att uppdateringar syns direkt), cachen när du är offline.
-  if (req.mode === 'navigate') {
+  // Förklaringarna fylls på ofta: hämta nätverket först även för dem
+  const isExpl = new URL(req.url).pathname.endsWith('/forklaringar.js');
+  if (req.mode === 'navigate' || isExpl) {
     e.respondWith(
       fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' }).then(res => {
-        if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put('./index.html', copy)); }
+        if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(isExpl ? './forklaringar.js' : './index.html', copy)); }
         return res;
-      }).catch(() => caches.match('./index.html'))
+      }).catch(() => caches.match(isExpl ? './forklaringar.js' : './index.html'))
     );
     return;
   }
