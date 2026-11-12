@@ -1,6 +1,6 @@
 // Provpass HP service worker: cachar appens filer så att den fungerar offline.
 // Höj VERSION när du publicerar en ny version, så hämtas filerna på nytt.
-const VERSION = 'provpass-v4';
+const VERSION = 'provpass-v5';
 const FILES = [
   './', './index.html', './manifest.webmanifest',
   './vendor/pdf.min.js', './vendor/pdf.worker.min.js',

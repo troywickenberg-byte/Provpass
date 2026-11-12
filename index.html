@@ -374,6 +374,7 @@ td.acts{white-space:nowrap;text-align:right}
 .choices{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
 .choices button{min-width:130px;padding:16px 22px;border:2px solid var(--line);background:var(--paper);border-radius:12px;font-family:var(--f-display);font-size:30px;font-weight:700}
 .choices button:hover{border-color:var(--ink)}
+.choices.words button{font-size:22px;min-width:150px}
 .tbar{position:relative;height:8px;width:100%;max-width:440px;border-radius:4px;background:var(--line);overflow:hidden}
 .tbar i{position:absolute;left:0;top:0;bottom:0;background:var(--ok);width:0}
 .tbar i.good{background:var(--quant)} .tbar i.hard{background:var(--warn)}
@@ -909,6 +910,22 @@ cat('hr-fork','Förkorta bråk',[4,8], add=>{
     return {kind:'reduced', q:`Förkorta ${p*k}/${q*k}`, ans:p/q, show:`${p}/${q}`, ex:`Dela täljare och nämnare med ${k}: ${p}/${q}.`};
   }});
 }, 'hr');
+cat('hr-prim','Primtal',[2,4], add=>{
+  // Alla 25 primtal ≤ 100 och alla 25 udda sammansatta tal ≤ 100 (de jämna är för lätta).
+  const ds = n => String(n).split('').reduce((a,c)=>a+ +c,0);
+  for (let n=2;n<=100;n++){
+    if (!isPrime(n) && n%2===0) continue;
+    const prime = isPrime(n), f = primeFactors(n), lim = [2,3,5,7].filter(p=>p*p<=n);
+    let ex;
+    if (n===2) ex = '2 är det enda jämna primtalet.';
+    else if (n===3) ex = '3 är ett primtal: bara delbart med 1 och 3.';
+    else if (prime){ const nx = [2,3,5,7,11][lim.length]; ex = `${n} är ett primtal: inte delbart med ${lim.join(', ').replace(/, (\d+)$/,' eller $1')}. Fler behöver du inte pröva, eftersom ${nx}² = ${nx*nx} är större än ${n}.`; }
+    else if (f[0]===3) ex = `${n} = ${factorStr(n)}. Siffersumman ${ds(n)} är delbar med 3.`;
+    else if (f[0]===5) ex = `${n} = ${factorStr(n)}. Slutar på 5, alltså delbart med 5.`;
+    else ex = `${n} = ${factorStr(n)}. Fällan: ${n} ser ut som ett primtal men är delbart med 7.`;
+    add({id:`n${n}`, kind:'choice', fixed:true, words:true, q:String(n), hint:'Primtal eller sammansatt? Använd ← och → om du vill.', opts:['Primtal','Sammansatt'], correct: prime?0:1, show: prime?'Primtal':'Sammansatt', ex});
+  }
+}, 'hr');
 
 const CARDS = {}; for (const c of CATS) for (const k of c.cards) CARDS[k.id] = k;
 const CATBY = Object.fromEntries(CATS.map(c=>[c.id,c]));
@@ -1186,7 +1203,7 @@ const shuffleS = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.
 function makeInst(card){
   const base = card.tpl ? card.gen() : Object.assign({}, card, {q: card.qf ? card.qf() : card.q});
   const inst = Object.assign({}, base, {id:card.id, cat:card.cat, tpl:!!card.tpl, tol: card.tpl ? tolOf(card) ?? base.tol : base.tol});
-  if (inst.kind==='choice' && Math.random()<0.5){ inst.opts = inst.opts.slice().reverse(); inst.correct = 1 - inst.correct; }
+  if (inst.kind==='choice' && !inst.fixed && Math.random()<0.5){ inst.opts = inst.opts.slice().reverse(); inst.correct = 1 - inst.correct; }
   return inst;
 }
 let pass = null, view = 'today';
@@ -1372,7 +1389,7 @@ function renderToday(r){
   const quizSel = el('select',{id:'quizn','aria-label':'Antal kort i snabbtestet',onchange:e=>{ set().quizN=+e.target.value; set().updated=Date.now(); queueState(); }},
     [10,15,20,25,30].map(n=>el('option',{value:n,selected:(set().quizN||20)===n}, n+' kort')));
   const hr = el('section',{class:'panel hrpanel'},
-    el('div',{class:'hrhead'}, el('h2',{style:'font-size:22px'}, 'Huvudräkning'), el('span',{class:'note'}, 'De sex svåra · kvadrater och rötter · bråk ↔ procent · förkortning')),
+    el('div',{class:'hrhead'}, el('h2',{style:'font-size:22px'}, 'Huvudräkning'), el('span',{class:'note'}, 'De sex svåra · kvadrater och rötter · bråk ↔ procent · förkortning · primtal')),
     focusPicker('hr'),
     el('div',{class:'hrcols'},
       el('div',{},
@@ -1424,7 +1441,7 @@ function renderCard(r){
   const card = el('section',{class:'cardq'}, qtext);
   if (!a){
     if (inst.kind==='choice'){
-      card.append(el('div',{class:'choices'}, inst.opts.map((o,i)=>el('button',{type:'button',onclick:()=>answer(String(i), o)}, o))), el('span',{class:'note'},'Tryck på det största, eller använd ← och →.'));
+      card.append(el('div',{class:'choices'+(inst.words?' words':'')}, inst.opts.map((o,i)=>el('button',{type:'button',onclick:()=>answer(String(i), o)}, o))), el('span',{class:'note'}, inst.hint || 'Tryck på det största, eller använd ← och →.'));
     } else {
       const input = el('input',{id:'srinput',type:'text',autocomplete:'off',autocapitalize:'off',spellcheck:'false',inputmode: inst.kind==='expr' ? 'text' : 'decimal','aria-label':'Ditt svar',enterkeyhint:'send'});
       input.addEventListener('keydown', e=>{ if (e.key==='Enter'){ e.preventDefault(); e.stopPropagation(); if (input.value.trim()) answer(input.value); } });
