@@ -926,6 +926,40 @@ cat('hr-prim','Primtal',[2,4], add=>{
     add({id:`n${n}`, kind:'choice', fixed:true, words:true, q:String(n), hint:'Primtal eller sammansatt? Använd ← och → om du vill.', opts:['Primtal','Sammansatt'], correct: prime?0:1, show: prime?'Primtal':'Sammansatt', ex});
   }
 }, 'hr');
+// Multiplikation med decimaltal: räkna utan komma och räkna sedan decimalerna
+const decs = x => (String(x).split('.')[1]||'').length;
+const noComma = x => Math.round(x * 10**decs(x));
+const decProd = (a,b) => Number((a*b).toPrecision(10));
+// t.ex. (1000, 4) → "0,1000 = 0,1" så att man ser var nollorna tar vägen
+const shiftTxt = (P, d) => { const raw = (P / 10**d).toFixed(d).replace('.',','), r = fmtN(P / 10**d); return raw===r ? r : `${raw} = ${r}`; };
+cat('hr-dec','Multiplikation med decimaltal',[4,8], add=>{
+  const TRICK = {'0.25*0.4':'0,25 är en fjärdedel: 0,4 / 4 = 0,1.','0.25*0.2':'0,25 är en fjärdedel: 0,2 / 4 = 0,05.','0.75*0.4':'0,75 är tre fjärdedelar: 0,4 / 4 = 0,1, gånger 3 = 0,3.','0.125*0.8':'0,125 är en åttondel: 0,8 / 8 = 0,1.','2.5*0.4':'0,4 · 2,5 = 0,4 · 5 / 2 = 2 / 2 = 1.','0.5*0.5':'Hälften av en halv är en fjärdedel.','1.5*0.4':'0,4 + hälften av 0,4 = 0,4 + 0,2 = 0,6.'};
+  for (const [a,b] of [[0.5,0.5],[0.1,0.1],[0.2,0.2],[0.3,0.3],[0.5,0.2],[0.2,0.3],[0.4,0.5],[0.6,0.5],[0.8,0.5],[0.25,0.4],[0.25,0.2],[0.75,0.4],[0.05,0.2],[0.125,0.8],[1.5,1.5],[1.2,1.2],[1.5,0.4],[2.5,0.4]]){
+    const r = decProd(a,b), d = decs(a)+decs(b), A = noComma(a), B = noComma(b);
+    const ex = `Räkna utan komma: ${A} · ${B} = ${A*B}. Sammanlagt ${d} decimaler, så flytta kommat ${d} steg: ${shiftTxt(A*B, d)}.`+(TRICK[a+'*'+b] ? ' Eller: '+TRICK[a+'*'+b] : '');
+    add({id:`${a}*${b}`, kind:'num', q:`${fmtN(a)} · ${fmtN(b)}`, ans:r, show:fmtN(r), ex});
+  }
+  for (const [a,n,ex] of [
+    [0.5,18,'0,5 är hälften: 18 / 2 = 9.'],[0.25,12,'0,25 är en fjärdedel: 12 / 4 = 3.'],[0.75,8,'0,75 är tre fjärdedelar: 8 / 4 = 2, gånger 3 = 6.'],
+    [0.2,35,'0,2 är en femtedel: 35 / 5 = 7.'],[0.4,15,'0,4 är två femtedelar: 15 / 5 = 3, gånger 2 = 6.'],[0.6,25,'0,6 är tre femtedelar: 25 / 5 = 5, gånger 3 = 15.'],
+    [0.8,25,'0,8 är fyra femtedelar: 25 / 5 = 5, gånger 4 = 20.'],[0.125,16,'0,125 är en åttondel: 16 / 8 = 2.'],[0.05,60,'0,05 är hälften av en tiondel: 60 / 10 = 6, hälften = 3.'],
+    [0.04,25,'4 · 25 = 100, och två decimaler ger 1,00 = 1.'],[0.01,350,'Att multiplicera med 0,01 är att flytta kommat två steg åt vänster: 3,5.'],[0.3,7,'3 · 7 = 21, och en decimal ger 2,1.'],
+    [1.2,5,'1,2 · 5 = 5 + 0,2 · 5 = 5 + 1 = 6.'],[1.5,14,'Talet plus hälften: 14 + 7 = 21.'],[2.5,8,'Dubbla och halvera: 2,5 · 8 = 5 · 4 = 20.'],[3.5,4,'3 · 4 + 0,5 · 4 = 12 + 2 = 14.'],
+  ]){ const r = decProd(a,n); add({id:`${a}*${n}`, kind:'num', q:`${fmtN(a)} · ${n}`, ans:r, show:fmtN(r), ex}); }
+}, 'hr');
+cat('hr-decs','Decimaltal (slumpade)',[5,10], add=>{
+  add({id:'genint', tpl:true, name:'Decimaltal · heltal (slumpat)', gen(){
+    const [a,q] = pickr([[0.5,2],[0.25,4],[0.2,5],[0.75,4],[1.5,2],[2.5,2]]);
+    const n = q * ri(a>1 ? 2 : 3, a>1 ? 12 : 16), r = decProd(a,n), p = n/q;
+    const tip = {0.5:`0,5 är hälften: ${n} / 2 = ${r}.`, 0.25:`0,25 är en fjärdedel: ${n} / 4 = ${r}.`, 0.2:`0,2 är en femtedel: ${n} / 5 = ${r}.`,
+      0.75:`0,75 är tre fjärdedelar: ${n} / 4 = ${p}, gånger 3 = ${r}.`, 1.5:`Talet plus hälften: ${n} + ${p} = ${r}.`, 2.5:`Dubbla och lägg till hälften: ${2*n} + ${p} = ${r}.`}[a];
+    return {kind:'num', q:`${fmtN(a)} · ${n}`, ans:r, show:fmtN(r), ex:tip};
+  }});
+  add({id:'gendec', tpl:true, name:'Decimaltal · decimaltal (slumpat)', gen(){
+    const A = ri(1,9), B = ri(1,9), r = decProd(A/10, B/10);
+    return {kind:'num', q:`${fmtN(A/10)} · ${fmtN(B/10)}`, ans:r, show:fmtN(r), ex:`Räkna utan komma: ${A} · ${B} = ${A*B}. Sammanlagt 2 decimaler: ${shiftTxt(A*B, 2)}.`};
+  }});
+}, 'hr');
 
 const CARDS = {}; for (const c of CATS) for (const k of c.cards) CARDS[k.id] = k;
 const CATBY = Object.fromEntries(CATS.map(c=>[c.id,c]));
@@ -1079,7 +1113,7 @@ function schedule(c, g, now, ret){
 // ---------- Lagring: schemat i ett dokument, försöken i ett dokument per dag ----------
 const LKEY = 'provpass-sr-v1';
 // Standardval: dessa kategorier är avstängda, och i "Förkorta bråk" är bråk med täljare > 30 och
-// nämnare > 50 samt den slumpade mallen avstängda. Allt går att slå på igen under Kategorier.
+// nämnare > 50 samt den slumpade mallen avstängda. Allt går att slå på igen under Inställningar.
 const DEFAULT_OFF_CATS = ['primtal','konjtal','tripplar'];
 const DEFAULTS_V = 3;
 // bråk med täljare > 30 och nämnare > 50, plus den slumpade mallen, i en förkortningskategori
@@ -1219,7 +1253,7 @@ function startPass(extraNew=0, group='sr'){
 // Snabbtest: n slumpade kort ur Huvudräkning, oberoende av schemat. Oftare-markerade väger dubbelt.
 function startQuiz(n){
   const pool = activeCards('hr');
-  if (!pool.length){ toast('Inga aktiva uppgifter i Huvudräkning. Slå på någon kategori under Kategorier.'); return; }
+  if (!pool.length){ toast('Inga aktiva uppgifter i Huvudräkning. Slå på någon kategori under Inställningar.'); return; }
   const picked = pool.map(k=>({k, r: Math.pow(Math.random(), 1/(isStar(k)?2:1))})).sort((a,b)=>b.r-a.r).map(x=>x.k);
   const queue = []; while (queue.length < n) queue.push(...(queue.length ? shuffleS(picked) : picked));
   pass = {queue: queue.slice(0,n), pending:[], done:[], start:Date.now(), extraNew:0, group:'hr', quiz:n, cur:null};
@@ -1349,7 +1383,7 @@ function rerenderStatus(){ const w = document.getElementById('srwarn'); if (w) w
 function nav(){
   const inPass = ['pass','summary'].includes(view), pg = pass?.group || 'hr';
   const b = (id, txt, cls='') => el('button',{type:'button',class:(view===id||(inPass && ((id==='today' && pg==='hr') || (id==='claude' && pg==='sr')))?'on ':'')+cls,onclick:()=>{ if (!canLeave()) return; view=id; pass=null; rerender(); }}, txt);
-  return el('div',{class:'subnav',role:'tablist','aria-label':'Huvudräkning'}, b('today','Idag'), b('cats','Kategorier'), b('stats','Statistik'), b('data','Säkerhetskopia'), b('claude','Snabbräkna med Claude','subtle'));
+  return el('div',{class:'subnav',role:'tablist','aria-label':'Huvudräkning'}, b('today','Idag'), b('cats','⚙ Inställningar'), b('stats','Statistik'), b('data','Säkerhetskopia'), b('claude','Snabbräkna med Claude','subtle'));
 }
 function storageNote(){
   if (!S.loaded) return el('div',{class:'warnbox',id:'srwarn'},'Hämtar dina framsteg…');
@@ -1389,7 +1423,8 @@ function renderToday(r){
   const quizSel = el('select',{id:'quizn','aria-label':'Antal kort i snabbtestet',onchange:e=>{ set().quizN=+e.target.value; set().updated=Date.now(); queueState(); }},
     [10,15,20,25,30].map(n=>el('option',{value:n,selected:(set().quizN||20)===n}, n+' kort')));
   const hr = el('section',{class:'panel hrpanel'},
-    el('div',{class:'hrhead'}, el('h2',{style:'font-size:22px'}, 'Huvudräkning'), el('span',{class:'note'}, 'De sex svåra · kvadrater och rötter · bråk ↔ procent · förkortning · primtal')),
+    el('div',{class:'hrhead'}, el('h2',{style:'font-size:22px'}, 'Huvudräkning'), el('span',{class:'note'}, 'De sex svåra · kvadrater och rötter · bråk ↔ procent · förkortning · primtal · decimaltal'),
+      el('button',{class:'link',type:'button',style:'margin-left:auto',onclick:()=>{view='cats';rerender();}}, '⚙ Inställningar')),
     focusPicker('hr'),
     el('div',{class:'hrcols'},
       el('div',{},
@@ -1402,7 +1437,7 @@ function renderToday(r){
         el('h3',{}, 'Snabbtest'),
         el('p',{class:'note'}, 'Slumpade kort ur de valda kategorierna, oberoende av schemat. Uppgifter markerade "oftare" dyker upp oftare.'),
         el('div',{class:'row'}, quizSel, el('button',{class:'btn primary',type:'button',disabled:!hCats.length,onclick:()=>startQuiz(set().quizN||20)}, 'Starta snabbtest')))),
-    !hCats.length && set().focusMode?.hr!=='pick' ? el('p',{class:'note'}, 'Alla kategorier i Huvudräkning är avstängda. Slå på dem under Kategorier, eller välj kategorier ovan.') : null);
+    !hCats.length && set().focusMode?.hr!=='pick' ? el('p',{class:'note'}, 'Alla kategorier i Huvudräkning är avstängda. Slå på dem under Inställningar, eller välj kategorier ovan.') : null);
   // Idag = Huvudräkning; "Snabbräkna med Claude" = de tidigare snabbräkningskorten
   if (view!=='claude') return put(r, nav(), storageNote(), hr);
   put(r, nav(), storageNote(),
@@ -1420,7 +1455,7 @@ function renderToday(r){
           el('button',{class:'btn primary',type:'button',disabled:!due && !fresh,onclick:()=>startPass(0)}, pickSr && !srIds.size ? 'Välj kategorier först' : due||fresh ? 'Starta pass' : 'Klart för idag'),
           el('button',{class:'btn ghost small',type:'button',disabled:!newList().length,onclick:()=>startPass(10)},'Ta 10 extra nya kort'))),
       el('div',{class:'panel'}, el('h3',{}, pickSr ? 'Valda kategorier' : 'Aktiva kategorier'),
-        st.length ? el('ul',{class:'catlist'}, st.map(x=>el('li',{}, el('span',{}, x.c.name), el('span',{class:'note mono'}, `${x.due} förf. · ${x.fresh} nya`)))) : el('p',{class:'empty'}, pickSr ? 'Inga kategorier valda. Välj några ovan.' : 'Inga kategorier är aktiva. Välj några under Kategorier.'),
+        st.length ? el('ul',{class:'catlist'}, st.map(x=>el('li',{}, el('span',{}, x.c.name), el('span',{class:'note mono'}, `${x.due} förf. · ${x.fresh} nya`)))) : el('p',{class:'empty'}, pickSr ? 'Inga kategorier valda. Välj några ovan.' : 'Inga kategorier är aktiva. Välj några under Inställningar.'),
         el('div',{class:'row',style:'margin-top:10px'}, el('button',{class:'link',type:'button',onclick:()=>{view='cats';rerender();}},'Välj kategorier')))));
 }
 function insertAt(input, txt){
@@ -1546,12 +1581,12 @@ function renderCats(r){
               el('button',{type:'button',class:'tg off'+(off?' on':''),'aria-pressed':off?'true':'false',title:'Stäng av uppgiften',onclick:()=>toggle(s.off, k.id)}, off ? 'Avstängd' : 'Stäng av')));
         })));
     }
-    return el('div',{class:'catitem open'}, head, el('div',{class:'catbody'}, el('div',{class:'panebtns',role:'group','aria-label':c.name}, paneBtn('params','Parametrar'), paneBtn('tasks','Uppgifter')), pane));
+    return el('div',{class:'catitem open'}, head, el('div',{class:'catbody'}, el('div',{class:'panebtns',role:'group','aria-label':c.name}, paneBtn('params', tpls.length ? 'Tid och felmarginal' : 'Tid per fråga'), paneBtn('tasks','Frågor')), pane));
   };
   const groups = [['hr','Huvudräkning'],['sr','Snabbräkna med Claude']].map(([gid, title])=>el('div',{class:'catgroup'},
     el('h3',{}, title), el('div',{class:'catitems'}, CATS.filter(c=>c.group===gid).map(catItem))));
   put(r, nav(), storageNote(),
-    el('section',{class:'panel',style:'margin-top:18px'}, el('h3',{},'Inställningar'),
+    el('section',{class:'panel',style:'margin-top:18px'}, el('h3',{},'Allmänt'),
       el('div',{class:'setgrid'},
         el('label',{}, 'Nya kort per dag', num(s.newPerDay, 0, 200, 1, v=>{ s.newPerDay=Math.round(v); }, 'Nya kort per dag')),
         el('label',{}, 'Passets längd',
@@ -1559,7 +1594,8 @@ function renderCats(r){
         s.passMode==='cards' ? el('label',{}, 'Kort per pass', num(s.passCards, 5, 200, 1, v=>{ s.passCards=Math.round(v); }, 'Kort per pass')) : el('label',{}, 'Minuter per pass', num(s.passMin, 1, 60, 1, v=>{ s.passMin=v; }, 'Minuter per pass')),
         el('label',{}, 'Målsäkerhet (FSRS)', el('select',{id:'ret',onchange:e=>{ s.retention=+e.target.value; s.updated=Date.now(); queueState(); }}, [0.8,0.85,0.9,0.95].map(v=>el('option',{value:v,selected:s.retention===v}, Math.round(v*100)+' %')))),
         el('label',{style:'grid-auto-flow:column;justify-content:start;align-items:center;gap:8px'}, el('input',{type:'checkbox',id:'auto',checked:s.auto,onchange:e=>{ s.auto=e.target.checked; s.updated=Date.now(); queueState(); }}), 'Gå vidare automatiskt efter snabbt rätt svar'))),
-    el('section',{class:'panel',style:'margin-top:16px'}, el('p',{class:'note',style:'margin:0 0 6px'}, 'Brytaren till vänster styr om kategorin ingår i passen. Tryck på namnet för parametrar och uppgifter.'), groups));
+    el('section',{class:'panel',style:'margin-top:16px'}, el('h3',{},'Kategorier'),
+      el('p',{class:'note',style:'margin:0 0 6px'}, 'Brytaren till vänster styr om kategorin ingår i passen. Tryck på namnet för att ändra tid per fråga eller stänga av enskilda frågor.'), groups));
 }
 function renderStats(r){
   const st = catStats(), w = weakest();
