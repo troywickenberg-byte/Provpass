@@ -383,6 +383,15 @@ td.acts{white-space:nowrap;text-align:right}
 .fb .verdict{font-family:var(--f-display);font-size:22px;font-weight:800}
 .fb .verdict.ok{color:var(--ok)} .fb .verdict.bad{color:var(--bad)}
 .fb .ex{max-width:52ch;background:var(--paper);border-radius:8px;padding:10px 14px;font-size:15px;text-align:left}
+.fb .ex.trap{border-left:4px solid var(--warn);font-weight:600}
+.qtext.kvaq{display:grid;gap:10px;font-size:clamp(22px,5vw,32px)}
+.kvaq .kvacond{font-size:.7em;font-weight:600}
+.kvaq .kvarow{display:grid;gap:2px;justify-items:center}
+.choices.kva{flex-direction:column;align-items:stretch;gap:8px;width:100%;max-width:400px;margin:0 auto}
+.choices.kva button{font-size:18px;padding:12px 18px;text-align:left;background:var(--paper)}
+details.intro{margin-top:12px;background:var(--paper);border-radius:14px;padding:10px 14px}
+details.intro summary{cursor:pointer;font-weight:700}
+details.intro ol{margin:10px 0 4px;padding-left:22px;display:grid;gap:8px;font-size:15px;line-height:1.45}
 .grade{font-family:var(--f-mono);font-size:12px;padding:2px 8px;border-radius:4px}
 .grade.g1{background:var(--bad-tint);color:var(--bad)} .grade.g2{background:var(--warn-tint);color:var(--warn)}
 .grade.g3{background:var(--quant-tint);color:var(--quant)} .grade.g4{background:var(--ok-tint);color:var(--ok)}
@@ -961,6 +970,95 @@ cat('hr-decs','Decimaltal (slumpade)',[5,10], add=>{
   }});
 }, 'hr');
 
+// Kvadratrötter & kvadrering: genomgång (intro), fasta uppgifter och en fälla per fel svar.
+// traps = [[uttryck, text], …] jämförs med det du skrev; trap = fällan som visas annars.
+// KVA-kort: trapBy = en fälla per svarsalternativ (A–D).
+const KVA_OPTS = ['A · I är större','B · II är större','C · De är lika','D · Otillräcklig information'];
+cat('hr-rotkv','Kvadratrötter & kvadrering',[15,30], add=>{
+  const T = {
+    inn: 'Fällan "flyttar in fel": talet framför roten går in som sin kvadrat. 2√7 = √(4 · 7) = √28, inte √8.',
+    dec: 'Fällan "uppskattar med decimaler": det är lätt att hamna fel (√50 "under 6,5", √3 ≈ 1,6). Kvadrera båda sidor i stället.',
+    mid: 'Fällan "glömmer mittentermen": (a ± b)² = a² ± 2ab + b². (√18 − √8)² är inte 18 − 8, och (x + 3)² är inte x² + 9.',
+    ab: 'Fällan i 2ab: a är √18, inte 18, och b² blir alltid plus. (√18 − √8)² = 18 − 2 · √18 · √8 + 8 = 26 − 2 · 12 = 2.',
+    twice: 'Fällan "kvadrerar två gånger": (√(x² + 9))² = x² + 9. Rottecknet försvinner bara. Det blir inte 19x² + 81, och +9 ska vara kvar.',
+    mix: 'Fällan "blandar ihop 12 och √12": √12 = √(4 · 3) = 2√3 ≈ 3,46, inte 12.',
+    decsq: 'Fällan "kvadrerar decimaltal fel": 2,5² = (2 + 0,5)² = 4 + 2 + 0,25 = 6,25, inte 4,25. Då är x² större än 2x = 5 för x = 2,5.',
+    test: 'Fällan "testar två x-värden och drar en slutsats": pröva tal under 1, exakt 1 och över 1, eller sätt sidorna lika och hitta gränsen.',
+    num: 'D kan bara vara rätt när det finns en okänd. Här är båda kvantiteterna bestämda tal, så de går alltid att jämföra.',
+  };
+  // Bryt ut
+  for (const [n,k,r] of [[12,2,3],[50,5,2],[72,6,2]])
+    add({id:`ut${n}`, kind:'expr', mode:'surd', rad:r, vars:[], q:`Bryt ut: √${n}`, expr:`${k}√${r}`, show:`${k}√${r}`,
+      ex:`Största kvadratfaktorn i ${n} är ${k*k}: √${n} = √(${k*k} · ${r}) = ${k}√${r}.`,
+      traps:[[String(n), T.mix.replace(/12/g, String(n)).replace('4 · 3', `${k*k} · ${r}`).replace('2√3 ≈ 3,46', `${k}√${r}`)],
+        [`${k*k}√${r}`, `Det som flyttas ut är roten ur kvadratfaktorn: √(${k*k} · ${r}) = ${k}√${r}, inte ${k*k}√${r}. Samma fälla som att flytta in fel (2√7 → √8), fast åt andra hållet.`]],
+      trap: n===12 ? T.mix : `Kontrollera genom att flytta in igen: ${k}√${r} = √(${k*k} · ${r}) = √${n}. `+T.inn});
+  // Skriv som en rot
+  for (const [k,r] of [[2,3],[5,2]])
+    add({id:`in${k}r${r}`, kind:'expr', mode:'oneroot', vars:[], q:`Skriv som en rot: ${k}√${r}`, expr:`√${k*k*r}`, show:`√${k*k*r}`,
+      ex:`${k} går in som ${k}² = ${k*k}: ${k}√${r} = √(${k*k} · ${r}) = √${k*k*r}.`,
+      traps:[[`√${k*r}`, `${k}√${r} → √${k*r} är fällan "flyttar in fel": ${k} går in som ${k}² = ${k*k}, så det blir √(${k*k} · ${r}) = √${k*k*r}. Jämför 2√7 = √28, inte √8.`]],
+      trap:T.inn});
+  // Utveckla och faktorisera
+  const signs = 'b² blir alltid plus, och mittentermen får minustecknet: (a − b)² = a² − 2ab + b².';
+  for (const [id,q,mode,expr,show,ex,traps,trap] of [
+    ['e1','Utveckla (x + 5)²','expand','x^2+10x+25','x² + 10x + 25','(a + b)² = a² + 2ab + b²: x² + 2 · 5 · x + 5².',
+      [['x^2+25', T.mid],['x^2+5x+25','Mittentermen är 2ab, alltså 2 · 5 · x = 10x, inte 5x.']], T.mid],
+    ['e2','Utveckla (x − 4)²','expand','x^2-8x+16','x² − 8x + 16','(a − b)² = a² − 2ab + b²: x² − 2 · 4 · x + 4².',
+      [['x^2-16', T.mid+' x² − 16 är i stället (x + 4)(x − 4).'],['x^2+16', T.mid],['x^2-8x-16', signs],['x^2+8x+16', signs],['x^2-4x+16','Mittentermen är 2ab, alltså 2 · 4 · x = 8x, inte 4x.']], T.mid],
+    ['e3','Utveckla (2x + 1)²','expand','4x^2+4x+1','4x² + 4x + 1','(2x)² + 2 · 2x · 1 + 1² = 4x² + 4x + 1.',
+      [['4x^2+1', T.mid],['2x^2+4x+1','Kvadraten delas ut över gånger: (2x)² = 2² · x² = 4x², inte 2x².'],['4x^2+2x+1','Mittentermen är 2ab, alltså 2 · 2x · 1 = 4x, inte 2x.'],['2x^2+1', T.mid]], T.mid],
+    ['e4','Utveckla (x + 7)(x − 7)','expand','x^2-49','x² − 49','Konjugatregeln: (a + b)(a − b) = a² − b² = x² − 7².',
+      [['x^2-14x+49','Det här är konjugatregeln, inte en kvadreringsregel: +7x och −7x tar ut varandra, så det finns ingen mittenterm. (a + b)(a − b) = a² − b².'],['x^2+14x+49','Det här är konjugatregeln, inte en kvadreringsregel: +7x och −7x tar ut varandra, så det finns ingen mittenterm. (a + b)(a − b) = a² − b².'],['x^2+49','Tecknet på b²: (a + b)(a − b) = a² − b², eftersom 7 · (−7) = −49.']],
+      'Konjugatregeln har ingen mittenterm: (a + b)(a − b) = a² − b². Mittentermen 2ab finns bara i (a ± b)².'],
+    ['f1','Faktorisera x² + 10x + 25','factor','(x+5)^2','(x + 5)²','Kvadreringsregeln baklänges: 10x = 2 · 5 · x och 25 = 5².',
+      [['(x+5)(x-5)','(x + 5)(x − 5) = x² − 25 saknar mittenterm. Här finns mittentermen 10x = 2 · 5 · x, och det är den som visar att det är (x + 5)².'],['(x-5)^2', signs]],
+      'Titta på mittentermen: 10x = 2 · 5 · x, så a = x och b = 5. Det är samma mittenterm som man glömmer när (x + 3)² blir x² + 9.'],
+    ['f2','Faktorisera x² − 6x + 9','factor','(x-3)^2','(x − 3)²','Kvadreringsregeln baklänges: 6x = 2 · 3 · x och 9 = 3². Minus i mittentermen ger (x − 3)².',
+      [['(x+3)(x-3)','(x + 3)(x − 3) = x² − 9 saknar mittenterm. Här finns −6x = −2 · 3 · x, och det visar att det är (x − 3)².'],['(x+3)^2', signs]],
+      'Titta på mittentermen: −6x = −2 · 3 · x, så a = x och b = 3. '+signs],
+  ]) add({id, kind:'expr', mode, q:q.replace(/-/g,M), expr, vars:['x'], show, ex, traps, trap});
+  // Kvantitativa jämförelser (KVA)
+  const kva = (id, cond, I, II, correct, ex, trapBy) => add({id, kind:'choice', fixed:true, words:true, kva:{cond, I, II},
+    q:(cond ? cond+'.  ' : '')+`I: ${I}   II: ${II}`, hint:'Tryck på ett alternativ, eller A–D på tangentbordet.',
+    opts:KVA_OPTS, correct:'ABCD'.indexOf(correct), show:KVA_OPTS['ABCD'.indexOf(correct)], ex, trapBy});
+  kva('k1','','3√2','2√3','A','Flytta in: 3√2 = √(9 · 2) = √18 och 2√3 = √(4 · 3) = √12. √18 är större (A).',
+    {B:T.inn, C:T.inn, D:T.num});
+  kva('k2','','√11','3 + √2','B','√11 är mindre än √16 = 4. 3 + √2 är större än 3 + 1 = 4. Alltså är II större (B).',
+    {A:T.dec+' Säkra gränser räcker: √11 < 4 < 3 + √2.', C:T.dec+' Säkra gränser räcker: √11 < 4 < 3 + √2.', D:T.num});
+  kva('k3','','√50','7','A','Kvadrera båda: 50 mot 7² = 49. 50 är större, så √50 är större (A).',
+    {B:T.dec+' 7² = 49 < 50, så √50 ligger strax över 7.', C:T.dec+' 7² = 49 < 50, så √50 ligger strax över 7.', D:T.num});
+  kva('k4','','2√7','3√3','A','Kvadrera båda: (2√7)² = 4 · 7 = 28 och (3√3)² = 9 · 3 = 27. I är större (A).',
+    {B:T.inn+' Och 3√3 = √27.', C:T.inn+' Och 3√3 = √27.', D:T.num});
+  kva('k5','','√(16 + 9)','√16 + √9','B','I = √25 = 5. II = 4 + 3 = 7. II är större (B).',
+    {A:'Roten delas aldrig ut över plus: √(16 + 9) = √25 = 5, men √16 + √9 = 7. Det är samma fälla som att glömma mittentermen i (a + b)².', C:'Roten delas aldrig ut över plus: √(16 + 9) = √25 = 5, men √16 + √9 = 7. Det är samma fälla som att glömma mittentermen i (a + b)².', D:T.num});
+  kva('k6','','√18 − √8','√2','C','Bryt ut: √18 = 3√2 och √8 = 2√2. 3√2 − 2√2 = √2. De är lika (C).',
+    {A:T.mid+' Med mittentermen: 18 − 2 · 12 + 8 = 2.', B:T.ab, D:T.num});
+  kva('k7','','√2 + √3','√5','A','Kvadrera båda: (√2 + √3)² = 2 + 2√6 + 3 = 5 + 2√6, och (√5)² = 5. I är större (A).',
+    {B:T.mid+' Här är mittentermen 2√6, och den gör I större.', C:T.mid+' Här är mittentermen 2√6, och den gör I större.', D:T.num});
+  kva('k8','x > 0','√(x² + 9)','x + 3','B','Båda är positiva, så kvadrera: x² + 9 mot (x + 3)² = x² + 6x + 9. Dra bort x² + 9: 0 mot 6x. Eftersom x > 0 är II större (B).',
+    {A:T.twice, C:T.mid+' (x + 3)² = x² + 6x + 9, och 6x > 0.', D:'Här går det att bevisa algebraiskt i stället för att testa tal: efter kvadrering skiljer bara 6x, och 6x > 0 för alla x > 0.'});
+  kva('k9','x > 0','√x','x','D','x = 1 ger 1 mot 1 (lika). x = 4 ger 2 mot 4 (II större). x = 1/4 ger 1/2 mot 1/4 (I större). Det beror på x (D).',
+    {A:T.test+' Över 1 är x större än √x.', B:T.test+' Under 1 är √x större än x.', C:T.test+' De är bara lika när x = 1.'});
+  kva('k10','','√98 − √32','√18','C','Bryt ut: √98 = 7√2, √32 = 4√2 och √18 = 3√2. 7√2 − 4√2 = 3√2. De är lika (C).',
+    {A:T.mid.replace(' (√18 − √8)² är inte 18 − 8, och (x + 3)² är inte x² + 9.',' (√98 − √32)² är inte 98 − 32.')+' Enklast är att bryta ut √2 ur alla tre.', B:T.ab+' Enklast här är att bryta ut √2 ur alla tre.', D:T.num});
+  kva('k11','','5√3','4√5','B','Kvadrera båda: (5√3)² = 25 · 3 = 75 och (4√5)² = 16 · 5 = 80. II är större (B).',
+    {A:T.inn+' Här: 5√3 = √75 och 4√5 = √80.', C:T.inn+' Här: 5√3 = √75 och 4√5 = √80.', D:T.num});
+  kva('k12','x > 0','(x + 2)²','x² + 4','A','(x + 2)² = x² + 4x + 4. Dra bort x² + 4 från båda: 4x mot 0. Eftersom x > 0 är I större (A).',
+    {B:T.mid+' Här: (x + 2)² = x² + 4x + 4.', C:T.mid+' Här: (x + 2)² = x² + 4x + 4.', D:'Här går det att bevisa algebraiskt i stället för att testa tal: skillnaden är mittentermen 4x, och 4x > 0 för alla x > 0.'});
+  kva('k13','x > 0','x²','2x','D','Sätt sidorna lika: x² = 2x ger x = 2. x = 1 ger 1 mot 2 (II större), x = 3 ger 9 mot 6 (I större). Det beror på x (D).',
+    {A:T.test+' Gränsen är x = 2: under 2 är 2x större.', B:T.decsq, C:T.test+' De är bara lika när x = 2.'});
+  kva('k14','','√5 + √7','√24','B','Kvadrera båda: (√5 + √7)² = 12 + 2√35, och 24 = 12 + 12. Jämför 2√35 med 12, alltså √35 med 6. Kvadrera igen: 35 < 36. II är större (B).',
+    {A:T.dec+' Här skiljer det bara på andra decimalen (≈ 4,88 mot ≈ 4,90), så kvadrera två gånger.', C:T.dec+' Här skiljer det bara på andra decimalen (≈ 4,88 mot ≈ 4,90), så kvadrera två gånger.', D:T.num});
+}, 'hr').intro = [
+  ['Bryta ut','hitta den största kvadratfaktorn. Testa 4, 9, 16, 25, 36, 49, 64 … uppifrån. √72 = √(36 · 2) = 6√2.'],
+  ['Flytta in','talet framför roten går in som sin kvadrat. 3√5 = √45 (inte √15).'],
+  ['Jämföra','om båda är positiva, kvadrera båda. (k√a)² = k² · a. (√a)² = a. Rottecknet försvinner bara, även över ett helt uttryck: (√(x² + 9))² = x² + 9.'],
+  ['Fällan','kvadrater och rötter delas ut över · och /, men aldrig över + och −. (a + b)² = a² + 2ab + b², (a − b)² = a² − 2ab + b², (a + b)(a − b) = a² − b². √(a + b) ≠ √a + √b.'],
+  ['Förenkla','dra bort samma sak från båda sidor, eller dela båda med samma positiva tal. Finns en rot kvar, kvadrera igen.'],
+  ['D-uppgifter','testa olika sorters tal (under 1, exakt 1, över 1), men bevisa hellre algebraiskt. Hitta gränsen genom att sätta sidorna lika (x² = 2x → x = 2).'],
+];
+
 const CARDS = {}; for (const c of CATS) for (const k of c.cards) CARDS[k.id] = k;
 const CATBY = Object.fromEntries(CATS.map(c=>[c.id,c]));
 
@@ -969,7 +1067,7 @@ const SUPMAP = {'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'
 function norm(s){
   s = String(s).trim().toLowerCase()
     .replace(/[−–—]/g,'-').replace(/[·×∙•⋅]/g,'*').replace(/÷/g,'/').replace(/,/g,'.')
-    .replace(/sqrt/g,'√').replace(/pi/g,'π').replace(/≈/g,'');
+    .replace(/sqrt|roten\s*ur|rot/g,'√').replace(/pi/g,'π').replace(/≈/g,'');
   s = s.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁻]+/g, m=>'^('+[...m].map(c=>SUPMAP[c]).join('')+')');
   s = s.replace(/½/g,'(1/2)').replace(/⅓/g,'(1/3)').replace(/¼/g,'(1/4)').replace(/¾/g,'(3/4)');
   return s.replace(/\s+/g,'');
@@ -1017,6 +1115,22 @@ function ev(n, env){
 }
 const hasVar = n => n.t==='var' || ['a','b'].some(k=>n[k] && hasVar(n[k]));
 const unpar = n => { while (n.t==='par') n = n.a; return n; };
+const sqrtNodes = n => !n || typeof n!=='object' ? [] : [...(n.t==='sqrt' ? [n] : []), ...sqrtNodes(n.a), ...sqrtNodes(n.b)];
+// Fällan som passar ett fel svar: per svarsalternativ (KVA), per igenkänt fel uttryck, annars kortets allmänna fälla
+function trapFor(inst, raw){
+  if (inst.trapBy) return inst.trapBy['ABCD'[Number(raw)]] || null;
+  if (inst.traps){
+    try{
+      const u = parse(raw);
+      for (const [expr, text] of inst.traps){
+        const e = parse(expr); let same = true;
+        for (let i=0;i<5 && same;i++){ const env = {}; for (const v of inst.vars||[]) env[v] = 0.37 + i*0.91; const a = ev(u,env), b = ev(e,env); same = isFinite(a) && Math.abs(a-b) <= 1e-6*Math.max(1,Math.abs(b)); }
+        if (same) return text;
+      }
+    }catch(e){}
+  }
+  return inst.trap || null;
+}
 const close = (a,b,tol) => tol ? Math.abs(a-b) <= tol*Math.abs(b) + 1e-12 : Math.abs(a-b) <= 1e-9*Math.max(1,Math.abs(b));
 const UNITS = /\s*(km\/h|m\/s|cm²|cm2|dm²|dm2|m²|m2|km²|dm³|dm3|cm³|cm3|m³|m3|liter|l|ml|dl|minuter|min|timmar|h|°|grader|kr|km)\s*$/i;
 function numVal(raw){ const t = parse(String(raw).replace(UNITS,'')); if (hasVar(t)) throw 0; const v = ev(t); if (!isFinite(v)) throw 0; return v; }
@@ -1073,6 +1187,8 @@ function check(inst, raw, tolOverride){
         if (inst.mode==='factor' && (r.t==='+' || r.t==='-' || r.t==='/' || !hasVar(r))) return {ok:false, note:'Rätt värde, men skriv det som en produkt, till exempel (x + 4)(x − 4).'};
         if (inst.mode==='expand' && /[()]/.test(raw.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g,''))) return {ok:false, note:'Rätt värde, men utveckla helt, utan parenteser.'};
         if (inst.mode==='simplify' && /\//.test(raw)) return {ok:false, note:'Rätt värde, men förenkla bort bråkstrecket.'};
+        if (inst.mode==='surd'){ const rads = sqrtNodes(u).map(n=>ev(n.a)); if (!rads.length || rads.some(v=>Math.abs(v-inst.rad)>1e-9)) return {ok:false, note:'Rätt värde, men bryt ut den största kvadratfaktorn, så att talet under roten blir så litet som möjligt.'}; }
+        if (inst.mode==='oneroot' && r.t!=='sqrt') return {ok:false, note:'Rätt värde, men skriv det som en enda rot, till exempel √12.'};
         if (inst.mode==='power'){ const okForm = r.t==='var' || r.t==='num' || (r.t==='^' && unpar(r.a).t==='var' && !hasVar(r.b)); if (!okForm) return {ok:false, note:'Rätt värde, men skriv det som en enda potens, till exempel a^8.'}; }
         return {ok:true};
       }
@@ -1295,7 +1411,7 @@ function answer(raw, display){
   S.log.push(att);
   S.dirtyDays.add(att.day+'|'+att.c);
   queueState(); queueLog();
-  cur.answered = {ok:res.ok, g, ms, note:res.note, mine: display ?? String(raw), next:next.due};
+  cur.answered = {ok:res.ok, g, ms, note:res.note, trap: res.ok || res.note ? null : trapFor(cur.inst, raw), mine: display ?? String(raw), next:next.due};
   pass.done.push(att);
   if (!pass.quiz && next.due - now < 20*60e3) pass.pending.push(cur.card);
   rerender();
@@ -1426,6 +1542,8 @@ function renderToday(r){
     el('div',{class:'hrhead'}, el('h2',{style:'font-size:22px'}, 'Huvudräkning'), el('span',{class:'note'}, 'De sex svåra · kvadrater och rötter · bråk ↔ procent · förkortning · primtal · decimaltal'),
       el('button',{class:'link',type:'button',style:'margin-left:auto',onclick:()=>{view='cats';rerender();}}, '⚙ Inställningar')),
     focusPicker('hr'),
+    hCats.filter(c=>c.intro).map(c=>el('details',{class:'intro'}, el('summary',{}, `Genomgång: ${c.name} (${c.intro.length} regler)`),
+      el('ol',{}, c.intro.map(([h,t])=>el('li',{}, el('strong',{}, h+': '), t))))),
     el('div',{class:'hrcols'},
       el('div',{},
         el('h3',{}, 'Repetition'),
@@ -1471,18 +1589,21 @@ function renderCard(r){
     el('span',{class:'chip '+(['tabell','potenser','rotter','primtal','decimal'].includes(cur.card.cat) || groupOf(cur.card)==='hr' ?'k':'v')}, CATBY[cur.card.cat].name),
     el('span',{class:'label'}, progress),
     el('button',{class:'link',type:'button',onclick:()=>{ view='summary'; rerender(); }},'Avsluta passet'));
-  const qtext = el('div',{class:'qtext'+(inst.q.length>26?' long':'')}, inst.q);
+  const qtext = inst.kva ? el('div',{class:'qtext kvaq'}, inst.kva.cond ? el('div',{class:'kvacond'}, inst.kva.cond) : null,
+      el('div',{class:'kvarow'}, el('span',{class:'label'},'Kvantitet I'), el('span',{}, inst.kva.I)), el('div',{class:'kvarow'}, el('span',{class:'label'},'Kvantitet II'), el('span',{}, inst.kva.II)))
+    : el('div',{class:'qtext'+(inst.q.length>26?' long':'')}, inst.q);
   const bar = el('div',{class:'tbar','aria-hidden':'true'}, el('i',{}), el('s',{style:`left:${100*easy/(good*1.5)}%`}), el('s',{style:`left:${100/1.5}%`}));
   const card = el('section',{class:'cardq'}, qtext);
   if (!a){
     if (inst.kind==='choice'){
-      card.append(el('div',{class:'choices'+(inst.words?' words':'')}, inst.opts.map((o,i)=>el('button',{type:'button',onclick:()=>answer(String(i), o)}, o))), el('span',{class:'note'}, inst.hint || 'Tryck på det största, eller använd ← och →.'));
+      card.append(el('div',{class:'choices'+(inst.words?' words':'')+(inst.kva?' kva':'')}, inst.opts.map((o,i)=>el('button',{type:'button',onclick:()=>answer(String(i), o)}, o))), el('span',{class:'note'}, inst.hint || 'Tryck på det största, eller använd ← och →.'));
     } else {
       const input = el('input',{id:'srinput',type:'text',autocomplete:'off',autocapitalize:'off',spellcheck:'false',inputmode: inst.kind==='expr' ? 'text' : 'decimal','aria-label':'Ditt svar',enterkeyhint:'send'});
       input.addEventListener('keydown', e=>{ if (e.key==='Enter'){ e.preventDefault(); e.stopPropagation(); if (input.value.trim()) answer(input.value); } });
       const keys = el('div',{class:'keys'});
       const k = (txt, ins=txt, cls='') => el('button',{type:'button',class:cls,onmousedown:e=>e.preventDefault(),onclick:()=>insertAt(input, ins)}, txt);
-      if (inst.kind==='expr'){ for (const v of inst.vars) keys.append(k(v)); keys.append(k('²'), k('^'), k('('), k(')'), k('+'), k('−','-'), k('/')); if (/√|π/.test(inst.expr)) keys.append(k('√'), k('π')); }
+      if (inst.mode==='surd' || inst.mode==='oneroot'){ keys.append(k('√'), k('·'), k('('), k(')')); }
+      else if (inst.kind==='expr'){ for (const v of inst.vars) keys.append(k(v)); keys.append(k('²'), k('^'), k('('), k(')'), k('+'), k('−','-'), k('/')); if (/√|π/.test(inst.expr)) keys.append(k('√'), k('π')); }
       else if (inst.kind==='factor'){ keys.append(k('·','·'), k('²'), k('^'), el('button',{type:'button',class:'wide',onclick:()=>answer('__prime__','Primtal')},'Primtal')); }
       else if (inst.kind==='reduced'){ keys.append(k('/')); }
       else { keys.append(k('−','-'), k('/'), k('%'), k(',')); }
@@ -1495,6 +1616,7 @@ function renderCard(r){
       el('div',{class:'row',style:'justify-content:center'}, el('span',{class:'grade g'+a.g}, GRADE[a.g]), el('span',{class:'note mono'}, fmtS(a.ms)), el('span',{class:'note'}, 'Nästa gång: '+whenTxt(a.next))),
       !a.ok ? el('div',{class:'note'}, `Ditt svar: ${a.mine} · Rätt svar: `, el('strong',{}, inst.show)) : a.ok && inst.kind==='num' && /\//.test(inst.show) && !/\//.test(a.mine) ? el('div',{class:'note'},'Som bråk: '+inst.show) : null,
       a.note ? el('div',{class:'note'}, a.note) : null,
+      a.trap ? el('div',{class:'ex trap'}, a.trap) : null,
       (!a.ok || a.g===2) && inst.ex ? el('div',{class:'ex'}, inst.ex) : null,
       el('div',{class:'row',style:'justify-content:center'}, el('button',{class:'btn primary',type:'button',id:'srnext',onclick:nextCard}, 'Nästa (Enter)')));
     card.append(fb);
@@ -1624,10 +1746,11 @@ function renderData(r){
       box));
 }
 document.addEventListener('keydown', e=>{
-  if (tab!=='sr' || view!=='pass' || !pass?.cur || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (tab!=='hr' || view!=='pass' || !pass?.cur || e.metaKey || e.ctrlKey || e.altKey) return;
   const cur = pass.cur;
   if (cur.answered){ if (e.key==='Enter' && document.activeElement?.id!=='srnext'){ e.preventDefault(); nextCard(); } return; }
-  if (cur.inst.kind==='choice'){ if (e.key==='ArrowLeft' || e.key==='1'){ e.preventDefault(); answer('0', cur.inst.opts[0]); } else if (e.key==='ArrowRight' || e.key==='2'){ e.preventDefault(); answer('1', cur.inst.opts[1]); } }
+  if (cur.inst.kva){ const i = 'abcd'.indexOf(e.key.toLowerCase()), j = i>=0 && e.key.length===1 ? i : '1234'.indexOf(e.key); if (j>=0 && e.key.length===1){ e.preventDefault(); answer(String(j), cur.inst.opts[j]); } }
+  else if (cur.inst.kind==='choice'){ if (e.key==='ArrowLeft' || e.key==='1'){ e.preventDefault(); answer('0', cur.inst.opts[0]); } else if (e.key==='ArrowRight' || e.key==='2'){ e.preventDefault(); answer('1', cur.inst.opts[1]); } }
 });
 function canLeave(){ return true; }
 
