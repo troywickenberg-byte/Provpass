@@ -4,8 +4,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<meta name="theme-color" content="#F3F0FA" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#15121F" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FBF8EF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1A1C24" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Provpass HP">
@@ -522,20 +522,192 @@ input.sw:checked{background:var(--accent)}
   .intro .countdown{grid-template-columns:minmax(0,1fr)}
   .intro .pdstats{grid-column:1;grid-row:auto;padding:16px 0 0;border-left:0;border-top:1px solid var(--line)}
 }
+
+/* ===== Lagom-designen: papper, bläck och ritade detaljer ===== */
+/* Blått bläck = ifyllt och valt, gul överstrykningspenna = huvudknappar och vald flik, röd penna = det som behöver uppmärksamhet. */
+:root{
+  --paper:#FBF8EF; --sheet:#FFFEFA; --ink:#2E2E38; --soft:#5E5E6B; --line:#D5DCE8; --rule:#E4EAF2;
+  --accent:#1F3FA8; --accent-tint:#E6EAF7; --accent-ink:#1F3FA8; --graphite:#1F3FA8;
+  --bad:#C8372D; --bad-tint:#FBE3E0;
+  --hl:#FFE66D; --hl-tint:#FFF3B0; --on-hl:#2E2E38; --edge:#2E2E38;
+  --f-hand:"Caveat","Segoe Print","Bradley Hand",cursive;
+  --wob:14px 9px 16px 10px/10px 15px 9px 14px; --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#1A1C24; --sheet:#23262F; --ink:#ECEAE2; --soft:#A9ABB8; --line:#3A3E4C; --rule:#20232C;
+  --accent:#3D5BD0; --accent-tint:#2A3152; --accent-ink:#A9BBFF; --graphite:#A9BBFF;
+  --bad:#FF9C92; --bad-tint:#3D1C1C;
+  --hl:#FFE066; --hl-tint:#3B3620; --on-hl:#2E2E38; --edge:#000}}
+:root[data-theme="dark"]{
+  --paper:#1A1C24; --sheet:#23262F; --ink:#ECEAE2; --soft:#A9ABB8; --line:#3A3E4C; --rule:#20232C;
+  --accent:#3D5BD0; --accent-tint:#2A3152; --accent-ink:#A9BBFF; --graphite:#A9BBFF;
+  --bad:#FF9C92; --bad-tint:#3D1C1C;
+  --hl:#FFE066; --hl-tint:#3B3620; --on-hl:#2E2E38; --edge:#000}
+
+body{background-color:var(--paper);background-image:linear-gradient(var(--rule) 1px,transparent 1px);background-size:100% 28px}
+h2,h3,.brand h1{font-family:var(--f-hand);font-weight:700;letter-spacing:0}
+h2,.frpage h2,.rtintro h2,.rthead h2{font-size:clamp(28px,4vw,34px)}
+h3,.panel h3,.catgroup h3,.rtarea h3,.drop h3,.hrcols h3{font-size:24px}
+.frpage h3.sub{font-size:22px}
+.score,.clock .big,.bignums b,.pdtile b,.rtnums b{font-family:var(--f-hand);font-weight:700;letter-spacing:0}
+.pdtile b{font-size:32px}.pdtile.time b{font-size:26px}
+.bignums b{font-size:52px}.rtnums b{font-size:30px}.rtnums.big b{font-size:38px}
+.score{font-size:76px}
+.clock .big{font-size:38px;color:var(--accent-ink)}
+.clock.mini .big{font-size:24px}
+.clock.low .big{color:var(--bad)}.clock.mini.over .big{color:var(--warn)}
+
+.box,.panel,.card,.side,.cardq,.item,.pass,.catitem,.rtcat,.rtmode{border:1.5px solid var(--ink);border-radius:var(--wob)}
+.box,.panel,.side,.cardq,.item{background:var(--sheet)}
+.item.bad{border-left:4px solid var(--bad)}
+.rtmode.on{border-color:var(--accent)}
+.catitem.open{border-color:var(--accent)}
+.pdtile{border:1.5px solid var(--line);border-radius:var(--wob)}
+.pdtile.sr{border-color:var(--quant)}.pdtile.time:not(.sr){border-color:var(--form)}.pdtile.warn{border-color:var(--warn)}
+.drop,.expl,.explain,.errlog,.warnbox,.verdictbox,.fb .ex,.toast{border-radius:var(--wob)}
+.drop{border-color:var(--soft)}
+
+.btn{border:1.5px solid var(--ink);border-radius:var(--wob);background:var(--sheet);color:var(--ink);min-height:44px;padding:8px 18px}
+.btn.small{min-height:38px;padding:6px 14px}
+.btn:not(:disabled):hover{transform:none;background:var(--hl-tint)}
+.btn.primary{background:var(--hl);color:var(--on-hl);border:2px solid var(--edge);box-shadow:2px 3px 0 var(--edge);font:700 22px/1.1 var(--f-hand)}
+.btn.primary.small{font-size:20px}
+.btn.primary:not(:disabled):hover{background:var(--hl);filter:brightness(.95)}
+.btn.primary:not(:disabled):active{transform:translate(2px,3px);box-shadow:0 0 0 var(--edge)}
+.btn.ghost{background:transparent;box-shadow:none;border:1.5px dashed var(--soft);color:var(--ink)}
+.countdown input,.fin,.ftsel,.setrow input[type=number],.setgrid input,.setgrid select,.catpane input[type=number],.errnotes textarea,.copybox,.hrpanel select,.ansrow input{border-color:var(--soft)}
+
+.bub,.kq .bub{width:52px;height:46px;border-radius:50%/60%;border:2px solid var(--ink);box-shadow:none;background:var(--sheet);color:var(--ink);font:700 24px/1 var(--f-hand)}
+.bub.on,.kq .bub.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.bub.right,.kq .bub.right{background:var(--ok);border-color:var(--ok);color:#fff}
+.bub.wrong,.kq .bub.wrong{background:var(--bad);border-color:var(--bad);color:#fff}
+
+/* rubriken, menyn och sidfoten */
+.brand h1{font-size:34px;line-height:1;padding:6px 14px;border:1.5px solid var(--ink);border-radius:var(--wob);background:var(--sheet);transform:rotate(-1.5deg)}
+.brand .tag{display:none}
+.appfoot{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;margin-top:36px;padding-top:14px;border-top:1.5px dashed var(--soft)}
+.themeseg{border:1px solid var(--line)}
+#tab-prov.on,#tab-rt.on,#tab-hr.on,#tab-fr.on{background:var(--hl);border-color:transparent;color:var(--on-hl)}
+body.inpass .tabs,body.inpass .mast,body.inpass .appfoot{display:none}
+@media (max-width:1099px){
+  .wrap{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+  body.inpass .wrap{padding-bottom:40px}
+  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:15;max-width:none;margin:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:6px 8px calc(8px + env(safe-area-inset-bottom,0px));background:var(--sheet);border-top:1.5px solid var(--ink)}
+  .tabs button{min-height:54px;padding:4px 2px;gap:3px;border:0;border-radius:var(--wob);background:none;font:700 11px/1.2 var(--f-body);color:var(--soft);transform:none}
+  .tabs button:hover{transform:none;border:0}
+  .tabs button svg{width:22px;height:22px}
+  .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+}
+@media (min-width:1100px){
+  .tabs button{border:0;border-radius:var(--wob)}
+  .tabs button:hover{background:var(--hl-tint);border:0}
+  .brand h1{font-size:30px;white-space:nowrap}
+  .appfoot{grid-column:2;grid-row:3}
+  body.inpass .wrap{grid-template-columns:minmax(0,1fr)}
+  body.inpass #app{grid-column:1;grid-row:1}
+}
+
+/* startsidan */
+.hintro{margin-top:20px}
+.hintro p{margin:6px 0 0;color:var(--soft);max-width:62ch}
+.hsec{margin:24px 0 8px}
+.hhead{display:flex;gap:16px;align-items:stretch;flex-wrap:wrap;margin-top:22px}
+.hfields{flex:1 1 420px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow:hidden}
+.hfields > *{display:grid;align-content:start;text-align:left;padding:8px 14px;min-width:0;border:0;border-right:1px solid var(--ink);border-radius:0;background:none;font:inherit;color:inherit}
+.hfields > :last-child{border-right:0}
+.hfields button:hover{background:var(--hl-tint)}
+.hfields .label{font-size:11px;letter-spacing:.04em}
+.hfields b{font:700 38px/1.05 var(--f-hand);color:var(--accent-ink)}
+.hcta{flex:0 0 auto;min-height:60px;padding:0 26px;font-size:24px}
+.btn.primary.hcta{font-size:24px}
+.hdone{display:grid;place-items:center;border:1.5px dashed var(--ok);border-radius:var(--wob);color:var(--ok);font:700 24px var(--f-hand)}
+.hroad{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;padding:10px 14px}
+.weeks{display:flex;flex-wrap:wrap;gap:5px;flex:1 1 100%;align-items:center}
+.hroad .note{flex:1 1 auto}
+.weeks i{flex:none;width:15px;height:15px;border-radius:50%;border:1.5px solid var(--ink)}
+.weeks i.f{background:var(--accent);border-color:var(--accent)}
+.weeks i.nu{border:2.5px solid var(--bad)}
+.weeks .dash{flex:1;min-width:12px;border-top:1.5px dashed var(--ink)}
+.weeks .flag{font-weight:700;font-size:12px;letter-spacing:.06em;border:1.5px solid var(--ink);border-radius:var(--wob);background:var(--hl-tint);padding:3px 10px}
+.hdate{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--soft)}
+.hdate input{font:inherit;font-size:14px;padding:4px 8px;min-height:36px;border:1.5px solid var(--soft);border-radius:10px;background:var(--paper);color:var(--ink)}
+
+.stig{position:relative;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));padding:0 8px 20px;min-height:258px}
+.stigline{position:absolute;left:8px;right:8px;top:0;height:200px;color:var(--ink);filter:url(#rough)}
+.stigline svg{display:block;width:100%;height:100%}
+.stn{position:relative;z-index:1;display:grid;justify-items:center;align-content:start;gap:6px;text-align:center;padding:0 4px;margin-top:32px}
+.stn.low{margin-top:102px}
+.ball{position:relative;display:grid;place-items:center;width:56px;height:56px;border-radius:50%;border:2px solid var(--ink);background:var(--sheet);font:700 28px/1 var(--f-hand)}
+.stn.done .ball{color:var(--accent-ink);font-size:38px}
+.stn.next .ball::after{content:"";position:absolute;inset:-11px -14px -9px -12px;border:2.5px solid var(--bad);border-radius:48% 52% 50% 50%/55% 46% 54% 45%;transform:rotate(-9deg);filter:url(#rough)}
+.stn.goal .ball{border-radius:var(--wob);background:var(--hl-tint);font:700 12px var(--f-body);letter-spacing:.06em}
+.stn.goal.done .ball{background:var(--hl);color:var(--on-hl)}
+.stx{display:grid}
+.stx b{font-size:15px;line-height:1.25}
+.stn.done:not(.goal) .stx b{text-decoration:line-through;color:var(--soft);font-weight:400}
+.stx small{font-size:12px;color:var(--soft)}
+.stx .here{font:700 19px/1.1 var(--f-hand);color:var(--bad)}
+
+.hcols{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0 28px;align-items:start}
+.dplist,.plist{overflow:hidden}
+.dprow{display:grid;grid-template-columns:40px minmax(0,1fr) auto 44px;align-items:center;gap:10px;width:100%;min-height:48px;padding:4px 12px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;font:inherit;color:inherit}
+.dprow:last-child{border-bottom:0}
+.dprow:not(:disabled):hover{background:var(--hl-tint)}
+.dprow:disabled{cursor:not-allowed;opacity:.6}
+.dprow b{font-size:14px}.dprow b.v{color:var(--form)}.dprow b.k{color:var(--quant)}
+.dprow .nm{display:grid;min-width:0;font-size:14px;overflow-wrap:anywhere}
+.dprow .nm small{font-size:12px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dprow .p{text-align:right;font-size:14px;font-variant-numeric:tabular-nums}
+.dprow.weak{box-shadow:inset 0 0 0 2px var(--bad);border-radius:var(--wob)}
+.dprow.weak .p{color:var(--bad);font-weight:700}
+.rings{display:flex;gap:3px}
+.rings i{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink)}
+.rings i.f{background:var(--accent);border-color:var(--accent)}
+.hhint{margin:6px 0 0;font-size:13px;color:var(--soft)}
+.prow{display:grid;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.prow:last-child{border-bottom:0}
+.pmain{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pmain b{flex:1 1 auto;font-size:15px}
+.pres{min-width:54px;text-align:right;font-size:14px;font-variant-numeric:tabular-nums}
+.psub{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.psub button.chip{min-height:34px;padding:4px 12px}
+.lower .drop{margin-top:0}
+@media (max-width:860px){.hcols{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:700px){
+  .hcta{flex:1 1 100%}
+  .stig{grid-template-columns:minmax(0,1fr);gap:18px;min-height:0;padding:18px 14px}
+  .stigline{display:none}
+  .stig::after{content:"";position:absolute;left:41px;top:34px;bottom:34px;border-left:2px dashed var(--ink)}
+  .stn,.stn.low{margin-top:0;grid-template-columns:56px minmax(0,1fr) auto;justify-items:start;align-items:center;text-align:left;gap:14px;padding:0}
+}
+@media (max-width:520px){
+  .hfields{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hfields > :nth-child(2){border-right:0}
+  .hfields > :nth-child(-n+2){border-bottom:1px solid var(--ink)}
+  .rings{gap:2px}.rings i{width:9px;height:9px}
+  .dprow .nm small{display:none}
+  .dprow{grid-template-columns:36px minmax(0,1fr) auto 40px;gap:8px;padding:4px 10px}
+}
+
+/* svarsblanketten i ett pass */
+.ansheet{columns:2;column-gap:14px}
+.ansheet .secsep{display:block;margin:4px 0 2px;break-after:avoid}
+.sr{display:flex;align-items:center;gap:5px;width:100%;min-height:24px;padding:2px 3px;border:0;border-radius:8px;background:none;font-size:12px;color:inherit;break-inside:avoid}
+.sr .n{width:20px;text-align:right;color:var(--soft);font-variant-numeric:tabular-nums}
+.sr i{width:16px;height:16px;border-radius:50%;border:1.3px solid var(--ink);font-style:normal;font-size:9px;line-height:13.5px;text-align:center}
+.sr i.f{background:var(--accent);border-color:var(--accent);color:transparent}
+.sr i.r{background:var(--ok);border-color:var(--ok);color:transparent}
+.sr i.w{background:var(--bad);border-color:var(--bad);color:transparent}
+.sr.nf i{border-style:dashed}
+.sr.cur{background:var(--hl-tint)}
+.sr.cur .n{color:var(--bad);font-weight:700}
+.sr:hover{background:var(--accent-tint)}
+@media (min-width:981px){.side{max-height:calc(100vh - 24px);overflow:auto}}
 </style>
 
 <div class="wrap">
   <header class="mast">
     <button class="brand" id="home-btn" type="button" aria-label="Till startsidan"><h1>Provpass HP</h1><span class="tag">gamla prov</span></button>
-    <div class="status"><span class="dot" id="sdot"></span><span id="stext">Sparas på den här enheten</span></div>
-    <div class="themeseg" role="group" aria-label="Utseende">
-      <button type="button" data-theme-choice="auto" aria-pressed="true" title="Följ enhetens inställning">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v16" /><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg><span>Auto</span></button>
-      <button type="button" data-theme-choice="light" aria-pressed="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span>Ljust</span></button>
-      <button type="button" data-theme-choice="dark" aria-pressed="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span>Mörkt</span></button>
-    </div>
   </header>
   <nav class="tabs" aria-label="Delar av appen">
     <button type="button" id="tab-prov" class="on" aria-current="page">
@@ -552,8 +724,20 @@ input.sw:checked{background:var(--accent)}
       <span>Framsteg</span></button>
   </nav>
   <main id="app"></main>
+  <footer class="appfoot">
+    <div class="status"><span class="dot" id="sdot"></span><span id="stext">Sparas på den här enheten</span></div>
+    <div class="themeseg" role="group" aria-label="Utseende">
+      <button type="button" data-theme-choice="auto" aria-pressed="true" title="Följ enhetens inställning">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v16" /><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg><span>Auto</span></button>
+      <button type="button" data-theme-choice="light" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span>Ljust</span></button>
+      <button type="button" data-theme-choice="dark" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span>Mörkt</span></button>
+    </div>
+  </footer>
 </div>
 <div class="toast" id="toast" hidden></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="rough" x="-5%" y="-20%" width="110%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="3.5"/></filter></svg>
 
 <script src="forklaringar.js"></script>
 <script src="vendor/pdf.min.js"></script>
@@ -1763,7 +1947,7 @@ function streak(){
   while (days.has(dayKey(d.getTime()))){ n++; d.setDate(d.getDate()-1); }
   return n;
 }
-const summary = () => ({ms: srTime(), streak: streak(), today: S.log.some(a=>a.day===dayKey())});
+const summary = () => ({ms: srTime(), streak: streak(), today: S.log.some(a=>a.day===dayKey()), days: [...new Set(S.log.map(a=>a.day))]});
 return {render, attach, canLeave, summary, schedule, _test:{check, parse, ev, CATS, CARDS, makeInst, schedule, S, csv, backup}};
 })();
 </script>
@@ -2236,6 +2420,7 @@ function setTab(t){
   render(); window.scrollTo(0,0);
 }
 function render(){
+  passMode(view==='quiz' && !!session && (tab==='prov' || tab==='rt'));
   if (tab==='hr') return SR.render($('#app'));
   if (tab==='fr') return renderProgress();
   if (tab==='rt'){
@@ -2350,46 +2535,111 @@ function renderHome(){
   drop.addEventListener('dragleave', ()=>drop.classList.remove('over'));
   drop.addEventListener('drop', e=>{ e.preventDefault(); drop.classList.remove('over'); onPick(e.dataTransfer.files); });
 
-  const byDate = {};
-  for (const t of tests) (byDate[t.date] ||= []).push(t);
   const doneBest = key => { let best=null; for (const s of P.sessions) if (s.tk===key && (!best || s.c/s.n > best.c/best.n)) best=s; return best; };
   const orphanFacit = Object.entries(LIB.facits).flatMap(([d,ps])=>Object.keys(ps).filter(p=>!LIB.tests[d+'|'+p]).map(p=>`${examShort(d)} provpass ${p}`));
-  const lib = tests.length ? el('section',{class:'lib'},
-    Object.entries(byDate).map(([date, ts])=>el('div',{class:'panel exam'},
-      el('h3',{}, examName(date), el('span',{class:'label'}, date+' · '+ts.length+' provpass')),
-      el('div',{class:'passes'}, ts.map(t=>{
-        const items = itemsFor(t);
-        const secs = [...new Set(items.map(i=>i.sec))];
-        const missingSecs = (t.kind==='v'?['ORD','LÄS','MEK','ELF']:['XYZ','KVA','NOG','DTK']).filter(c=>!secs.includes(c));
-        const best = doneBest(t.key);
-        const nf = items.filter(i=>!i.answer).length;
-        return el('article',{class:'pass'},
-          el('div',{class:'pass-head'}, el('strong',{}, `Provpass ${t.pass} · ${t.kind==='v'?'Verbal':'Kvantitativ'}`),
-            t.facit ? el('span',{class:'chip okc'}, nf ? `Facit saknas för ${nf} uppg.` : 'Facit finns') : el('span',{class:'chip missing'},'Facit saknas')),
-          el('span',{class:'note'}, `${items.length} uppgifter`+(missingSecs.length?` · ${missingSecs.join(', ')} finns inte i filen`:'')+(best?` · bästa: ${best.c}/${best.n}`:'')),
-          !t.facit ? el('span',{class:'note'}, 'Utan facit kan passet inte rättas. Lägg till facit-filen för '+examSeason(t.date)+' ('+t.date+').') : null,
-          el('div',{class:'chips'},
-            el('button',{class:'btn small primary',type:'button',onclick:()=>startPass(t)},'Hela passet, 55 min'),
-            secs.map(c=>el('button',{class:'chip '+SEC[c].part,type:'button',title:SEC[c].name,onclick:()=>startSec(t,c)}, c))));
-      })))),
-    orphanFacit.length ? el('p',{class:'note'}, 'Facit finns men provhäftet saknas för: '+orphanFacit.join(', ')+'.') : null
-  ) : null;
+  const availFor = c => tests.filter(t=>t.facit && itemsFor(t,c).length);
+  const practisable = CODES.filter(c=>availFor(c).length);
+  const secPct = c => pct(P.stats[c].c, P.stats[c].n);
+  const weak = CODES.filter(c=>P.stats[c]?.n).sort((a,b)=>secPct(a)-secPct(b))[0] || null;
 
-  const part = (p, title, sub) => el('section',{class:'part'},
-    el('div',{class:'part-head'}, el('h3',{},title), el('span',{class:'label'},sub)),
-    el('div',{class:'grid'}, CODES.filter(c=>SEC[c].part===p).map(c=>{
-      const s=SEC[c], st=P.stats[c]||{n:0,c:0,ms:0};
-      const avg = st.n ? st.ms/st.n : null;
-      const avail = tests.filter(t=>t.facit && itemsFor(t,c).length);
-      return el('article',{class:'card '+p},
-        el('span',{class:'code'},c),
-        el('h4',{},s.name),
-        el('div',{class:'meter',role:'img','aria-label':st.n?`${pct(st.c,st.n)} procent rätt`:'Inte övat än'}, el('i',{style:`width:${pct(st.c,st.n)}%`})),
-        el('div',{class:'stat'}, el('span',{}, st.n ? `${pct(st.c,st.n)} % rätt av ${st.n}` : 'Inte övat än'), el('span',{class:'mono'}, avg!=null ? `${fmtTime(avg)} / uppg` : `riktm. ${fmtTime(s.pace*1000)}`)),
-        st.n ? el('div',{class:'stat'}, el('span',{}, `Snabba fel: ${st.fast||0}`), el('span',{}, `Långsamma fel: ${st.slow||0}`)) : null,
-        el('div',{class:'acts'},
-          el('button',{type:'button',disabled:!avail.length,onclick:()=>{ const t = leastPractised(avail, c); startSec(t, c); }}, avail.length ? `Öva ${c} (${avail.length} prov)` : (c==='ELF' && tests.length ? 'ELF finns inte i filerna' : 'Läs in prov först'))));
-    })));
+  // ----- Fälten överst: dagar kvar, senaste resultat, mål och dagar i rad -----
+  const act = activeDays();
+  const lastExam = examRows().filter(e=>e.t!=null).pop();
+  const dateIn = el('input',{id:'exam',type:'date',value:P.examDate||'','aria-label':'Datum för provet',onchange:e=>{P.examDate=e.target.value; store.save(); render();}});
+  const field = (label, value, go, hint) => el(go?'button':'div', go?{type:'button',onclick:go,title:hint}:{}, el('span',{class:'label'},label), el('b',{}, value));
+  const fields = el('div',{class:'hfields box'},
+    field('Dagar kvar', dl==null ? '–' : dl<0 ? 'Klart' : String(dl), ()=>{ dateIn.focus(); dateIn.showPicker?.(); }, 'Ändra provdatum'),
+    field('Senast', lastExam ? fmtHP(lastExam.t) : '–', ()=>setTab('fr'), 'Helprov lägger du in under Framsteg'),
+    field('Mål', P.goal!=null ? fmtHP(P.goal) : '–', ()=>setTab('fr'), 'Målet anger du under Framsteg'),
+    field('Dagar i rad', String(dayStreak(act))));
+
+  // ----- Vägen till provdagen: en ring per vecka, ifylld om du har tränat den veckan -----
+  let roadTitle = 'Vägen till provdagen', road;
+  if (dl==null || dl<0){
+    road = el('div',{class:'hroad box'}, el('span',{}, dl==null ? 'Ange datumet för ditt prov, så ritas vägen dit.' : 'Provdagen har passerat. Ange nästa provdatum.'), el('label',{class:'hdate'}, 'Provdag', dateIn));
+  } else {
+    const WEEK = 7*86400000;
+    const mon = d => { const x = new Date(d); x.setHours(12,0,0,0); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; };
+    const now = mon(new Date()), exam = mon(P.examDate+'T12:00:00');
+    const firstDay = [...act].filter(Boolean).sort()[0];
+    const first = firstDay ? mon(firstDay+'T12:00:00') : now;
+    let start = first < now ? first : now;
+    const MAXW = 30;
+    if (Math.round((now-start)/WEEK) > MAXW-4) start = new Date(now - (MAXW-4)*WEEK);
+    const total = Math.max(1, Math.round((exam-start)/WEEK)+1), cur = Math.round((now-start)/WEEK);
+    const activeWeeks = new Set([...act].filter(Boolean).map(d=>localDay(mon(d+'T12:00:00'))));
+    const shown = Math.min(total, MAXW);
+    const rings = Array.from({length:shown}, (_,i)=>{ const w = new Date(start.getTime()+i*WEEK);
+      return el('i',{class:(activeWeeks.has(localDay(w))?'f':'')+(i===cur?' nu':''), title:'Vecka '+(i+1)+(i===cur?' (den här veckan)':'')}); });
+    roadTitle += ` · vecka ${cur+1} av ${total}`;
+    road = el('div',{class:'hroad box'},
+      el('div',{class:'weeks',role:'img','aria-label':`Vecka ${cur+1} av ${total} fram till provdagen`}, rings, el('span',{class:'dash'}), el('span',{class:'flag'},'PROVDAG')),
+      el('span',{class:'note'},'En ring per vecka. Ifylld = du har tränat.'),
+      el('label',{class:'hdate'}, 'Provdag', dateIn));
+  }
+
+  // ----- Dagens stig: huvudräkning, repetera fel och ett delprov -----
+  const today = isoDay(), sr = SR.summary();
+  const doneToday = f => P.sessions.some(s=>localDay(s.d)===today && f(s));
+  const stations = [{title:'Huvudräkning', sub: sr.today ? 'Klart idag' : 'ca 5 min', done: !!sr.today, go:()=>setTab('hr')}];
+  if (!tests.length) stations.push({title:'Läs in dina prov', sub:'provhäften och facit', done:false, go:()=>{ $('#drop')?.scrollIntoView({behavior:'smooth',block:'center'}); }});
+  if (openLoaded.length){
+    const n = Math.min(openLoaded.length, 10);
+    stations.push({title:`Repetera ${n} fel`, sub:`${openLoaded.length} sparade fel`, done: doneToday(s=>s.label==='Repetera fel'),
+      go:()=>startSession(shuffle(openLoaded).slice(0,n).map(m=>({tk:m.tk,n:m.n,sec:m.sec,answer:LIB.tests[m.tk].facit?.[m.n-1]||null})),'Repetera fel')});
+  }
+  const focus = practisable.find(c=>!P.stats[c]?.n) || (practisable.includes(weak) ? weak : practisable[0]);
+  if (focus) stations.push({title:`Öva ${focus}`, sub: P.stats[focus]?.n ? (focus===weak ? `svagast · ${secPct(focus)} % rätt` : `${secPct(focus)} % rätt`) : 'inte övat än',
+    done: doneToday(s=>!!s.sec), go:()=>startSec(leastPractised(availFor(focus), focus), focus)});
+  const next = stations.find(s=>!s.done) || null;
+  const left = stations.filter(s=>!s.done).length;
+  const all = [...stations, {goal:true, title:'Dagens mål', sub: left ? (left===1 ? '1 steg kvar' : left+' steg kvar') : 'Klart för idag!', done:!left}];
+  const pts = all.map((_,i)=>[(i+0.5)/all.length*1000, i%2 ? 130 : 60]);
+  let pathD = `M${pts[0][0]} ${pts[0][1]}`;
+  for (let i=1;i<pts.length;i++){ const [x0,y0]=pts[i-1], [x1,y1]=pts[i], mx=(x0+x1)/2; pathD += ` C${mx} ${y0} ${mx} ${y1} ${x1} ${y1}`; }
+  const line = el('div',{class:'stigline','aria-hidden':'true'});
+  line.innerHTML = `<svg viewBox="0 0 1000 200" preserveAspectRatio="none"><path d="${pathD}" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="7 8" vector-effect="non-scaling-stroke"/></svg>`;
+  const stig = el('div',{class:'stig box',style:`--n:${all.length}`}, line, all.map((st,i)=>
+    el('div',{class:'stn'+(i%2?' low':'')+(st.done?' done':'')+(st===next?' next':'')+(st.goal?' goal':'')},
+      el('span',{class:'ball'}, st.goal ? 'MÅL' : st.done ? '✓' : String(i+1)),
+      el('span',{class:'stx'}, el('b',{}, st.title), el('small',{}, st.sub), st===next ? el('span',{class:'here'},'du är här') : null),
+      st===next ? el('button',{class:'btn primary small',type:'button',onclick:st.go},'Starta')
+        : !st.done && st.go ? el('button',{class:'btn small',type:'button',onclick:st.go},'Starta') : null)));
+  const cta = next ? el('button',{class:'btn primary hcta',type:'button',onclick:next.go}, 'Fortsätt: '+next.title)
+    : el('div',{class:'hcta hdone'}, 'Dagens stig är klar ✓');
+
+  // ----- Delprov som rader med svarsringar -----
+  const dpRow = c => {
+    const s=SEC[c], st=P.stats[c]||{n:0,c:0,ms:0}, p=pct(st.c,st.n), avail=availFor(c);
+    return el('button',{type:'button',class:'dprow'+(c===weak?' weak':''),disabled:!avail.length,
+        title: avail.length ? `Öva ${c} (${avail.length} prov)` : (c==='ELF' && tests.length ? 'ELF finns inte i filerna' : 'Läs in prov först'),
+        onclick:()=>startSec(leastPractised(avail, c), c)},
+      el('b',{class:s.part}, c),
+      el('span',{class:'nm'}, s.name, el('small',{}, st.n ? `${fmtTime(st.ms/st.n)} / uppg · riktm. ${fmtTime(s.pace*1000)}` : `riktm. ${fmtTime(s.pace*1000)}`)),
+      el('span',{class:'rings',role:'img','aria-label':st.n?`${p} procent rätt`:'Inte övat än'}, Array.from({length:10},(_,i)=>el('i',{class: st.n && i<Math.round(p/10) ? 'f' : ''}))),
+      el('span',{class:'p'}, st.n ? p+' %' : '–'));
+  };
+
+  // ----- Provhäften: en rad per provpass -----
+  const plist = tests.length ? el('div',{class:'plist box'}, tests.map(t=>{
+    const items = itemsFor(t);
+    const secs = [...new Set(items.map(i=>i.sec))];
+    const missingSecs = (t.kind==='v'?['ORD','LÄS','MEK','ELF']:['XYZ','KVA','NOG','DTK']).filter(c=>!secs.includes(c));
+    const best = doneBest(t.key);
+    const nf = items.filter(i=>!i.answer).length;
+    return el('div',{class:'prow'},
+      el('div',{class:'pmain'},
+        el('b',{}, `${examShort(t.date)} · pass ${t.pass}`),
+        el('span',{class:'chip '+t.kind}, t.kind==='v'?'Verbal':'Kvantitativ'),
+        el('span',{class:'pres',title:best?'Bästa resultat':'Inte gjort än'}, best ? `${best.c} / ${best.n}` : '–'),
+        el('button',{class:'btn small',type:'button',title:'Hela passet, 55 min',onclick:()=>startPass(t)}, best ? 'Gör om' : 'Starta')),
+      el('div',{class:'psub'},
+        el('span',{class:'note'},'Bara ett delprov:'),
+        secs.map(c=>el('button',{class:'chip '+SEC[c].part,type:'button',title:SEC[c].name,onclick:()=>startSec(t,c)}, c)),
+        !t.facit ? el('span',{class:'chip missing',title:'Utan facit kan passet inte rättas. Lägg till facit-filen för '+examSeason(t.date)+' ('+t.date+').'},'Facit saknas')
+          : nf ? el('span',{class:'chip missing'}, `Facit saknas för ${nf} uppg.`) : null,
+        missingSecs.length ? el('span',{class:'note'}, `${missingSecs.join(', ')} finns inte i filen`) : null));
+  })) : el('p',{class:'empty'},'Inga prov inlästa än.');
 
   const log = P.sessions.length
     ? el('div',{class:'tbl-wrap'}, el('table',{class:'log'}, el('thead',{}, el('tr',{}, el('th',{},'Datum'), el('th',{},'Pass'), el('th',{class:'n'},'Rätt'), el('th',{class:'n'},'Tid'))),
@@ -2404,23 +2654,44 @@ function renderHome(){
       P.mistakes.length ? el('button',{class:'btn ghost small',type:'button',onclick:()=>{ view='mistakes'; renderMistakes(); }},'Visa alla') : null),
     open.length && !openLoaded.length ? el('p',{class:'note'},'Läs in provfilerna för att kunna repetera.') : null);
 
-  put(app, 
-    el('section',{class:'intro'},
-      el('div',{},
-        el('h2',{}, total.n ? `${total.n} uppgifter rättade, ${pct(total.c,total.n)} % rätt` : 'Träna på riktiga gamla högskoleprov'),
-        el('p',{}, 'Appen visar sidorna ur dina egna provhäften och rättar bara mot facit i samma mapp. Varje pass har 55 minuter, precis som på provet, och tiden mäts för varje uppgift. Efteråt får du en analys av dina fel, och alla fel sparas.')),
-      el('div',{class:'panel countdown'},
-        el('span',{class:'label'},'Provdag'),
-        el('span',{class:'big mono'}, dl==null ? '–' : dl<0 ? 'Klart' : String(dl)),
-        el('span',{class:'note'}, dl==null ? 'Ange datumet för ditt provtillfälle.' : dl<0 ? 'Datumet har passerat.' : dl===1?'dag kvar':'dagar kvar'),
-        el('label',{for:'exam',class:'note'},'Datum för provet'),
-        el('input',{id:'exam',type:'date',value:P.examDate||'',onchange:e=>{P.examDate=e.target.value; store.save(); render();}}),
-        provdagStats())),
-    drop, lib,
-    part('v','Verbal del','ORD · LÄS · MEK · ELF'),
-    part('k','Kvantitativ del','XYZ · KVA · NOG · DTK'),
-    el('section',{class:'lower'}, el('div',{class:'panel'}, el('h3',{},'Senaste pass'), log), mist));
+  passMode(false);
+  put(app,
+    !tests.length ? el('section',{class:'hintro'},
+      el('h2',{},'Träna på riktiga gamla högskoleprov'),
+      el('p',{}, 'Appen visar sidorna ur dina egna provhäften och rättar bara mot facit i samma mapp. Varje pass har 55 minuter, precis som på provet, och tiden mäts för varje uppgift. Efteråt får du en analys av dina fel, och alla fel sparas.')) : null,
+    el('div',{class:'hhead'}, fields, cta),
+    el('section',{}, el('h3',{class:'hsec'}, roadTitle), road),
+    !tests.length ? drop : null,
+    el('section',{}, el('h3',{class:'hsec'},'Dagens stig'), stig),
+    el('div',{class:'hcols'},
+      el('section',{}, el('h3',{class:'hsec'},'Delprov, andel rätt'), el('div',{class:'dplist box'}, CODES.map(dpRow)),
+        el('p',{class:'hhint'}, 'Klicka på en rad för att träna det delprovet.')),
+      el('section',{}, el('h3',{class:'hsec'},'Provhäften'), plist,
+        orphanFacit.length ? el('p',{class:'note'}, 'Facit finns men provhäftet saknas för: '+orphanFacit.join(', ')+'.') : null)),
+    el('section',{class:'lower'}, el('div',{class:'panel'}, el('h3',{},'Senaste pass'), log), mist),
+    el('section',{class:'lower'},
+      el('div',{class:'panel'}, el('h3',{},'Hittills'),
+        total.n ? el('p',{class:'note'}, `${total.n} uppgifter rättade, ${pct(total.c,total.n)} % rätt.`) : null,
+        provdagStats()),
+      tests.length ? drop : null));
 }
+// Dagar med träning: provpass, delprov och huvudräkning. Används för "dagar i rad" och veckoringarna.
+const localDay = d => { const x = new Date(d); return isNaN(x) ? '' : x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); };
+function activeDays(){
+  const s = new Set(SR.summary().days||[]);
+  for (const x of P.sessions) s.add(localDay(x.d));
+  for (const x of delprovRows()) if (x.d) s.add(localDay(x.d));
+  s.delete('');
+  return s;
+}
+function dayStreak(days){
+  const d = new Date(); let n = 0;
+  if (!days.has(localDay(d))) d.setDate(d.getDate()-1);
+  while (days.has(localDay(d))){ n++; d.setDate(d.getDate()-1); }
+  return n;
+}
+// Under ett pass göms menyn, så att provsidan får hela bredden.
+function passMode(on){ document.body.classList.toggle('inpass', !!on); }
 // ================= Framsteg (tracker) =================
 const isoDay = () => { const d = new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
 let frState = {edit:null, showAllLog:false, errFilter:'all'};
@@ -2855,11 +3126,15 @@ function renderSide(){
   const s=session, it=s.items[s.cur], sec=SEC[it.sec], side=$('#side'); if (!side) return;
   const left = s.deadline - Date.now();
   const opts = sec.opts;
-  const sheet = el('div',{class:'sheetgrid'});
+  // Svarsblanketten: en rad per uppgift med en ring per svarsalternativ, som på provet
+  const sheet = el('div',{class:'ansheet'});
   let lastSec = null;
   s.items.forEach((x,i)=>{
     if (x.sec!==lastSec){ sheet.append(el('span',{class:'secsep'}, x.sec)); lastSec=x.sec; }
-    sheet.append(el('button',{type:'button',class:[s.chosen[i]?'done':'', i===s.cur?'cur':'', x.answer?'':'nf'].join(' '),'aria-label':`Uppgift ${x.n}`+(s.chosen[i]?`, svar ${s.chosen[i]}`:', ej besvarad'),onclick:()=>goTo(i)}, String(s.rt ? i+1 : x.n), el('span',{class:'a'}, s.chosen[i]||'')));
+    const shown = s.lock?.[i] && x.answer;   // "Visa svaret direkt": rätt ring blir grön, fel val rött
+    sheet.append(el('button',{type:'button',class:['sr', i===s.cur?'cur':'', x.answer?'':'nf'].join(' '),'aria-label':`Uppgift ${x.n}`+(s.chosen[i]?`, svar ${s.chosen[i]}`:', ej besvarad'),onclick:()=>goTo(i)},
+      el('span',{class:'n'}, String(s.rt ? i+1 : x.n)),
+      LET.slice(0,SEC[x.sec].opts).map(L=>el('i',{class: shown ? (L===x.answer ? 'r' : s.chosen[i]===L ? 'w' : '') : s.chosen[i]===L ? 'f' : ''}, L))));
   });
   const answered = Object.keys(s.chosen).length;
   side.className = 'side '+(sec.part==='k'?'kq':'');
@@ -2876,8 +3151,8 @@ function renderSide(){
     el('div',{class:'row'},
       el('button',{class:'btn ghost small',type:'button',disabled:s.cur===0,onclick:()=>goTo(s.cur-1)},'Föregående'),
       el('button',{class:'btn primary small',type:'button',disabled:s.cur===s.items.length-1,onclick:()=>goTo(s.cur+1)},'Nästa')),
-    el('button',{class:'link sheettoggle',type:'button',onclick:()=>$('#sheetwrap').classList.toggle('open')},'Visa svarshäftet'),
-    el('div',{class:'sheetwrap',id:'sheetwrap'}, el('span',{class:'label'},`Svarshäfte · ${answered} av ${s.items.length} besvarade`), sheet),
+    el('button',{class:'link sheettoggle',type:'button',onclick:()=>$('#sheetwrap').classList.toggle('open')},'Visa svarsblanketten'),
+    el('div',{class:'sheetwrap',id:'sheetwrap'}, el('span',{class:'label'},`Svarsblankett · ${answered} av ${s.items.length} besvarade`), sheet),
     el('div',{class:'row'},
       el('button',{class:'btn small',type:'button',onclick:confirmSubmit,id:'submitbtn'},'Lämna in'),
       el('span',{class:'note',id:'confirm'})),
@@ -3021,7 +3296,7 @@ navigator.storage?.persist?.().catch(()=>{});
 // Temaväljare: Auto följer enheten, Ljust och Mörkt låser utseendet. Valet sparas på enheten.
 (function(){
   const KEY = 'provpass-theme';
-  const COLORS = { light:'#F3F0FA', dark:'#15121F' };
+  const COLORS = { light:'#FBF8EF', dark:'#1A1C24' };
   const metas = [...document.querySelectorAll('meta[name="theme-color"]')];
   const orig = metas.map(m => m.getAttribute('content'));
   const get = () => { try{ const v = localStorage.getItem(KEY); return v==='light'||v==='dark' ? v : 'auto'; }catch(e){ return 'auto'; } };
