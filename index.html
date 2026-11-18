@@ -344,6 +344,12 @@ td.acts{white-space:nowrap;text-align:right}
 .errlog .row{align-items:center;gap:8px 12px}
 .ftsel{font:inherit;font-size:14px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--sheet);color:var(--ink)}
 .tag.unclass{background:var(--warn-tint);color:var(--warn)}
+.tag.topic{background:var(--paper);color:var(--ink);border:1px dashed var(--line)}
+.ftact{margin:6px 0 0;font-size:13px;color:var(--soft);max-width:70ch}
+.ftact strong{color:var(--ink)}
+.resbtn{font-size:12px}
+.resbtn[aria-pressed="true"]{background:var(--accent-tint);color:var(--accent-ink);border-color:var(--accent)}
+.chip.res{background:var(--accent-tint);color:var(--accent-ink)}
 .errnotes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
 .errnotes label{display:grid;gap:4px;font-size:13px;color:var(--soft)}
 .errnotes textarea{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--sheet);color:var(--ink);resize:vertical}
@@ -740,6 +746,7 @@ body.inpass .tabs,body.inpass .mast,body.inpass .appfoot{display:none}
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="rough" x="-5%" y="-20%" width="110%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="3.5"/></filter></svg>
 
 <script src="forklaringar.js"></script>
+<script src="amnen.js"></script>
 <script src="vendor/pdf.min.js"></script>
 <script>if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.js';</script>
 <script>
@@ -1392,9 +1399,16 @@ const nextD = (D,g) => { const dp = D - W[6]*(g-3); return clampD(W[7]*D0(4) + (
 const recallS = (D,S,r,g) => S*(1 + Math.exp(W[8])*(11-D)*Math.pow(S,-W[9])*(Math.exp(W[10]*(1-r))-1)*(g===2?W[15]:1)*(g===4?W[16]:1));
 const forgetS = (D,S,r) => Math.min(S, W[11]*Math.pow(D,-W[12])*(Math.pow(S+1,W[13])-1)*Math.exp(W[14]*(1-r)));
 const shortS = (S,g) => S*Math.exp(W[17]*(g-3+W[18]));
+// Längsta intervall i dagar. Sätts av huvudkoden till ca 15 % av dagarna kvar till provet
+// (Cepedas tumregel i rapporten), annars 365.
+let capFn = () => 365;
+const maxIvl = () => { try{ const d = capFn(); return isFinite(d) && d>=1 ? d : 365; }catch(e){ return 365; } };
+function setCap(fn){ capFn = fn; }
+// Förfallodag med taket: ett kort som schemalagts långt fram innan provdatumet sattes kommer tillbaka i tid
+const effDue = c => !c ? 0 : c.st==='review' && c.last ? Math.min(c.due, c.last + maxIvl()*DAY) : c.due;
 function schedule(c, g, now, ret){
   c = Object.assign({st:'new', S:0, D:0, due:now, last:0, reps:0, lapses:0}, c||{});
-  const toReview = () => { const days = Math.min(365, Math.max(1, Math.round(ivlDays(c.S, ret) * (1 + (Math.random()-0.5)*0.1)))); c.st='review'; c.due = now + days*DAY; };
+  const toReview = () => { const days = Math.min(maxIvl(), Math.max(1, Math.round(ivlDays(c.S, ret) * (1 + (Math.random()-0.5)*0.1)))); c.st='review'; c.due = now + days*DAY; };
   if (c.st==='new'){
     c.S = W[g-1]; c.D = D0(g);
     if (g===1){ c.st='learn'; c.due = now + 60e3; } else if (g===2){ c.st='learn'; c.due = now + 5*60e3; } else toReview();
@@ -1522,8 +1536,8 @@ const passCats = (group='sr') => set().focusMode?.[group]==='pick' ? CATS.filter
 const activeCards = (group='sr') => passCats(group).flatMap(c=>c.cards).filter(k=>!isOff(k));
 function dueList(group='sr'){
   const end = endOfToday();
-  return activeCards(group).filter(k=>{ const c=S.state.cards[k.id]; return c && c.st!=='new' && c.due<=end; })
-    .sort((a,b)=> (isStar(b)-isStar(a)) || S.state.cards[a.id].due - S.state.cards[b.id].due);   // oftare-markerade först
+  return activeCards(group).filter(k=>{ const c=S.state.cards[k.id]; return c && c.st!=='new' && effDue(c)<=end; })
+    .sort((a,b)=> (isStar(b)-isStar(a)) || effDue(S.state.cards[a.id]) - effDue(S.state.cards[b.id]));   // oftare-markerade först
 }
 function newList(group='sr'){
   const per = passCats(group).map(c=>c.cards.filter(k=>!S.state.cards[k.id] && !isOff(k)).sort((a,b)=>isStar(b)-isStar(a)));
@@ -1612,7 +1626,7 @@ function catStats(){
     const att = S.log.filter(a=>a.cat===c.id);
     const okT = att.filter(a=>a.ok).map(a=>a.ms);
     let learned=0, due=0, fresh=0;
-    for (const k of c.cards){ const st=S.state.cards[k.id]; if (!st) fresh++; else { if (st.st==='review') learned++; if (st.due<=end) due++; } }
+    for (const k of c.cards){ const st=S.state.cards[k.id]; if (!st) fresh++; else { if (st.st==='review') learned++; if (effDue(st)<=end) due++; } }
     return {c, n:att.length, ok:att.filter(a=>a.ok).length, med:median(okT), learned, due, fresh, total:c.cards.length};
   });
 }
@@ -1879,7 +1893,7 @@ function renderCats(r){
         el('p',{class:'note'}, `${c.cards.length} uppgifter`+(nStar?` · ${nStar} visas oftare`:'')+(nOff?` · ${nOff} avstängda`:'')+'. "Oftare" ger halva tiden till nästa repetition och förtur i passen. Avstängda uppgifter visas inte alls.'),
         el('ul',{class:'tasklist'}, c.cards.map(k=>{
           const st = S.state.cards[k.id], off = isOff(k), star = isStar(k);
-          const status = off ? 'Avstängd' : !st ? 'Ny' : st.due<=end ? 'Förfallen idag' : 'Nästa: '+whenTxt(st.due);
+          const status = off ? 'Avstängd' : !st ? 'Ny' : effDue(st)<=end ? 'Förfallen idag' : 'Nästa: '+whenTxt(effDue(st));
           return el('li',{class:off?'off':''},
             el('span',{class:'tq'}, k.tpl ? k.name : k.q, el('small',{class:'note'}, status)),
             el('span',{class:'tbtns'},
@@ -1948,7 +1962,7 @@ function streak(){
   return n;
 }
 const summary = () => ({ms: srTime(), streak: streak(), today: S.log.some(a=>a.day===dayKey()), days: [...new Set(S.log.map(a=>a.day))]});
-return {render, attach, canLeave, summary, schedule, _test:{check, parse, ev, CATS, CARDS, makeInst, schedule, S, csv, backup}};
+return {render, attach, canLeave, summary, schedule, setCap, effDue, maxIvl, _test:{check, parse, ev, CATS, CARDS, makeInst, schedule, S, csv, backup}};
 })();
 </script>
 <script>
@@ -2353,7 +2367,12 @@ function submit(){
       const rec = {key, tk:r.tk, n:r.n, sec:r.sec, chosen:r.chosen, answer:r.answer, ms:r.ms, tag:r.tag, d:new Date().toISOString(), fixed:false, times:(at>=0?(P.mistakes[at].times||1)+1:1), ex: at>=0 ? P.mistakes[at].ex : null, ftype: at>=0 ? P.mistakes[at].ftype : null, what: at>=0 ? P.mistakes[at].what : '', lesson: at>=0 ? P.mistakes[at].lesson : ''};
       if (at>=0) P.mistakes.splice(at,1);
       P.mistakes.unshift(rec);
-    } else if (r.status==='ok' && at>=0){ P.mistakes[at].fixed = true; P.mistakes[at].fixedD = new Date().toISOString(); }
+    } else if (r.status==='ok' && at>=0){
+      // klarad först efter två rätt i tid på olika dagar (se logTask)
+      const fixed = !needsWork(tasks()[key]);
+      if (fixed && !P.mistakes[at].fixed) P.mistakes[at].fixedD = new Date().toISOString();
+      P.mistakes[at].fixed = fixed;
+    }
   }
   P.mistakes = P.mistakes.slice(0, 800);
   if (graded.length){
@@ -2447,7 +2466,15 @@ function provTotals(){
   return P.totals;
 }
 // ---------- Framsteg: mål, helprov, delprovslogg och fellogg (som Excel-trackern) ----------
-const FTYPES = ['Kunskapslucka','Slarvfel','Tidsbrist/gissning','Missförstod frågan'];
+const FTYPES = ['Kunskapslucka','Fel metod','Slarvfel','Missförstod frågan','Tidsbrist/gissning'];
+// Vad du gör åt felet, beroende på feltyp (rapporten "Matteinlärning för högskoleprovet")
+const FTACTION = {
+  'Kunskapslucka':'Gå igenom ämnet med ett löst exempel, gör sedan 4–6 liknande uppgifter och till sist 3 utan hjälp.',
+  'Fel metod':'Skriv under Lärdom vilken signal i uppgiften som visar rätt metod, till exempel "x² mot x → testa 0 < x < 1".',
+  'Slarvfel':'Skriv en kontrollregel under Lärdom, till exempel "räkna om sista steget" eller "kolla tecknet".',
+  'Missförstod frågan':'Skriv en läsregel under Lärdom, till exempel "vad efterfrågas: x − y eller x?" eller "per dag eller per vecka?".',
+  'Tidsbrist/gissning':'Träna uppgiftstypen med tid. På provet: gissa och markera uppgiften när du har lagt dubbla riktmärket på den. Fel svar kostar inget.',
+};
 const suggestFtype = tag => tag==='fast' ? 'Slarvfel' : tag==='skipped' ? 'Tidsbrist/gissning' : tag==='slow' ? 'Kunskapslucka' : null;
 const SECN = {ORD:10, 'LÄS':10, MEK:10, ELF:10, XYZ:12, KVA:10, NOG:6, DTK:12};
 const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -2476,6 +2503,7 @@ function errEditor(rec, onChange){
       !rec.ftype ? el('span',{class:'tag unclass'}, 'Ej klassad') : null,
       sug ? el('button',{class:'link',type:'button',onclick:()=>{ rec.ftype = sug; save(); }}, `Förslag: ${sug}`) : null,
       el('button',{class:'link',type:'button','aria-expanded':notes.hidden?'false':'true',onclick:e=>{ notes.hidden=!notes.hidden; e.currentTarget.setAttribute('aria-expanded', notes.hidden?'false':'true'); }}, 'Anteckningar')),
+    rec.ftype && FTACTION[rec.ftype] ? el('p',{class:'ftact'}, el('strong',{}, 'Gör så här: '), FTACTION[rec.ftype]) : null,
     notes);
 }
 const fmtHP = v => v==null || v==='' || isNaN(v) ? '–' : Number(v).toLocaleString('sv-SE',{minimumFractionDigits:2, maximumFractionDigits:2});
@@ -2537,7 +2565,8 @@ function renderHome(){
 
   const doneBest = key => { let best=null; for (const s of P.sessions) if (s.tk===key && (!best || s.c/s.n > best.c/best.n)) best=s; return best; };
   const orphanFacit = Object.entries(LIB.facits).flatMap(([d,ps])=>Object.keys(ps).filter(p=>!LIB.tests[d+'|'+p]).map(p=>`${examShort(d)} provpass ${p}`));
-  const availFor = c => tests.filter(t=>t.facit && itemsFor(t,c).length);
+  // reserverade prov används inte till delprovsträning (bara till hela pass)
+  const availFor = c => tests.filter(t=>t.facit && !isReserved(t.key) && itemsFor(t,c).length);
   const practisable = CODES.filter(c=>availFor(c).length);
   const secPct = c => pct(P.stats[c].c, P.stats[c].n);
   const weak = CODES.filter(c=>P.stats[c]?.n).sort((a,b)=>secPct(a)-secPct(b))[0] || null;
@@ -2575,6 +2604,7 @@ function renderHome(){
     road = el('div',{class:'hroad box'},
       el('div',{class:'weeks',role:'img','aria-label':`Vecka ${cur+1} av ${total} fram till provdagen`}, rings, el('span',{class:'dash'}), el('span',{class:'flag'},'PROVDAG')),
       el('span',{class:'note'},'En ring per vecka. Ifylld = du har tränat.'),
+      el('span',{class:'note',title:'Repetitionen anpassas till provdatumet: inget kort eller fel schemaläggs längre fram än ca 15 % av tiden som är kvar.'}, `Längsta repetitionsintervall nu: ${capDays()} ${capDays()===1?'dag':'dagar'}.`),
       el('label',{class:'hdate'}, 'Provdag', dateIn));
   }
 
@@ -2627,10 +2657,12 @@ function renderHome(){
     const missingSecs = (t.kind==='v'?['ORD','LÄS','MEK','ELF']:['XYZ','KVA','NOG','DTK']).filter(c=>!secs.includes(c));
     const best = doneBest(t.key);
     const nf = items.filter(i=>!i.answer).length;
+    const res = isReserved(t.key);
     return el('div',{class:'prow'},
       el('div',{class:'pmain'},
         el('b',{}, `${examShort(t.date)} · pass ${t.pass}`),
         el('span',{class:'chip '+t.kind}, t.kind==='v'?'Verbal':'Kvantitativ'),
+        res ? el('span',{class:'chip res',title:'Används inte i Riktad träning eller delprovsträning, bara till hela pass'}, 'Reserverat') : null,
         el('span',{class:'pres',title:best?'Bästa resultat':'Inte gjort än'}, best ? `${best.c} / ${best.n}` : '–'),
         el('button',{class:'btn small',type:'button',title:'Hela passet, 55 min',onclick:()=>startPass(t)}, best ? 'Gör om' : 'Starta')),
       el('div',{class:'psub'},
@@ -2638,8 +2670,18 @@ function renderHome(){
         secs.map(c=>el('button',{class:'chip '+SEC[c].part,type:'button',title:SEC[c].name,onclick:()=>startSec(t,c)}, c)),
         !t.facit ? el('span',{class:'chip missing',title:'Utan facit kan passet inte rättas. Lägg till facit-filen för '+examSeason(t.date)+' ('+t.date+').'},'Facit saknas')
           : nf ? el('span',{class:'chip missing'}, `Facit saknas för ${nf} uppg.`) : null,
-        missingSecs.length ? el('span',{class:'note'}, `${missingSecs.join(', ')} finns inte i filen`) : null));
+        missingSecs.length ? el('span',{class:'note'}, `${missingSecs.join(', ')} finns inte i filen`) : null,
+        t.kind==='k' ? el('button',{class:'btn ghost small resbtn',type:'button','aria-pressed':res?'true':'false',
+          title: res ? 'Gör passet tillgängligt för träning igen' : 'Spara passet orört till en fullständig simulering. Riktad träning och delprovsträning hoppar över det.',
+          onclick:()=>{ setReserved(t.key, !res); render(); toast(res ? 'Passet används i träningen igen.' : 'Passet är reserverat för helsimulering.'); }}, res ? 'Sluta reservera' : 'Reservera') : null));
   })) : el('p',{class:'empty'},'Inga prov inlästa än.');
+  // förslag: reservera de 4 senaste kvantpassen när det finns gott om äldre pass att träna på
+  const kvTests = tests.filter(t=>t.kind==='k');
+  const resHint = kvTests.length >= 8 && !kvTests.some(t=>isReserved(t.key)) && !P.resHintDone ? el('div',{class:'panel seed'},
+    el('p',{class:'note'}, `Du har ${kvTests.length} kvantpass inlästa. Spara de 4 senaste orörda till fullständiga simuleringar närmare provet, så tränar du på de äldre i Riktad träning.`),
+    el('div',{class:'row'},
+      el('button',{class:'btn primary small',type:'button',onclick:()=>{ kvTests.slice(0,4).forEach(t=>setReserved(t.key, true)); P.resHintDone = true; store.save(); render(); }}, 'Reservera de 4 senaste'),
+      el('button',{class:'link',type:'button',onclick:()=>{ P.resHintDone = true; store.save(); render(); }}, 'Inte nu'))) : null;
 
   const log = P.sessions.length
     ? el('div',{class:'tbl-wrap'}, el('table',{class:'log'}, el('thead',{}, el('tr',{}, el('th',{},'Datum'), el('th',{},'Pass'), el('th',{class:'n'},'Rätt'), el('th',{class:'n'},'Tid'))),
@@ -2666,7 +2708,7 @@ function renderHome(){
     el('div',{class:'hcols'},
       el('section',{}, el('h3',{class:'hsec'},'Delprov, andel rätt'), el('div',{class:'dplist box'}, CODES.map(dpRow)),
         el('p',{class:'hhint'}, 'Klicka på en rad för att träna det delprovet.')),
-      el('section',{}, el('h3',{class:'hsec'},'Provhäften'), plist,
+      el('section',{}, el('h3',{class:'hsec'},'Provhäften'), resHint, plist,
         orphanFacit.length ? el('p',{class:'note'}, 'Facit finns men provhäftet saknas för: '+orphanFacit.join(', ')+'.') : null)),
     el('section',{class:'lower'}, el('div',{class:'panel'}, el('h3',{},'Senaste pass'), log), mist),
     el('section',{class:'lower'},
@@ -2714,8 +2756,11 @@ function exportCsv(kind){
     ...examRows().map(e=>[e.date, e.name, e.type, e.v, e.k, e.t, P.goal, P.goal!=null && e.t!=null ? Math.round((P.goal-e.t)*100)/100 : '', e.comment])]));
   if (kind==='delprov') downloadFile('delprov.csv', csvOf([['Datum','Prov','Delprov','Rätt','Antal frågor','% rätt','Tid (min)','Källa','Kommentar'],
     ...delprovRows().map(r=>[fmtDay(r.d), passTxt(r), r.sec, r.c, r.n, r.n ? Math.round(1000*r.c/r.n)/10 : '', r.ms!=null ? Math.round(r.ms/6000)/10 : '', r.src==='app'?'Appen':'Egen', r.comment||''])]));
-  if (kind==='fellogg') downloadFile('fellogg.csv', csvOf([['Datum','Prov / pass / uppgift','Delprov','Feltyp','Vad gick fel','Lärdom / regel att komma ihåg','Källa'],
-    ...allErrors().map(x=>[fmtDay(x.d), x.where, x.sec, x.rec.ftype||'', x.rec.what||'', x.rec.lesson||'', x.src==='app'?'Appen':'Egen'])]));
+  if (kind==='fellogg') downloadFile('fellogg.csv', csvOf([['Datum','Prov / pass / uppgift','Delprov','Ämne','Mitt svar','Facit','Tid (s)','Riktmärke (s)','Tidskvot','Feltyp','Vad gick fel','Lärdom / regel att komma ihåg','Klarad (2 rätt i tid)','Källa'],
+    ...allErrors().map(x=>{ const r = x.rec, app = x.src==='app', pace = SEC[x.sec]?.pace, t = app ? tasks()[r.key] : null;
+      return [fmtDay(x.d), x.where, x.sec, app ? (topicOf(r.tk, r.n) ? topicName(topicOf(r.tk, r.n)) : '') : '', app ? r.chosen||'' : '', app ? r.answer||'' : '',
+        app && r.ms!=null ? Math.round(r.ms/100)/10 : '', app ? pace : '', app && r.ms!=null && pace ? Math.round(r.ms/pace/100)/10 : '',
+        r.ftype||'', r.what||'', r.lesson||'', app ? (t && !needsWork(t) ? 'ja' : 'nej') : '', app?'Appen':'Egen']; })]));
 }
 const svgEsc = s => String(s).replace(/[<&>"]/g, c=>({'<':'&lt;','&':'&amp;','>':'&gt;','"':'&quot;'}[c]));
 // enkla SVG-diagram som följer appens färger i ljust och mörkt läge
@@ -2793,7 +2838,7 @@ function renderProgress(){
   // 4. Delprov: träffsäkerhet och feltyper
   const stats = CODES.map(sec=>{ const r = log.filter(x=>x.sec===sec), e = errs.filter(x=>x.sec===sec);
     return {sec, c:r.reduce((a,x)=>a+x.c,0), n:r.reduce((a,x)=>a+x.n,0), passes:r.length, ft:FTYPES.map(f=>e.filter(x=>x.rec.ftype===f).length)}; });
-  const tot = stats.reduce((a,s)=>({c:a.c+s.c, n:a.n+s.n, passes:a.passes+s.passes, ft:a.ft.map((v,i)=>v+s.ft[i])}), {c:0,n:0,passes:0,ft:[0,0,0,0]});
+  const tot = stats.reduce((a,s)=>({c:a.c+s.c, n:a.n+s.n, passes:a.passes+s.passes, ft:a.ft.map((v,i)=>v+s.ft[i])}), {c:0,n:0,passes:0,ft:FTYPES.map(()=>0)});
   const pctCell = (c,n) => n ? el('td',{class:'n'}, el('span',{class:'pbar'}, el('i',{style:`width:${Math.round(100*c/n)}%`})), ` ${Math.round(100*c/n)} %`) : el('td',{class:'n'},'–');
   const secTable = el('section',{class:'panel'}, el('h2',{}, 'Delprov – träffsäkerhet och fel'),
     el('div',{class:'tbl-wrap'}, el('table',{class:'log'},
@@ -2896,28 +2941,56 @@ function renderProgress(){
 // "Träna på tidigare fel" tar de uppgifter som är på väg att glömmas först.
 const SLOW = 1.5;
 const taskColor = (ok, ms, pace) => !ok ? 'red' : ms > SLOW*pace ? 'orange' : 'green';
+// En uppgift som blivit fel eller långsam (need) lämnar felbanken först efter två gröna försök
+// på olika dagar (ok2 = antal sådana dagar sedan senaste missen).
+const CLEAR_AFTER = 2;
+function greensSinceMiss(hist){
+  const days = new Set();
+  for (let i=hist.length-1; i>=0; i--){ if (hist[i].c!=='green') break; days.add(localDay(hist[i].d)); }
+  return days.size;
+}
 function tasks(){
   if (!P.tasks){
     P.tasks = {};
     for (const m of P.mistakes) P.tasks[m.key] = {tk:m.tk, n:m.n, sec:m.sec, st:m.fixed ? 'green' : 'red', tries:m.times||1, last:Date.parse(m.d)||Date.now(), ms:m.ms, fs:null, hist:[]};
   }
+  // en gång: räkna fram need/ok2 ur historiken för uppgifter från före regeln "två rätt i tid"
+  if (!P.tasksV2){
+    for (const t of Object.values(P.tasks)){
+      const h = t.hist||[], missed = h.some(x=>x.c!=='green') || (!h.length && t.st!=='green') || P.mistakes.some(m=>m.key===t.tk+'|'+t.n);
+      t.ok2 = greensSinceMiss(h);
+      t.need = missed && t.ok2 < CLEAR_AFTER;
+    }
+    P.tasksV2 = true;
+  }
   return P.tasks;
 }
+const needsWork = t => !!t && (t.need ?? t.st!=='green');
+const taskDue = t => t?.fs ? SR.effDue(t.fs) : 0;
+// Längsta repetitionsintervall: ca 15 % av dagarna kvar till provet (minst 1 dag). Utan provdatum: 365.
+const CAP_SHARE = 0.15;
+const capDays = () => { const d = daysLeft(); return d==null || d<=0 ? 365 : Math.max(1, Math.round(d*CAP_SHARE)); };
+SR.setCap(capDays);
 function logTask(r, now){
   const T = tasks(), key = r.tk+'|'+r.n, ok = r.status==='ok', pace = SEC[r.sec].pace*1000;
   const st = taskColor(ok, r.ms, pace);
   const g = !ok ? 1 : r.ms > SLOW*pace ? 2 : r.ms < 0.5*pace ? 4 : 3;   // Igen / Svårt / Lätt / Bra
-  const t = T[key] || (T[key] = {tk:r.tk, n:r.n, sec:r.sec, tries:0, hist:[], fs:null});
+  const t = T[key] || (T[key] = {tk:r.tk, n:r.n, sec:r.sec, tries:0, hist:[], fs:null, need:false, ok2:0});
   t.tries++; t.st = st; t.last = now; t.ms = r.ms;
   t.hist = [...(t.hist||[]), {d:now, c:st, ms:r.ms}].slice(-10);
+  if (st!=='green'){ t.need = true; t.ok2 = 0; }
+  else if (t.need){ t.ok2 = greensSinceMiss(t.hist); if (t.ok2 >= CLEAR_AFTER) t.need = false; }
   try{ t.fs = SR.schedule(t.fs, g, now, 0.9); }catch(e){}
 }
 const AREAS = [['Matematik',['XYZ','KVA','NOG','DTK']], ['Svenska',['ORD','LÄS','MEK']], ['Engelska',['ELF']]];
-// alla uppgifter i ett delprov som har facit
-function availableItems(sec){
+// ---------- Reserverade prov: sparas orörda till fullständiga simuleringar ----------
+const isReserved = tk => !!(P.reserved||{})[tk];
+function setReserved(tk, on){ P.reserved ||= {}; if (on) P.reserved[tk] = true; else delete P.reserved[tk]; store.save(); }
+// alla uppgifter i ett delprov som har facit. Reserverade prov tas bara med om withReserved är satt.
+function availableItems(sec, withReserved=false){
   const out = [];
   for (const t of Object.values(LIB.tests)){
-    if (!t.facit) continue;
+    if (!t.facit || (!withReserved && isReserved(t.key))) continue;
     for (let n=1;n<=40;n++) if (t.qpage[n] && secOf(t.kind, n)===sec && t.facit[n-1]) out.push({tk:t.key, n, sec, answer:t.facit[n-1]});
   }
   return out;
@@ -2971,11 +3044,11 @@ function renderRT(){
     AREAS.map(([area, secs])=>el('section',{class:'rtarea'}, el('h3',{}, area), el('div',{class:'rtgrid'}, secs.map(tile))))));
 }
 function pickItems(sec, mode, n){
-  const T = tasks(), pool = availableItems(sec), key = i => i.tk+'|'+i.n;
+  const T = tasks(), pool = availableItems(sec, mode==='err'), key = i => i.tk+'|'+i.n;
   let list;
   if (mode==='err'){
     // tidigare fel: de som är på väg att glömmas (förfallna enligt schemat) först
-    list = pool.filter(i=>['red','orange'].includes(T[key(i)]?.st)).sort((a,b)=>(T[key(a)].fs?.due||0) - (T[key(b)].fs?.due||0));
+    list = pool.filter(i=>needsWork(T[key(i)])).sort((a,b)=>taskDue(T[key(a)]) - taskDue(T[key(b)]));
   } else {
     // nya: aldrig gjorda först (slumpade), sedan de du gjort minst antal gånger
     const unseen = shuffle(pool.filter(i=>!T[key(i)])), seen = pool.filter(i=>T[key(i)]).sort((a,b)=>(T[key(a)].tries-T[key(b)].tries) || (T[key(a)].last-T[key(b)].last));
@@ -2992,10 +3065,10 @@ function startRT(sec, mode, n, instant){
   startSession(items, `Riktad träning · ${sec}`+(mode==='err' ? ' · tidigare fel' : ''), {rt:{sec, mode, n, instant}, sec, deadline: Date.now()+plan});
 }
 function renderRTCat(sec){
-  const app = $('#app'), S = SEC[sec], s = secStats(sec), T = tasks(), pool = availableItems(sec), pr = rtPrefs();
+  const app = $('#app'), S = SEC[sec], s = secStats(sec), T = tasks(), pool = availableItems(sec), errPool = availableItems(sec, true), pr = rtPrefs();
   const key = i => i.tk+'|'+i.n, now = Date.now();
   const unseen = pool.filter(i=>!T[key(i)]).length;
-  const errs = pool.filter(i=>['red','orange'].includes(T[key(i)]?.st)), due = errs.filter(i=>(T[key(i)].fs?.due||0) <= now).length;
+  const errs = errPool.filter(i=>needsWork(T[key(i)])), due = errs.filter(i=>taskDue(T[key(i)]) <= now).length;
   if (rtPage.mode==='err' && !errs.length) rtPage.mode = 'new';
   const avail = rtPage.mode==='err' ? errs.length : pool.length, n = Math.min(pr.n, avail);
   const plan = n*S.pace*1000;
@@ -3015,10 +3088,11 @@ function renderRTCat(sec){
       el('h3',{}, 'Vad vill du träna på?'),
       el('div',{class:'rtmodes'},
         seg('new','Nya uppgifter', unseen ? `${unseen} som du inte gjort än` : 'Alla är gjorda – de du gjort minst kommer först'),
-        seg('err','Träna på tidigare fel', errs.length ? `${errs.length} orange och röda`+(due ? ` · ${due} att repetera idag` : '') : 'Inga orange eller röda uppgifter')),
+        seg('err','Träna på tidigare fel', errs.length ? `${errs.length} kvar att klara`+(due ? ` · ${due} att repetera idag` : '') : 'Inga fel kvar att klara')),
       el('h3',{class:'sub'}, 'Antal uppgifter'),
       el('div',{class:'rtcounts'}, [5,10,15,20,25,30].map(k=>el('button',{type:'button',class:'fchip'+(pr.n===k?' on':''),'aria-pressed':pr.n===k?'true':'false',onclick:()=>{ pr.n=k; store.save(); renderRT(); }}, String(k)))),
       avail < pr.n ? el('p',{class:'note'}, `Det finns bara ${avail} ${rtPage.mode==='err' ? 'tidigare fel' : 'uppgifter'} här, så du får ${avail}.`) : null,
+      rtPage.mode==='err' ? el('p',{class:'note'}, `En uppgift räknas som klarad först när du har svarat rätt i tid ${CLEAR_AFTER} gånger, på olika dagar.`) : null,
       el('label',{class:'rtcheck'}, el('input',{type:'checkbox',checked:pr.instant,onchange:e=>{ pr.instant=e.target.checked; store.save(); }}), ' Visa svaret direkt efter varje uppgift'),
       el('p',{class:'note'}, `Tid: ${n} × ${S.pace} s = ${fmtTime(plan)}. Timern är liten och du får fortsätta om tiden går ut.`),
       el('button',{class:'btn primary',type:'button',disabled:!n,onclick:()=>startRT(sec, rtPage.mode, pr.n, pr.instant)}, n ? `Starta ${n} uppgifter` : 'Inga uppgifter att träna på'))));
@@ -3059,20 +3133,22 @@ function timePanel(rows){
 // Framsteg: uppgiftslogg med färger
 function taskLogSection(){
   const T = tasks(), all = Object.values(T), now = Date.now();
-  const bad = all.filter(t=>t.st!=='green').sort((a,b)=>(a.fs?.due||0)-(b.fs?.due||0));
+  const bad = all.filter(needsWork).sort((a,b)=>taskDue(a)-taskDue(b));
   const perSec = CODES.map(sec=>({sec, ...secStats(sec)})).filter(s=>s.green+s.orange+s.red);
   return el('section',{class:'panel'}, el('h2',{}, 'Uppgiftslogg'),
-    el('p',{class:'note'}, 'Varje uppgift du gjort, med färg efter senaste försöket. Orange och röda uppgifter tränar du under Riktad träning → "Träna på tidigare fel". De kommer tillbaka med repetition med mellanrum tills du klarar dem i tid.'),
+    el('p',{class:'note'}, `Varje uppgift du gjort, med färg efter senaste försöket. Uppgifter som blivit fel eller tagit för lång tid tränar du under Riktad träning → "Träna på tidigare fel". De kommer tillbaka med repetition med mellanrum tills du har klarat dem i tid ${CLEAR_AFTER} gånger, på olika dagar.`),
     perSec.length ? el('div',{class:'tasksecs'}, perSec.map(s=>el('button',{type:'button',class:'fchip',onclick:()=>{ rtPage = {sec:s.sec, mode:s.orange+s.red ? 'err' : 'new'}; setTab('rt'); }}, el('strong',{}, s.sec+' '), dots(s)))) : el('p',{class:'empty'}, 'Inga uppgifter loggade än.'),
     bad.length ? el('div',{class:'tbl-wrap'}, el('table',{class:'log'},
-      el('thead',{}, el('tr',{}, ['','Uppgift','Delprov','Senaste tid','Försök','Repetera'].map((h,i)=>el('th',{class:i>=3?'n':''}, h)))),
-      el('tbody',{}, bad.slice(0,40).map(t=>el('tr',{},
-        el('td',{}, el('span',{class:'dot '+(t.st==='red'?'r':'o')})),
+      el('thead',{}, el('tr',{}, ['','Uppgift','Delprov','Ämne','Senaste tid','Försök','Rätt i tid','Repetera'].map((h,i)=>el('th',{class:i>=4?'n':''}, h)))),
+      el('tbody',{}, bad.slice(0,40).map(t=>{ const due = taskDue(t); return el('tr',{},
+        el('td',{}, el('span',{class:'dot '+(t.st==='red'?'r':t.st==='orange'?'o':'g')})),
         el('td',{}, `${examShort(t.tk.split('|')[0])} · pass ${t.tk.split('|')[1]} · uppg. ${t.n}`),
         el('td',{}, el('span',{class:'chip '+SEC[t.sec].part}, t.sec)),
+        el('td',{}, topicOf(t.tk, t.n) ? topicName(topicOf(t.tk, t.n)) : '–'),
         el('td',{class:'n'}, t.ms!=null ? `${fmtTime(t.ms)} / ${fmtTime(SEC[t.sec].pace*1000)}` : '–'),
         el('td',{class:'n'}, t.tries),
-        el('td',{class:'n'}, !t.fs || t.fs.due<=now ? 'nu' : t.fs.due < new Date().setHours(24,0,0,0) ? 'idag' : fmtDay(t.fs.due))))))) : null,
+        el('td',{class:'n'}, `${t.ok2||0} av ${CLEAR_AFTER}`),
+        el('td',{class:'n'}, !t.fs || due<=now ? 'nu' : due < new Date().setHours(24,0,0,0) ? 'idag' : fmtDay(due))); })))) : null,
     bad.length>40 ? el('p',{class:'note'}, `Visar 40 av ${bad.length}.`) : null);
 }
 function leastPractised(tests, c){
@@ -3220,7 +3296,7 @@ function itemCard(x){
   return el('article',{class:'item'+(x.status==='bad'||x.status==='blank'?' bad':'')},
     el('div',{class:'item-head'},
       el('span',{class:'chip '+SEC[x.sec].part}, x.sec), el('strong',{}, `Uppgift ${x.n}`),
-      el('span',{class:'tag '+st[0]}, st[1]),
+      el('span',{class:'tag '+st[0]}, st[1]), topicChip(x.tk, x.n),
       x.tag ? el('span',{class:'tag '+(x.tag==='skipped'?'norm':x.tag)}, TAGTXT[x.tag]) : null,
       el('span',{class:'note mono'}, `Ditt svar: ${x.chosen||'–'} · Facit: ${x.answer||'saknas'} · ${fmtTime(x.ms)} (riktm. ${fmtTime(x.pace)})`)),
     el('div',{class:'row'},
@@ -3231,6 +3307,10 @@ function itemCard(x){
 // ---------- Förklaringar skrivna i förväg (forklaringar.js): nyckel "datum|pass|uppgift" ----------
 // s = lösning (kortaste vägen), t = trick, f = fälla, w = kommentar till ett visst felsvar
 const hasExpl = (tk, n) => !!(window.EXPL||{})[tk+'|'+n];
+// ---------- Ämne per kvantuppgift (amnen.js): kod, t.ex. "pot", eller null för otaggade prov ----------
+const topicOf = (tk, n) => (window.AMNE||{})[tk]?.[n-1] || null;
+const topicName = code => (window.AMNE_NAMN||{})[code] || code;
+const topicChip = (tk, n) => { const t = topicOf(tk, n); return t ? el('span',{class:'tag topic',title:'Ämne'}, topicName(t)) : null; };
 function explBox(tk, n, chosen){
   const e = (window.EXPL||{})[tk+'|'+n]; if (!e) return null;
   return el('div',{class:'explain'},
