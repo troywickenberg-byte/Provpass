@@ -350,6 +350,12 @@ td.acts{white-space:nowrap;text-align:right}
 .resbtn{font-size:12px}
 .resbtn[aria-pressed="true"]{background:var(--accent-tint);color:var(--accent-ink);border-color:var(--accent)}
 .chip.res{background:var(--accent-tint);color:var(--accent-ink)}
+.rtmix,.weakpanel{margin-bottom:16px}
+.rtmix h2{margin:0}
+.rtmix .btn.primary{margin-top:6px}
+.weaklist{display:grid;gap:8px;margin:8px 0}
+.weakrow{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--sheet)}
+.weakrow small{display:inline}
 .errnotes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
 .errnotes label{display:grid;gap:4px;font-size:13px;color:var(--soft)}
 .errnotes textarea{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--sheet);color:var(--ink);resize:vertical}
@@ -2847,6 +2853,16 @@ function renderProgress(){
         el('td',{}, s.sec), el('td',{class:'n'}, s.c), el('td',{class:'n'}, s.n), pctCell(s.c,s.n), el('td',{class:'n'}, s.passes), s.ft.map(v=>el('td',{class:'n'}, v))))))),
     el('h3',{class:'sub'}, '% rätt per delprov'), barChart(stats));
 
+  // 4b. Ämnen: träffsäkerhet och tid per ämne, svagast först
+  const tstats = topicStats(0).sort((a,b)=> b.lost-a.lost || a.pctInTime-b.pctInTime);
+  const topicSec = el('section',{class:'panel'}, el('h2',{}, 'Ämnen – kvantdelen'),
+    el('p',{class:'note'}, 'Byggt på uppgifter ur gamla prov som har ämnestagg (de 10 senaste försöken per uppgift). Sorterat efter förlorade poäng: fel räknas helt, rätt men långsamt till hälften.'),
+    tstats.length ? el('div',{class:'tbl-wrap'}, el('table',{class:'log'},
+      el('thead',{}, el('tr',{}, ['Ämne','Försök','% rätt','% rätt i tid','Snitt tidskvot','Förlorade poäng','Kvar att klara',''].map((h,i)=>el('th',{class:i&&i<7?'n':''}, h)))),
+      el('tbody',{}, tstats.map(b=>el('tr',{}, el('td',{}, topicName(b.code)), el('td',{class:'n'}, b.n), el('td',{class:'n'}, fmtPct(b.pctOk)), el('td',{class:'n'}, fmtPct(b.pctInTime)),
+        el('td',{class:'n'}, fmtRatio(b.avgRatio)), el('td',{class:'n'}, fmtN1(b.lost)), el('td',{class:'n'}, b.open),
+        el('td',{class:'acts'}, el('button',{class:'link',type:'button',onclick:()=>startTopic(b.code)}, 'Träna'))))))) : el('p',{class:'empty'}, 'Gör några kvantuppgifter ur gamla prov, så fylls tabellen på.'));
+
   // 5. Helprov
   const ed = frState.edit?.kind==='exam' ? (P.exams||[]).find(e=>e.id===frState.edit.id) : null;
   const ef = {}; const fld = (k, label, attrs) => el('label',{}, label, ef[k] = inp(attrs));
@@ -2932,7 +2948,7 @@ function renderProgress(){
       el('button',{class:'btn small',type:'button',onclick:()=>exportCsv('fellogg')}, 'Fellogg (CSV)')));
 
   const y = window.scrollY;
-  put(app, el('div',{class:'frpage'}, seed, overview, suggest, secTable, taskLogSection(), examSec, logSec, errSec, exp));
+  put(app, el('div',{class:'frpage'}, seed, overview, suggest, secTable, weakPanel(), topicSec, taskLogSection(), examSec, logSec, errSec, exp));
   window.scrollTo(0, y);
 }
 // ================= Uppgiftslogg: färg per uppgift + repetition med mellanrum =================
@@ -3041,8 +3057,24 @@ function renderRT(){
     !loaded ? el('section',{class:'panel'}, el('p',{}, 'Inga prov är inlästa än. Läs in provhäften och facit under Gamla prov, eller här:'),
       el('label',{class:'btn small primary filebtn'}, 'Välj PDF-filer', el('input',{type:'file',accept:'application/pdf,.pdf',multiple:true,onchange:e=>onPick(e.target.files)}))) : null,
     facitWarning(),
+    loaded ? mixPanel() : null,
+    loaded ? weakPanel() : null,
     AREAS.map(([area, secs])=>el('section',{class:'rtarea'}, el('h3',{}, area), el('div',{class:'rtgrid'}, secs.map(tile))))));
 }
+// Blandad träning: XYZ, KVA och NOG omkastade, rättas först när hela setet är inlämnat
+function mixPanel(){
+  const pr = rtPrefs(), T = tasks(), pool = mixPool(), unseen = pool.filter(i=>!T[i.tk+'|'+i.n]).length;
+  pr.mixN ||= 15;
+  const n = Math.min(pr.mixN, pool.length), plan = pickPlan(n);
+  return el('section',{class:'panel rtmix'},
+    el('div',{class:'rthead'}, el('span',{class:'chip k'}, 'XYZ · KVA · NOG'), el('h2',{}, 'Blandad träning')),
+    el('p',{class:'note'}, 'Uppgifter ur flera äldre prov i blandad ordning, så att du måste känna igen vilken metod varje uppgift kräver. Det är den träning som hjälper mest för metodval. Du får facit först när du har lämnat in hela setet. Svaga ämnen kommer oftare, och reserverade prov tas aldrig med.'),
+    el('div',{class:'rtcounts'}, [10,15,20].map(k=>el('button',{type:'button',class:'fchip'+(pr.mixN===k?' on':''),'aria-pressed':pr.mixN===k?'true':'false',onclick:()=>{ pr.mixN=k; store.save(); renderRT(); }}, String(k)))),
+    el('p',{class:'note'}, pool.length ? `${pool.length} uppgifter att välja bland, varav ${unseen} som du inte gjort. Tid: ca ${fmtTime(plan)}, en minut per XYZ och KVA och 100 s per NOG.` : 'Inga XYZ-, KVA- eller NOG-uppgifter med facit är inlästa, eller så är alla reserverade.'),
+    el('button',{class:'btn primary',type:'button',disabled:!n,onclick:()=>startMix(pr.mixN)}, n ? `Starta ${n} blandade uppgifter` : 'Inga uppgifter att blanda'));
+}
+// ungefärlig tid för ett blandat set med n uppgifter (XYZ 12, KVA 10, NOG 6 per pass)
+const pickPlan = n => Math.round(n * (12*60 + 10*60 + 6*100)/28) * 1000;
 function pickItems(sec, mode, n){
   const T = tasks(), pool = availableItems(sec, mode==='err'), key = i => i.tk+'|'+i.n;
   let list;
@@ -3063,6 +3095,112 @@ function startRT(sec, mode, n, instant){
   const plan = items.reduce((a,i)=>a+SEC[i.sec].pace*1000, 0);
   tab==='rt' || setTab('rt');
   startSession(items, `Riktad träning · ${sec}`+(mode==='err' ? ' · tidigare fel' : ''), {rt:{sec, mode, n, instant}, sec, deadline: Date.now()+plan});
+}
+// ================= Ämnesstatistik, blandad träning och ämnesträning =================
+const DAYMS = 86400000;
+const MIX_SECS = ['XYZ','KVA','NOG'];
+// Försök per ämne ur uppgiftsloggen (de 10 senaste försöken per uppgift), från och med "since".
+// lost = förlorade poäng: fel räknas helt, rätt men långsamt till hälften (det stjäl tid från DTK).
+function topicStats(since=0){
+  const by = {};
+  for (const t of Object.values(tasks())){
+    const code = topicOf(t.tk, t.n); if (!code) continue;
+    const b = by[code] ||= {code, n:0, green:0, orange:0, red:0, ratio:0, open:0};
+    const pace = SEC[t.sec].pace*1000;
+    let any = false;
+    for (const h of t.hist||[]){ if (h.d < since) continue; any = true; b.n++; b[h.c] = (b[h.c]||0)+1; b.ratio += (h.ms||0)/pace; }
+    if (any && needsWork(t)) b.open++;
+  }
+  return Object.values(by).filter(b=>b.n).map(b=>Object.assign(b, {pctOk:(b.green+b.orange)/b.n, pctInTime:b.green/b.n, avgRatio:b.ratio/b.n, lost:b.red + 0.5*b.orange}));
+}
+// Veckans svagaste ämnen: flest förlorade poäng de senaste 7 dagarna (annars 4 veckorna)
+function weakTopics(k=2){
+  const now = Date.now();
+  const pick = days => topicStats(now - days*DAYMS).filter(b=>b.lost>0).sort((a,b)=> b.lost-a.lost || a.pctInTime-b.pctInTime);
+  let list = pick(7), span = 'den senaste veckan';
+  if (list.length < k){ list = pick(28); span = 'de senaste fyra veckorna'; }
+  return {span, list: list.slice(0,k)};
+}
+// Vikt per ämne när uppgifter väljs: svaga ämnen (låg andel rätt i tid) kommer oftare
+function topicWeights(){
+  const w = {};
+  for (const b of topicStats(Date.now() - 42*DAYMS)) w[b.code] = 1 + 2*(1-b.pctInTime)*Math.min(1, b.n/4);
+  return w;
+}
+// Ordna så att två uppgifter i rad helst har olika delprov och olika ämnen
+function interleave(items){
+  const rest = shuffle(items), out = [], tp = i => topicOf(i.tk, i.n);
+  while (rest.length){
+    const prev = out[out.length-1];
+    let j = rest.findIndex(i=>!prev || (i.sec!==prev.sec && (!tp(i) || tp(i)!==tp(prev))));
+    if (j<0) j = rest.findIndex(i=>!tp(i) || tp(i)!==tp(prev));
+    if (j<0) j = 0;
+    out.push(rest.splice(j,1)[0]);
+  }
+  return out;
+}
+function mixPool(){ return MIX_SECS.flatMap(s=>availableItems(s)); }
+function pickMix(n){
+  const T = tasks(), key = i => i.tk+'|'+i.n, W = topicWeights(), pool = mixPool();
+  const weight = i => { const c = topicOf(i.tk, i.n); return c ? (W[c] ?? 1.2) : 1; };
+  // viktad dragning utan återläggning: nyckel = slump^(1/vikt)
+  const draw = list => list.map(i=>({i, r:Math.pow(Math.random(), 1/weight(i))})).sort((a,b)=>b.r-a.r).map(x=>x.i);
+  const unseen = draw(pool.filter(i=>!T[key(i)]));
+  const seen = pool.filter(i=>T[key(i)] && !needsWork(T[key(i)])).sort((a,b)=>(T[key(a)].tries-T[key(b)].tries) || (T[key(a)].last-T[key(b)].last));
+  const errs = pool.filter(i=>needsWork(T[key(i)]));
+  return interleave([...unseen, ...seen, ...errs].slice(0, n));
+}
+function startMix(n){
+  const items = pickMix(n);
+  if (!items.length){ toast('Det finns inga XYZ-, KVA- eller NOG-uppgifter med facit att blanda. Läs in prov först.'); return; }
+  const plan = items.reduce((a,i)=>a+SEC[i.sec].pace*1000, 0);
+  tab==='rt' || setTab('rt');
+  startSession(items, 'Blandad träning · XYZ, KVA och NOG', {rt:{sec:'MIX', mode:'mix', mix:true, n, instant:false}, sec:'MIX', deadline: Date.now()+plan});
+}
+// Ämnesträning: uppgifter ur ett ämne. Facit och förklaring visas direkt, eftersom det är inlärning av ett svagt ämne.
+function topicPool(code, withReserved=false){ return ['XYZ','KVA','NOG','DTK'].flatMap(s=>availableItems(s, withReserved)).filter(i=>topicOf(i.tk, i.n)===code); }
+function startTopic(code, n=8){
+  const T = tasks(), key = i => i.tk+'|'+i.n;
+  const errs = topicPool(code, true).filter(i=>needsWork(T[key(i)])).sort((a,b)=>taskDue(T[key(a)])-taskDue(T[key(b)]));
+  const pool = topicPool(code);
+  const unseen = shuffle(pool.filter(i=>!T[key(i)]));
+  const seen = pool.filter(i=>T[key(i)] && !needsWork(T[key(i)])).sort((a,b)=>(T[key(a)].tries-T[key(b)].tries) || (T[key(a)].last-T[key(b)].last));
+  // först de fel som är på väg att glömmas, sedan nya uppgifter, sist de du gjort minst
+  const items = [...errs.slice(0, Math.ceil(n/2)), ...unseen, ...seen, ...errs.slice(Math.ceil(n/2))].slice(0, n);
+  if (!items.length){ toast('Det finns inga uppgifter med facit i ämnet '+topicName(code)+'.'); return; }
+  const plan = items.reduce((a,i)=>a+SEC[i.sec].pace*1000, 0);
+  tab==='rt' || setTab('rt');
+  startSession(items, 'Ämnesträning · '+topicName(code), {rt:{sec:'TOPIC', mode:'topic', topic:code, n, instant:true}, sec:'TOPIC', deadline: Date.now()+plan});
+}
+const fmtN1 = x => (Math.round(x*10)/10).toLocaleString('sv-SE');
+const fmtPct = x =>x==null || !isFinite(x) ? '–' : Math.round(x*100)+' %';
+const fmtRatio = x => x==null || !isFinite(x) ? '–' : (Math.round(x*10)/10).toLocaleString('sv-SE',{minimumFractionDigits:1})+' ×';
+// Rutan "Veckans svagaste ämnen" (Riktad träning och Framsteg)
+function weakPanel(){
+  const {span, list} = weakTopics(2);
+  return el('section',{class:'panel weakpanel'},
+    el('h3',{}, 'Veckans svagaste ämnen'),
+    list.length ? [
+      el('p',{class:'note'}, `Flest förlorade poäng ${span}. Fel räknas som ett poäng, rätt men långsamt som ett halvt.`),
+      el('div',{class:'weaklist'}, list.map(b=>el('div',{class:'weakrow'},
+        el('div',{}, el('strong',{}, topicName(b.code)), el('small',{class:'note'}, ` ${b.red} fel och ${b.orange} långsamma av ${b.n} försök · ${fmtPct(b.pctInTime)} rätt i tid`)),
+        el('button',{class:'btn primary small',type:'button',onclick:()=>startTopic(b.code)}, 'Träna ämnet')))),
+      el('p',{class:'note'}, 'Gör så här: läs förklaringen till den första uppgiften noga, lös sedan resten själv och titta på förklaringen först efter att du svarat.')]
+      : el('p',{class:'empty'}, 'Här visas de två ämnen där du har tappat flest poäng när du har gjort några kvantuppgifter med ämnestagg.'));
+}
+// Per ämne efter ett pass
+function resultTopicPanel(rows){
+  const by = {};
+  for (const r of rows){ if (r.status==='nofacit') continue; const c = topicOf(r.tk, r.n); if (!c) continue;
+    const b = by[c] ||= {c, n:0, ok:0, ratio:0}; b.n++; if (r.status==='ok') b.ok++; b.ratio += r.ms/r.pace; }
+  const list = Object.values(by).sort((a,b)=> a.ok/a.n - b.ok/b.n || b.ratio/b.n - a.ratio/a.n);
+  if (!list.length) return null;
+  return el('section',{class:'panel'}, el('h3',{}, 'Per ämne'),
+    el('div',{class:'tbl-wrap'}, el('table',{class:'log'},
+      el('thead',{}, el('tr',{}, ['Ämne','Rätt','Snitt tidskvot',''].map((h,i)=>el('th',{class:i&&i<3?'n':''}, h)))),
+      el('tbody',{}, list.map(b=>el('tr',{}, el('td',{}, topicName(b.c)), el('td',{class:'n'}, `${b.ok}/${b.n}`), el('td',{class:'n'}, fmtRatio(b.ratio/b.n)),
+        el('td',{class:'acts'}, b.ok<b.n ? el('button',{class:'link',type:'button',onclick:()=>startTopic(b.c)}, 'Träna ämnet') : null)))))),
+    el('p',{class:'note'}, 'Tidskvot = din tid delad med riktmärket. Över 1,5 räknas som långsamt.'));
 }
 function renderRTCat(sec){
   const app = $('#app'), S = SEC[sec], s = secStats(sec), T = tasks(), pool = availableItems(sec), errPool = availableItems(sec, true), pr = rtPrefs();
@@ -3206,7 +3344,8 @@ function renderSide(){
   const sheet = el('div',{class:'ansheet'});
   let lastSec = null;
   s.items.forEach((x,i)=>{
-    if (x.sec!==lastSec){ sheet.append(el('span',{class:'secsep'}, x.sec)); lastSec=x.sec; }
+    // i blandade set och ämnesträning byts delprovet hela tiden, så där visas inga delprovsrubriker
+    if (x.sec!==lastSec && !s.rt?.mix && !s.rt?.topic){ sheet.append(el('span',{class:'secsep'}, x.sec)); lastSec=x.sec; }
     const shown = s.lock?.[i] && x.answer;   // "Visa svaret direkt": rätt ring blir grön, fel val rött
     sheet.append(el('button',{type:'button',class:['sr', i===s.cur?'cur':'', x.answer?'':'nf'].join(' '),'aria-label':`Uppgift ${x.n}`+(s.chosen[i]?`, svar ${s.chosen[i]}`:', ej besvarad'),onclick:()=>goTo(i)},
       el('span',{class:'n'}, String(s.rt ? i+1 : x.n)),
@@ -3268,12 +3407,14 @@ function renderResult(){
         el('p',{}, r.graded ? `${pct(r.correct,r.graded)} % rätt. Tid: ${fmtTime(r.used)} av ${r.rt ? fmtTime(r.plan) : '55:00'}.` : 'Inga uppgifter kunde rättas.'),
         r.nofacit.length ? el('p',{class:'chip missing'}, `Facit saknas för ${r.nofacit.length} uppgifter (${r.nofacit.map(x=>x.sec+' '+x.n).join(', ')}). De har inte rättats.`) : null,
         el('p',{class:'note'}, 'Alla fel och obesvarade uppgifter är sparade under "Sparade fel".'),
-        el('div',{class:'row'}, r.rt ? [el('button',{class:'btn primary',type:'button',onclick:()=>startRT(r.rt.sec, r.rt.mode, r.rt.n, r.rt.instant)},'Ny omgång'), el('button',{class:'btn ghost',type:'button',onclick:()=>{view='home';render();}},`Tillbaka till ${r.rt.sec}`)] : el('button',{class:'btn primary',type:'button',onclick:()=>{view='home';render();}},'Till startsidan'))),
+        el('div',{class:'row'}, r.rt ? [el('button',{class:'btn primary',type:'button',onclick:()=> r.rt.mix ? startMix(r.rt.n) : r.rt.topic ? startTopic(r.rt.topic, r.rt.n) : startRT(r.rt.sec, r.rt.mode, r.rt.n, r.rt.instant)},'Ny omgång'),
+          el('button',{class:'btn ghost',type:'button',onclick:()=>{ if (r.rt.mix || r.rt.topic) rtPage = {sec:null, mode:'new'}; view='home'; render(); }}, r.rt.mix || r.rt.topic ? 'Tillbaka till Riktad träning' : `Tillbaka till ${r.rt.sec}`)] : el('button',{class:'btn primary',type:'button',onclick:()=>{view='home';render();}},'Till startsidan'))),
       el('div',{class:'panel'}, el('h3',{},'Per delprov'),
         el('div',{class:'tbl-wrap'}, el('table',{class:'log'},
           el('thead',{}, el('tr',{}, el('th',{},'Delprov'), el('th',{class:'n'},'Rätt'), el('th',{class:'n'},'Snitt / uppg'), el('th',{class:'n'},'Riktmärke'), el('th',{class:'n'},'Snabba fel'), el('th',{class:'n'},'Långsamma fel'))),
           el('tbody',{}, secs.map(b=>el('tr',{}, el('td',{}, b.sec), el('td',{class:'n'}, `${b.c}/${b.n}`), el('td',{class:'n'}, fmtTime(b.ms/b.n)), el('td',{class:'n'}, fmtTime(b.pace)), el('td',{class:'n'}, b.fast), el('td',{class:'n'}, b.slow)))))))),
     r.rt ? timePanel(r.rows) : null,
+    resultTopicPanel(r.rows),
     el('section',{class:'panel pattern'}, el('h3',{},'Mönster i felen'), el('ul',{class:'insights'}, out.map(t=>el('li',{},t))),
       el('p',{class:'note'}, 'Snabbt fel: mindre än halva riktmärket. Långsamt fel: mer än 1,5 gånger riktmärket. Riktmärket kommer från provhäftenas rekommenderade provtid per delprov.')),
     el('section',{}, el('div',{class:'part-head',style:'margin-top:28px'}, el('h3',{},'Rättning'),
