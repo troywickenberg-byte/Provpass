@@ -401,6 +401,14 @@ td.acts{white-space:nowrap;text-align:right}
 .kvaq .kvarow{display:grid;gap:2px;justify-items:center}
 .choices.kva{flex-direction:column;align-items:stretch;gap:8px;width:100%;max-width:400px;margin:0 auto}
 .choices.kva button{font-size:18px;padding:12px 18px;text-align:left;background:var(--paper)}
+.choices.meth{max-width:560px}
+.choices.meth button{font-size:16px;line-height:1.35;font-family:inherit;font-weight:500}
+.cardq.flipcard{gap:14px}
+.flipcard .qtext{font-size:clamp(18px,3.8vw,26px);white-space:pre-wrap}
+.flipback{max-width:56ch;background:var(--paper);border-radius:8px;padding:12px 16px;font-size:17px;text-align:left;white-space:pre-wrap}
+.flipgrades{justify-content:center;flex-wrap:wrap}
+.owncard{margin-top:8px;display:grid;gap:8px}
+.owncard .row{gap:8px;align-items:center}
 details.intro{margin-top:12px;background:var(--paper);border-radius:14px;padding:10px 14px}
 details.intro summary{cursor:pointer;font-weight:700}
 details.intro ol{margin:10px 0 4px;padding-left:22px;display:grid;gap:8px;font-size:15px;line-height:1.45}
@@ -1256,6 +1264,193 @@ cat('hr-rotkv','Kvadratrötter & kvadrering',[15,30], add=>{
   ['D-uppgifter','testa olika sorters tal (under 1, exakt 1, över 1), men bevisa hellre algebraiskt. Hitta gränsen genom att sätta sidorna lika (x² = 2x → x = 2).'],
 ];
 
+// Metodval: känn igen vilken metod en uppgift kräver (rapportens största flaskhals).
+// Varje kort: [id, ämne, uppgift, [rätt metod, fel, fel, fel], signalen som visar metoden].
+// Alternativen blandas varje gång. Du väljer metoden, du behöver inte räkna klart.
+cat('hr-metod','Metodval: vilken väg?',[12,25], add=>{
+  for (const [id, amne, q, opts, ex] of [
+    ['kva-x2','olik','KVA, x > 0.  I: x²   II: x',
+      ['Testa x under 1, lika med 1 och över 1','Sätt in x = 2 och x = 3 och jämför','Svara A: en kvadrat är alltid större','Räkna med x = 10 som typiskt värde'],
+      'Signalen: x² mot x (eller √x mot x). Svaret beror på om x är under eller över 1. Testa x = 1/2, 1 och 2, eller sätt sidorna lika: x² = x ger x = 1. Svaret är D.'],
+    ['kva-rot','pot','KVA.  I: 3√5   II: 2√11',
+      ['Kvadrera båda: 45 mot 44','Räkna ut rötterna med två decimaler','Jämför talen framför roten: 3 > 2','Jämför talen under roten: 5 < 11'],
+      'Signalen: tal gånger rot på båda sidor. Kvadrera: (3√5)² = 9 · 5 = 45 och (2√11)² = 4 · 11 = 44. I är större. Decimaler är långsamt och lätt att göra fel med.'],
+    ['kva-pot','pot','KVA.  I: 2³⁰   II: 3²⁰',
+      ['Skriv om till samma exponent: 8¹⁰ mot 9¹⁰','Jämför exponenterna: 30 > 20','Räkna ut båda med överslag','Jämför baserna: 3 > 2'],
+      'Signalen: olika baser och exponenter med en gemensam faktor (30 och 20 är delbara med 10). 2³⁰ = (2³)¹⁰ = 8¹⁰ och 3²⁰ = (3²)¹⁰ = 9¹⁰. II är större.'],
+    ['kva-bas01','pot','KVA.  I: 0,9¹⁰   II: 0,9¹¹',
+      ['Basen är mellan 0 och 1: fler faktorer ger mindre','Högre exponent ger alltid ett större tal','Räkna ut 0,9¹⁰ med överslag','Svara D: det går inte att avgöra'],
+      'Signalen: samma bas mellan 0 och 1. Varje extra faktor 0,9 gör talet mindre, så I är större.'],
+    ['kva-brak','brak','KVA.  I: 7/15   II: 8/17',
+      ['Korsmultiplicera: 7 · 17 mot 8 · 15','Gör om båda till decimaltal','Jämför täljarna: 8 > 7','Jämför nämnarna: 17 > 15'],
+      'Signalen: två bråk som ligger nära varandra. Korsmultiplicera: 119 mot 120, så II är större.'],
+    ['kva-tecken','olik','KVA. Inget sägs om x.  I: x³   II: x²',
+      ['Testa ett negativt tal, 0, ett bråk och ett tal över 1','Sätt in x = 2 och x = 3','Dela båda med x²','Svara A: högre exponent ger större tal'],
+      'Signalen: inget villkor på x. Då kan x vara negativt, 0 eller ett bråk. x = −1 ger −1 mot 1, och x = 2 ger 8 mot 4. Svaret är D. Att dela med x² går inte, eftersom x kan vara 0.'],
+    ['kva-heltal','tal','KVA. x och y är positiva heltal och x + y = 5.  I: xy   II: 5',
+      ['Lista alla par: (1, 4), (2, 3), (3, 2), (4, 1)','Sätt x = y = 2,5','Lös ut y = 5 − x och förenkla','Testa ett par och dra en slutsats'],
+      'Signalen: positiva heltal med en liten summa. Det finns bara några få fall, så lista alla. xy blir 4 eller 6, alltså D.'],
+    ['kva-medel','stat','KVA. Medelvärdet av fem tal är 8. Fyra av talen är 6, 7, 9 och 10.  I: det femte talet   II: 8',
+      ['Räkna med summan: 5 · 8 = 40','Ta medelvärdet av de fyra talen','Ta medianen av talen','Uppskatta: talen ligger runt 8'],
+      'Signalen: medelvärde och ett saknat tal. Summan är antal gånger medelvärde: 40. 40 − 32 = 8, så de är lika (C).'],
+    ['kva-pct','proc','KVA. Ett pris höjs med 10 % och sänks sedan med 10 %.  I: nya priset   II: gamla priset',
+      ['Multiplicera förändringsfaktorerna: 1,1 · 0,9','Addera procentsatserna: +10 − 10 = 0','Sänkningen räknas på det gamla priset','Svara D: det beror på vad priset är'],
+      'Signalen: flera procentuella förändringar i rad. Multiplicera faktorerna: 1,1 · 0,9 = 0,99. Nya priset är lägre (B).'],
+    ['proc-orig','proc','Efter 25 % rabatt kostar en jacka 600 kr. Vad kostade den före rabatten?',
+      ['Dela med förändringsfaktorn: 600 / 0,75','Lägg på 25 %: 600 · 1,25','Lägg till 25 % av 600 kr','Räkna 600 · 0,25'],
+      'Signalen: priset EFTER en förändring är känt, och du söker det ursprungliga. Dela med faktorn: 600 / 0,75 = 800. Att lägga på 25 % ger 750, vilket är fel.'],
+    ['proc-jmf','proc','Hur många procent större är 50 än 40?',
+      ['Skillnaden delad med talet man jämför med: 10/40','Skillnaden delad med det större talet: 10/50','Dela talen: 40/50 = 80 %, alltså 20 %','Skillnaden är 10, alltså 10 %'],
+      'Signalen: "större än 40". 40 är jämförelsetalet och står i nämnaren: 10/40 = 25 %. Omvänt är 40 20 % mindre än 50.'],
+    ['proc-andel','proc','40 % av eleverna är tjejer, och 25 % av tjejerna spelar fotboll. Hur stor andel av alla elever är tjejer som spelar fotboll?',
+      ['Multiplicera andelarna: 0,4 · 0,25','Subtrahera: 40 % − 25 %','Addera: 40 % + 25 %','Ta medelvärdet av 40 % och 25 %'],
+      'Signalen: "av" två gånger, alltså en andel av en andel. Multiplicera: 0,4 · 0,25 = 0,1 = 10 %.'],
+    ['dtk-pe','dtk-andel','DTK. Arbetslösheten gick från 4 % till 6 %. Hur stor var ökningen i procent?',
+      ['Förändringen delad med startvärdet','Skillnaden direkt: 2 %','Förändringen delad med slutvärdet','Slutvärdet delat med startvärdet'],
+      'Signalen: "i procent" om något som redan mäts i procent. Skillnaden 2 är procentenheter. Ökningen i procent är 2/4 = 50 %. Läs alltid om frågan vill ha procent eller procentenheter.'],
+    ['dtk-skala','dtk-karta','DTK. Kartans skala är 1:50 000. Två orter ligger 6 cm från varandra på kartan. Hur långt är det i verkligheten?',
+      ['6 · 50 000 cm, gör sedan om till km','6 / 50 000, gör sedan om till km','50 000 / 6, gör sedan om till km','6 · 50 000 m direkt'],
+      'Signalen: skala 1:N betyder att 1 cm på kartan är N cm i verkligheten. 6 · 50 000 cm = 300 000 cm = 3 km. Gör om enheten sist: 100 000 cm = 1 km.'],
+    ['dtk-ars','dtk-andel','DTK. Ett diagram visar en storhet som växer varje år. Vilket år var den procentuella ökningen störst?',
+      ['Jämför ökningen delad med föregående års värde','Leta efter den största ökningen i antal','Leta efter året med det högsta värdet','Leta efter det år då kurvan är högst'],
+      'Signalen: "procentuell" ökning. En stor ökning i antal kan vara en liten ökning i procent om startvärdet är stort. Jämför ökning delad med startvärde, gärna med överslag.'],
+    ['dtk-overslag','overslag','DTK. Ungefär hur stor andel är 1 987 av 7 912? Alternativen är 15 %, 25 %, 35 % och 45 %.',
+      ['Avrunda: 2 000 / 8 000 = 25 %','Räkna exakt med två decimaler','Dela det stora talet med det lilla','Ta skillnaden mellan talen'],
+      'Signalen: "ungefär" och svarsalternativ som ligger långt isär. Avrunda till enkla tal. Exakt räkning tar tid utan att ge fler poäng.'],
+    ['nog-samma','ekv','NOG. Hur mycket kostar en penna? (1) 3 pennor och 2 suddgummin kostar 16 kr. (2) 6 pennor och 4 suddgummin kostar 32 kr.',
+      ['Se att (2) är (1) gånger 2: ingen ny information','Två ekvationer med två okända räcker alltid','Lös ekvationssystemet med substitution','Pröva rimliga priser tills det stämmer'],
+      'Signalen: två villkor som ser olika ut. Kolla först om det ena bara är det andra multiplicerat. Här är (2) = 2 · (1), så det finns bara en ekvation med två okända. Svaret är E.'],
+    ['nog-kvadrat','ekv','NOG. Vad är x? (1) x² = 16. (2) x < 0.',
+      ['Se att (1) ger två värden och att (2) väljer ett av dem','Lös x² = 16 till x = 4 och svara A','(2) räcker eftersom x är negativt','Pröva x = 4 i (2)'],
+      'Signalen: en kvadrat i ett villkor. x² = 16 ger x = 4 eller x = −4, så (1) räcker inte. Tillsammans med (2) blir x = −4. Svaret är C.'],
+    ['nog-rakna','text','NOG. Hur många elever går i klassen? (1) Förhållandet mellan pojkar och flickor är 3:2. (2) Det finns 6 fler pojkar än flickor.',
+      ['Avgör om villkoren räcker, utan att räkna klart','Räkna ut antalet med (1) först','Pröva klasser med 20, 25 och 30 elever','Ställ upp ekvationer och lös ut alla okända'],
+      'Signalen: NOG frågar bara OM det går att bestämma. (1) ger 3k pojkar och 2k flickor, (2) ger 3k − 2k = 6. Tillsammans räcker de (C). Att räkna fram 30 elever kostar bara tid.'],
+    ['nog-viktat','stat','NOG. Vad är medelvärdet för klass A och B tillsammans? (1) Medelvärdet är 12 i A och 16 i B. (2) Klass A har dubbelt så många elever som B.',
+      ['Ett vägt medelvärde kräver hur stora grupperna är','Medelvärdet är (12 + 16)/2, så (1) räcker','Antalet elever spelar ingen roll för medelvärden','(2) räcker eftersom A väger dubbelt'],
+      'Signalen: medelvärdet av två grupper. Det är ett vägt medelvärde: (2 · 12 + 1 · 16)/3. Förhållandet mellan gruppernas storlek räcker, även utan exakta antal. Svaret är C.'],
+    ['alg-konj','alg','Förenkla (x² − 25)/(x + 5).',
+      ['Faktorisera täljaren med konjugatregeln','Dela varje term i täljaren med x + 5','Förkorta x² mot x och 25 mot 5','Utveckla (x + 5)² och jämför'],
+      'Signalen: kvadrat minus kvadrat i ett bråk. x² − 25 = (x + 5)(x − 5). Förkorta bort (x + 5): svaret är x − 5.'],
+    ['alg-kvad','alg','a + b = 7 och ab = 10. Vad är a² + b²?',
+      ['Kvadrera a + b: (a + b)² = a² + 2ab + b²','a² + b² = (a + b)² = 49','Kvadrera båda talen: 7² + 10²','Multiplicera: 7 · 10'],
+      'Signalen: summa och produkt är kända och en kvadratsumma söks. (a + b)² = a² + 2ab + b², så a² + b² = 49 − 2 · 10 = 29.'],
+    ['alg-kvot','brak','a/b = 3/4. Vad är (a + b)/b?',
+      ['Dela upp bråket: a/b + b/b','Addera täljare och nämnare: (3 + 4)/(4 + 4)','Det går inte utan värdet på b','Vänd på bråket: 4/3 + 1'],
+      'Signalen: ett förhållande är givet och ett uttryck med samma variabler söks. Dela upp: (a + b)/b = a/b + 1 = 3/4 + 1 = 7/4. Det går också att välja a = 3 och b = 4.'],
+    ['ekv-sys','ekv','x + y = 10 och x − y = 4. Vad är x?',
+      ['Addera ekvationerna: 2x = 14','Pröva x = 1, 2, 3 … tills det stämmer','Multiplicera ekvationerna med varandra','Dividera ekvationerna med varandra'],
+      'Signalen: samma variabel med motsatta tecken (+y och −y). Addera ekvationerna så försvinner y: 2x = 14, x = 7.'],
+    ['ekv-mgn','ekv','x/3 + x/4 = 7. Vad är x?',
+      ['Multiplicera hela ekvationen med 12','Addera nämnarna: x/7 = 7','Gör om bråken till decimaltal','Addera täljarna: 2x/7 = 7'],
+      'Signalen: x i flera bråk. Multiplicera hela ekvationen med minsta gemensamma nämnaren 12: 4x + 3x = 84, x = 12.'],
+    ['ekv-utbryt','pot','2^(x+1) + 2^x = 48. Vad är x?',
+      ['Bryt ut 2^x: 2^x · (2 + 1) = 48','Addera exponenterna: 2^(2x+1) = 48','Skriv 48 som en potens av 2','Dela båda leden med 2'],
+      'Signalen: samma bas med olika exponenter i en summa. Bryt ut den minsta potensen: 3 · 2^x = 48 ger 2^x = 16, x = 4. Att pröva svarsalternativen fungerar också.'],
+    ['ekv-alt','ekv','Vilket värde på x uppfyller √(x + 7) = x − 5? A: 2  B: 9  C: 11  D: 14',
+      ['Sätt in svarsalternativen och pröva','Kvadrera och lös andragradsekvationen','Rita båda graferna','Sätt x − 5 = 0'],
+      'Signalen: en krånglig ekvation och få svarsalternativ. Sätt in: x = 9 ger √16 = 4 = 9 − 5. Rätt direkt. Att kvadrera ger en andragradsekvation och en falsk rot.'],
+    ['olik-neg','olik','Lös olikheten −3x < 12.',
+      ['Dela med −3 och vänd olikhetstecknet','Dela med −3 och behåll tecknet','Flytta över: x < 12 + 3','Kvadrera båda leden'],
+      'Signalen: du delar eller multiplicerar med ett negativt tal. Då vänds olikhetstecknet: x > −4.'],
+    ['olik-kvad','olik','Vilka x uppfyller x² < 9?',
+      ['Tänk på båda tecknen: −3 < x < 3','Dra roten ur: x < 3','Dela med x: x < 9/x','Testa x = 2 och dra en slutsats'],
+      'Signalen: x² i en olikhet. Både positiva och negativa x ger positiva kvadrater, så svaret är −3 < x < 3.'],
+    ['funk-neg','funk','f(x) = x² − 3x. Vad är f(−2)?',
+      ['Sätt in med parentes: (−2)² − 3 · (−2)','Sätt in utan parentes: −2² − 3 · −2','Räkna f(2) och byt tecken','Lös ekvationen f(x) = −2'],
+      'Signalen: ett negativt tal ska in i en funktion. Använd parentes: (−2)² = 4 och −3 · (−2) = 6, så f(−2) = 10.'],
+    ['funk-uttr','funk','f(x) = 3x + 2. Vad är f(x + 1) − f(x)?',
+      ['Byt varje x mot (x + 1), förenkla sedan','Lägg till 1: 3x + 2 + 1','Multiplicera f(x) med (x + 1)','f(x + 1) = f(x) + f(1)'],
+      'Signalen: ett uttryck inne i funktionsparentesen. Byt VARJE x mot (x + 1): 3(x + 1) + 2 = 3x + 5. Skillnaden är 3, samma som lutningen.'],
+    ['linje-k','linje','En linje går genom (1, 3) och (3, 7). Vad är lutningen?',
+      ['k = Δy/Δx = (7 − 3)/(3 − 1)','k = Δx/Δy = (3 − 1)/(7 − 3)','k = 7/3, y delat med x i andra punkten','k = 3/1, y delat med x i första punkten'],
+      'Signalen: två punkter och lutningen söks. k = förändringen i y delad med förändringen i x = 4/2 = 2.'],
+    ['linje-x','linje','Var skär linjen y = 2x − 6 x-axeln?',
+      ['Sätt y = 0 och lös ut x','Sätt x = 0 och läs av y','Läs av m-värdet: −6','Läs av k-värdet: 2'],
+      'Signalen: skärning med x-axeln. Där är y = 0: 0 = 2x − 6 ger x = 3. Med y-axeln är det tvärtom: x = 0, och då är svaret m.'],
+    ['linje-par','linje','Linjen L är parallell med y = −2x + 5 och går genom (0, 1). Vilken ekvation har L?',
+      ['Samma k, nytt m: y = −2x + 1','Vinkelrätt k: y = x/2 + 1','Samma m: y = −2x + 5','Byt tecken på k: y = 2x + 1'],
+      'Signalen: parallella linjer har samma lutning k. Punkten (0, 1) ger m = 1. Vinkelräta linjer har i stället k₁ · k₂ = −1.'],
+    ['pyth-tripp','pyth','En rätvinklig triangel har kateterna 9 och 12. Hur lång är hypotenusan?',
+      ['Känn igen 3-4-5 gånger 3','Räkna 9 + 12','Räkna √(12² − 9²)','Använd arean: 9 · 12 / 2'],
+      'Signalen: rätvinklig triangel med sidor som är multiplar av 3, 4, 5 (eller 5, 12, 13). 9 = 3 · 3 och 12 = 4 · 3, så hypotenusan är 5 · 3 = 15. Pythagoras sats fungerar också men tar längre tid.'],
+    ['pyth-dold','pyth','En rektangel har sidorna 5 och 12. Hur lång är diagonalen?',
+      ['Diagonalen bildar en rätvinklig triangel: Pythagoras','Diagonalen är summan av sidorna','Diagonalen är medelvärdet av sidorna','Diagonalen är halva omkretsen'],
+      'Signalen: en diagonal eller ett avstånd mellan två punkter. Då finns det en dold rätvinklig triangel. 5-12-13: diagonalen är 13.'],
+    ['vinkel-ytter','vinkel','I en triangel är två vinklar 50° och 60°. Hur stor är yttervinkeln vid det tredje hörnet?',
+      ['Summan av de två andra vinklarna: 50° + 60°','180° − 50° − 60°','360° − 50° − 60°','Den är lika stor som den tredje vinkeln'],
+      'Signalen: yttervinkel. Den är lika med summan av de två inre vinklarna som inte ligger intill: 110°. 180° − 50° − 60° = 70° är den inre vinkeln.'],
+    ['vinkel-n','vinkel','Hur stor är vinkelsumman i en sexhörning?',
+      ['(n − 2) · 180° = 4 · 180°','n · 180° = 6 · 180°','Alltid 360°','6 · 60°'],
+      'Signalen: vinkelsumma i en månghörning. Dela den i trianglar från ett hörn: n − 2 trianglar med 180° vardera. En sexhörning har 720°.'],
+    ['vinkel-par','vinkel','Två parallella linjer skärs av en tredje linje. En av vinklarna är 65°. Vilka vinklar finns?',
+      ['Bara 65° och 180° − 65° = 115°','Alla vinklar är 65°','65° och 90°','Det går inte att avgöra'],
+      'Signalen: parallella linjer och en linje som skär dem. Alla vinklar är antingen v eller 180° − v (likbelägna vinklar, alternatvinklar och sidovinklar).'],
+    ['area-cirkel','area','En cirkel har omkretsen 10π. Hur stor är arean?',
+      ['Hitta radien först: 2πr = 10π ger r = 5','Arean är omkretsen gånger π','Arean är omkretsen i kvadrat','Arean är πd = 10π'],
+      'Signalen: omkretsen är given och arean söks. Gå via radien: r = 5 och A = πr² = 25π.'],
+    ['area-skala','area','Alla sidor i en kub fördubblas. Hur många gånger större blir volymen?',
+      ['Längdskala k ger volymskala k³: 2³','Volymen fördubblas också','Längdskala k ger volymskala k²: 2²','Jämför begränsningsytorna'],
+      'Signalen: alla längder skalas med samma faktor. Area skalas med k², volym med k³. 2³ = 8 gånger.'],
+    ['area-skugg','area','En cirkel är inskriven i en kvadrat med sidan 4. Hur stort är området mellan kvadraten och cirkeln?',
+      ['Stor figur minus liten: 16 − 4π','Kvadratens area delad med 4','Cirkelns area: 4π','Kvadratens area plus cirkelns'],
+      'Signalen: ett skuggat område mellan figurer. Räkna hela figuren minus det som inte är skuggat: 4² − π · 2² = 16 − 4π.'],
+    ['hast-medel','hast','Du cyklar till jobbet i 20 km/h och hem i 30 km/h, samma väg. Vad är medelhastigheten?',
+      ['Total sträcka delad med total tid','Medelvärdet: (20 + 30)/2','Medelvärdet av tiderna','Multiplicera hastigheterna'],
+      'Signalen: medelhastighet över delar med olika fart. Räkna total sträcka genom total tid. Välj en sträcka, till exempel 60 km: 3 h + 2 h = 5 h, och 120 km / 5 h = 24 km/h, inte 25.'],
+    ['hast-tak','hast','En kran fyller ett kar på 3 h och en annan på 6 h. Hur lång tid tar det med båda?',
+      ['Addera takterna: 1/3 + 1/6 av karet per timme','Ta medelvärdet: 4,5 h','Addera tiderna: 9 h','Subtrahera: 6 − 3 = 3 h'],
+      'Signalen: två som arbetar samtidigt. Addera det de hinner per timme: 1/3 + 1/6 = 1/2 kar per timme, alltså 2 h.'],
+    ['sann-minst','sann','Du kastar en tärning tre gånger. Hur stor är sannolikheten att få minst en sexa?',
+      ['1 − P(ingen sexa) = 1 − (5/6)³','1/6 + 1/6 + 1/6','(1/6)³','Lista alla 216 utfall'],
+      'Signalen: "minst en". Räkna motsatsen: ingen sexa = (5/6)³ = 125/216, så svaret är 91/216. Att addera 1/6 tre gånger räknar vissa utfall flera gånger.'],
+    ['sann-utan','sann','En påse har 5 röda och 3 blå kulor. Du drar två utan återläggning. Hur stor är sannolikheten att båda är röda?',
+      ['Multiplicera och minska efter första: 5/8 · 4/7','Multiplicera samma bråk: 5/8 · 5/8','Addera: 5/8 + 4/7','Antal röda du drar delat med alla: 2/8'],
+      'Signalen: "utan återläggning". Multiplicera, och minska både antalet röda och totalen efter första dragningen: 5/8 · 4/7 = 5/14.'],
+    ['tal-mgm','tal','Vilket är det minsta positiva heltal som är delbart med både 12 och 18?',
+      ['Faktorisera: 2² · 3 och 2 · 3², ta högsta potenserna','Multiplicera: 12 · 18','Största gemensamma delaren: 6','Addera: 12 + 18'],
+      'Signalen: minsta gemensamma multipel. Faktorisera och ta varje primtal med den högsta exponenten: 2² · 3² = 36.'],
+    ['tal-monster','tal','Vilken är sista siffran i 3²⁵?',
+      ['Leta mönster: slutsiffrorna 3, 9, 7, 1 upprepas','Räkna ut 3²⁵ med överslag','Sista siffran i 3 · 25 = 75','Sista siffran är alltid 3'],
+      'Signalen: en stor potens där bara sista siffran efterfrågas. Slutsiffrorna går i en cykel om 4: 3, 9, 7, 1. 25 = 6 · 4 + 1, så sista siffran är 3.'],
+    ['stat-median','stat','Vad är medianen av 7, 2, 9, 4, 5, 8?',
+      ['Sortera först, ta medelvärdet av de två mittersta','Ta det mittersta talet i den givna ordningen','Räkna ut medelvärdet','Ta talet som förekommer flest gånger'],
+      'Signalen: median. Sortera alltid först: 2, 4, 5, 7, 8, 9. Med ett jämnt antal tal är medianen (5 + 7)/2 = 6.'],
+    ['stat-nytt','stat','Medelvärdet av 4 tal är 10. Ett femte tal läggs till och medelvärdet blir 12. Vilket är det femte talet?',
+      ['Jämför summorna: 5 · 12 − 4 · 10','Det femte talet är 12','12 − 10 = 2','(10 + 12)/2'],
+      'Signalen: medelvärdet ändras när ett tal läggs till. Räkna med summor: 60 − 40 = 20.'],
+    ['pot-bas','pot','Vad är 2¹⁰ · 5¹⁰?',
+      ['Samma exponent: (2 · 5)¹⁰ = 10¹⁰','Addera exponenterna: 10²⁰','Addera baserna: 7¹⁰','Multiplicera baser och exponenter: 10¹⁰⁰'],
+      'Signalen: olika baser med samma exponent. Multiplicera baserna: aⁿ · bⁿ = (ab)ⁿ = 10¹⁰.'],
+    ['pot-dec','pot','Vad är √0,0009?',
+      ['Skriv som bråk: √(9/10 000) = 3/100','Dra roten ur 9 och behåll antalet decimaler: 0,0003','Gissa ungefär 0,003','Kvadrera 0,0009'],
+      'Signalen: roten ur ett litet decimaltal. Skriv som bråk eller tiopotens: 9 · 10⁻⁴ blir 3 · 10⁻² = 0,03. Antalet decimaler halveras.'],
+    ['oversl-ordn','overslag','Beräkna 0,25 · 37 · 40.',
+      ['Byt ordning: 0,25 · 40 = 10, sedan 10 · 37','Räkna från vänster: 0,25 · 37 först','Gör om 0,25 till procent','Avrunda 37 till 40'],
+      'Signalen: två faktorer som tillsammans blir ett jämnt tal (0,25 · 4, 5 · 2, 1/3 · 3). Byt ordning: 0,25 · 40 = 10 och 10 · 37 = 370.'],
+    ['text-mangd','text','I en klass med 30 elever spelar 18 fotboll och 15 handboll. 5 spelar ingetdera. Hur många spelar båda?',
+      ['Rita två cirklar: 18 + 15 − båda = 30 − 5','18 + 15 − 30 = 3','Skillnaden: 18 − 15 = 3','30 − 18 − 15 + 5 = 2'],
+      'Signalen: två grupper som kan överlappa. Rita ett venndiagram: 25 spelar något, och 18 + 15 − båda = 25 ger båda = 8.'],
+    ['text-ordn','text','A är äldre än B men yngre än C. D är yngre än B. Vem är näst äldst?',
+      ['Rita en tallinje och placera en person i taget','Räkna med åldrarna 10, 20, 30 och 40 i textens ordning','Den som nämns först är äldst','Räkna hur många gånger varje namn nämns'],
+      'Signalen: många jämförelser (äldre än, längre än). Rita en tallinje och placera en i taget. Ordningen blir C, A, B, D, så A är näst äldst.'],
+  ]) add({id, kind:'choice', fixed:true, words:true, meth:true, amne, q, opts, correct:0, show:opts[0], ex,
+      hint:'Välj metoden. Du behöver inte räkna klart. Tryck på ett alternativ eller 1–4.'});
+}, 'hr').intro = [
+  ['Så tränar du','välj metoden innan du räknar. Kortet frågar vilken väg som är snabbast och säkrast, inte vad svaret blir. Läs signalen efter varje kort.'],
+  ['x² mot x','testa tal under 1, exakt 1 och över 1. Står inget om x: testa också negativa tal och 0.'],
+  ['Rötter och potenser','kvadrera båda sidor, eller skriv om till samma bas eller samma exponent.'],
+  ['Procent','flera förändringar i rad: multiplicera faktorerna. Känt värde efter en förändring: dela med faktorn.'],
+  ['Sannolikhet','"minst en" räknas som 1 − P(ingen). "Utan återläggning": minska nämnaren.'],
+  ['Medelvärde','räkna med summor: summa = antal · medelvärde.'],
+  ['NOG','avgör bara om det går att räkna ut. Kolla om ett villkor bara är ett annat i ny form, och om en kvadrat ger två svar.'],
+  ['Svarsalternativ','krånglig ekvation och få alternativ: pröva alternativen.'],
+];
+
+// Egna kort: lärdomar från felloggen som du gör om till vändkort och betygsätter själv.
+// Korten byggs från S.state.own av syncOwn() när schemat har lästs in.
+const OWN = cat('hr-egna','Egna kort från felloggen',[20,40], ()=>{}, 'hr');
+
 const CARDS = {}; for (const c of CATS) for (const k of c.cards) CARDS[k.id] = k;
 const CATBY = Object.fromEntries(CATS.map(c=>[c.id,c]));
 
@@ -1459,10 +1654,10 @@ function applyDefaultsOnce(st){
   st.focusMode = Object.assign({sr:'all', hr:'all'}, st.focusMode); st.focus = Object.assign({sr:[], hr:[]}, st.focus);
   st.defaultsV = DEFAULTS_V; st.updated = Date.now();
 }
-const S = {state:{cards:{}, settings:defSettings(), newDays:{}}, log:[], mode:'local', db:null, uid:null, attached:false, loaded:false, stateTimer:null, logTimer:null, chain:Promise.resolve(), dirtyDays:new Set(), error:null};
+const S = {state:{cards:{}, settings:defSettings(), newDays:{}, own:{}}, log:[], mode:'local', db:null, uid:null, attached:false, loaded:false, stateTimer:null, logTimer:null, chain:Promise.resolve(), dirtyDays:new Set(), error:null};
 function loadLocal(){
   try{ const raw = localStorage.getItem(LKEY); if (!raw) return; const o = JSON.parse(raw);
-    if (o.state){ S.state.cards = o.state.cards||{}; S.state.newDays = o.state.newDays||{}; S.state.settings = Object.assign(defSettings(), o.state.settings||{}); S.state.settings.active = Object.assign(defSettings().active, (o.state.settings||{}).active||{}); S.state.settings.defaultsV = (o.state.settings||{}).defaultsV||0; applyDefaultsOnce(S.state.settings); if (o.state.timeMs!=null) S.state.timeMs = o.state.timeMs; }
+    if (o.state){ S.state.cards = o.state.cards||{}; S.state.newDays = o.state.newDays||{}; S.state.settings = Object.assign(defSettings(), o.state.settings||{}); S.state.settings.active = Object.assign(defSettings().active, (o.state.settings||{}).active||{}); S.state.settings.defaultsV = (o.state.settings||{}).defaultsV||0; applyDefaultsOnce(S.state.settings); if (o.state.timeMs!=null) S.state.timeMs = o.state.timeMs; S.state.own = o.state.own||{}; }
     if (Array.isArray(o.log)) S.log = o.log;
   }catch(e){}
 }
@@ -1478,6 +1673,8 @@ function mergeState(into, other){
   for (const [id,c] of Object.entries(other.cards||{})){ const mine = into.cards[id]; if (!mine || (c.last||0) > (mine.last||0)) into.cards[id] = c; }
   for (const [d,n] of Object.entries(other.newDays||{})) into.newDays[d] = Math.max(into.newDays[d]||0, n);
   if (other.timeMs!=null) into.timeMs = Math.max(into.timeMs||0, other.timeMs);
+  for (const [id,o] of Object.entries(other.own||{})){ into.own ||= {}; const m = into.own[id]; if (!m || (o.t||0) > (m.t||0)) into.own[id] = o; }
+  if (into===S.state) syncOwn();
   if (other.settings && (other.settings.updated||0) > (into.settings.updated||0)){ into.settings = Object.assign(defSettings(), other.settings); into.settings.active = Object.assign(defSettings().active, other.settings.active||{}); into.settings.defaultsV = other.settings.defaultsV||0; applyDefaultsOnce(into.settings); }
   return into;
 }
@@ -1558,6 +1755,8 @@ function makeInst(card){
   const base = card.tpl ? card.gen() : Object.assign({}, card, {q: card.qf ? card.qf() : card.q});
   const inst = Object.assign({}, base, {id:card.id, cat:card.cat, tpl:!!card.tpl, tol: card.tpl ? tolOf(card) ?? base.tol : base.tol});
   if (inst.kind==='choice' && !inst.fixed && Math.random()<0.5){ inst.opts = inst.opts.slice().reverse(); inst.correct = 1 - inst.correct; }
+  // metodval: alla fyra alternativ blandas varje gång
+  if (inst.meth){ const order = shuffleS(inst.opts.map((_,i)=>i)); inst.correct = order.indexOf(base.correct); inst.opts = order.map(i=>base.opts[i]); }
   return inst;
 }
 let pass = null, view = 'today';
@@ -1595,13 +1794,16 @@ function nextCard(){
   pass.cur = {card, inst:makeInst(card), shown:0, answered:null};
   rerender();
 }
-function answer(raw, display){
+// gSel = betyget du själv valt (egna vändkort); annars sätts betyget av rätt/fel och tiden
+function answer(raw, display, gSel){
   const cur = pass.cur; if (!cur || cur.answered) return;
   const ms = Math.round(performance.now() - cur.shown);
-  const res = check(cur.inst, raw);
+  const flip = cur.inst.kind==='flip';
+  if (flip && !(gSel>=1 && gSel<=4)) return;
+  const res = flip ? {ok: gSel>1} : check(cur.inst, raw);
   if (res.invalid){ toast('Svaret gick inte att tolka. Kontrollera skrivsättet.'); return; }
   const [easy, good] = limitsOf(cur.card.cat);
-  const g = !res.ok ? 1 : ms < easy*1000 ? 4 : ms < good*1000 ? 3 : 2;
+  const g = flip ? gSel : !res.ok ? 1 : ms < easy*1000 ? 4 : ms < good*1000 ? 3 : 2;
   const now = Date.now(), prev = S.state.cards[cur.card.id];
   // tid i passet: sedan förra svaret (högst 3 min, så att en paus inte räknas)
   S.state.timeMs = srTime() + Math.min(now - (pass.mark || pass.start), 180e3); pass.mark = now;
@@ -1618,8 +1820,9 @@ function answer(raw, display){
   cur.answered = {ok:res.ok, g, ms, note:res.note, trap: res.ok || res.note ? null : trapFor(cur.inst, raw), mine: display ?? String(raw), next:next.due};
   pass.done.push(att);
   if (!pass.quiz && next.due - now < 20*60e3) pass.pending.push(cur.card);
+  if (flip){ nextCard(); return; }   // du har redan sett svaret och betygsatt dig själv
   rerender();
-  if (res.ok && g>=3 && set().auto){ const me = cur; setTimeout(()=>{ if (pass && pass.cur===me) nextCard(); }, 650); }
+  if (res.ok && g>=3 && set().auto && !cur.inst.meth){ const me = cur; setTimeout(()=>{ if (pass && pass.cur===me) nextCard(); }, 650); }
 }
 
 // ---------- Statistik och export ----------
@@ -1743,7 +1946,7 @@ function renderToday(r){
   const quizSel = el('select',{id:'quizn','aria-label':'Antal kort i snabbtestet',onchange:e=>{ set().quizN=+e.target.value; set().updated=Date.now(); queueState(); }},
     [10,15,20,25,30].map(n=>el('option',{value:n,selected:(set().quizN||20)===n}, n+' kort')));
   const hr = el('section',{class:'panel hrpanel'},
-    el('div',{class:'hrhead'}, el('h2',{style:'font-size:22px'}, 'Huvudräkning'), el('span',{class:'note'}, 'De sex svåra · kvadrater och rötter · bråk ↔ procent · förkortning · primtal · decimaltal'),
+    el('div',{class:'hrhead'}, el('h2',{style:'font-size:22px'}, 'Huvudräkning'), el('span',{class:'note'}, 'De sex svåra · kvadrater och rötter · bråk ↔ procent · förkortning · primtal · decimaltal · metodval'+(ownCount() ? ' · '+ownCount()+' egna kort' : '')),
       el('button',{class:'link',type:'button',style:'margin-left:auto',onclick:()=>{view='cats';rerender();}}, '⚙ Inställningar')),
     focusPicker('hr'),
     hCats.filter(c=>c.intro).map(c=>el('details',{class:'intro'}, el('summary',{}, `Genomgång: ${c.name} (${c.intro.length} regler)`),
@@ -1797,10 +2000,17 @@ function renderCard(r){
       el('div',{class:'kvarow'}, el('span',{class:'label'},'Kvantitet I'), el('span',{}, inst.kva.I)), el('div',{class:'kvarow'}, el('span',{class:'label'},'Kvantitet II'), el('span',{}, inst.kva.II)))
     : el('div',{class:'qtext'+(inst.q.length>26?' long':'')}, inst.q);
   const bar = el('div',{class:'tbar','aria-hidden':'true'}, el('i',{}), el('s',{style:`left:${100*easy/(good*1.5)}%`}), el('s',{style:`left:${100/1.5}%`}));
-  const card = el('section',{class:'cardq'}, qtext);
-  if (!a){
+  const card = el('section',{class:'cardq'+(inst.kind==='flip'?' flipcard':'')}, qtext);
+  if (!a && inst.kind==='flip'){
+    // eget vändkort: visa svaret, betygsätt sedan dig själv
+    if (inst.src) card.append(el('span',{class:'note'}, 'Från felloggen: '+inst.src));
+    if (!cur.flipped) card.append(el('button',{class:'btn primary',type:'button',id:'srflip',onclick:()=>{ cur.flipped = true; rerender(); }}, 'Visa svaret (mellanslag)'));
+    else card.append(el('div',{class:'ex flipback'}, inst.back),
+      el('p',{class:'note'}, 'Hur väl kom du ihåg det? Tryck 1–4.'),
+      el('div',{class:'row flipgrades'}, [1,2,3,4].map(g=>el('button',{type:'button',class:'btn'+(g===3?' primary':''),id:g===3?'srgood':null,onclick:()=>answer('', GRADE[g], g)}, `${g} · ${GRADE[g]}`))));
+  } else if (!a){
     if (inst.kind==='choice'){
-      card.append(el('div',{class:'choices'+(inst.words?' words':'')+(inst.kva?' kva':'')}, inst.opts.map((o,i)=>el('button',{type:'button',onclick:()=>answer(String(i), o)}, o))), el('span',{class:'note'}, inst.hint || 'Tryck på det största, eller använd ← och →.'));
+      card.append(el('div',{class:'choices'+(inst.words?' words':'')+(inst.kva||inst.meth?' kva':'')+(inst.meth?' meth':'')}, inst.opts.map((o,i)=>el('button',{type:'button',onclick:()=>answer(String(i), o)}, inst.meth ? `${i+1} · ${o}` : o))), el('span',{class:'note'}, inst.hint || 'Tryck på det största, eller använd ← och →.'));
     } else {
       const input = el('input',{id:'srinput',type:'text',autocomplete:'off',autocapitalize:'off',spellcheck:'false',inputmode: inst.kind==='expr' ? 'text' : 'decimal','aria-label':'Ditt svar',enterkeyhint:'send'});
       input.addEventListener('keydown', e=>{ if (e.key==='Enter'){ e.preventDefault(); e.stopPropagation(); if (input.value.trim()) answer(input.value); } });
@@ -1821,13 +2031,14 @@ function renderCard(r){
       !a.ok ? el('div',{class:'note'}, `Ditt svar: ${a.mine} · Rätt svar: `, el('strong',{}, inst.show)) : a.ok && inst.kind==='num' && /\//.test(inst.show) && !/\//.test(a.mine) ? el('div',{class:'note'},'Som bråk: '+inst.show) : null,
       a.note ? el('div',{class:'note'}, a.note) : null,
       a.trap ? el('div',{class:'ex trap'}, a.trap) : null,
-      (!a.ok || a.g===2) && inst.ex ? el('div',{class:'ex'}, inst.ex) : null,
+      (!a.ok || a.g===2 || inst.meth) && inst.ex ? el('div',{class:'ex'}, inst.ex) : null,
       el('div',{class:'row',style:'justify-content:center'}, el('button',{class:'btn primary',type:'button',id:'srnext',onclick:nextCard}, 'Nästa (Enter)')));
     card.append(fb);
   }
   put(r, nav(), el('div',{class:'drill'}, top, card));
   requestAnimationFrame(()=>{
-    if (!a){ cur.shown = performance.now(); const i = document.getElementById('srinput'); if (i) i.focus({preventScroll:true}); tickBar(cur, easy, good); }
+    if (!a && inst.kind==='flip'){ if (!cur.shown) cur.shown = performance.now(); (document.getElementById(cur.flipped ? 'srgood' : 'srflip'))?.focus({preventScroll:true}); }
+    else if (!a){ cur.shown = performance.now(); const i = document.getElementById('srinput'); if (i) i.focus({preventScroll:true}); tickBar(cur, easy, good); }
     else document.getElementById('srnext')?.focus({preventScroll:true});
   });
 }
@@ -1953,12 +2164,43 @@ document.addEventListener('keydown', e=>{
   if (tab!=='hr' || view!=='pass' || !pass?.cur || e.metaKey || e.ctrlKey || e.altKey) return;
   const cur = pass.cur;
   if (cur.answered){ if (e.key==='Enter' && document.activeElement?.id!=='srnext'){ e.preventDefault(); nextCard(); } return; }
+  if (cur.inst.kind==='flip'){
+    if (!cur.flipped){ if (document.activeElement?.id==='srflip') return; if (e.key===' ' || e.key==='Enter'){ e.preventDefault(); cur.flipped = true; rerender(); } }
+    else { const g = '1234'.indexOf(e.key)+1; if (g>0){ e.preventDefault(); answer('', GRADE[g], g); } }
+    return;
+  }
+  if (cur.inst.meth){ const j = '1234'.indexOf(e.key); if (j>=0){ e.preventDefault(); answer(String(j), cur.inst.opts[j]); } return; }
   if (cur.inst.kva){ const i = 'abcd'.indexOf(e.key.toLowerCase()), j = i>=0 && e.key.length===1 ? i : '1234'.indexOf(e.key); if (j>=0 && e.key.length===1){ e.preventDefault(); answer(String(j), cur.inst.opts[j]); } }
   else if (cur.inst.kind==='choice'){ if (e.key==='ArrowLeft' || e.key==='1'){ e.preventDefault(); answer('0', cur.inst.opts[0]); } else if (e.key==='ArrowRight' || e.key==='2'){ e.preventDefault(); answer('1', cur.inst.opts[1]); } }
 });
 function canLeave(){ return true; }
 
+// ---------- Egna kort (lärdomar från felloggen) ----------
+// S.state.own[id] = {src, front, back, label, c (skapad), t (ändrad)}, eller {src, del:1, t} när kortet är borttaget
+function syncOwn(){
+  for (const k of OWN.cards) delete CARDS[k.id];
+  OWN.cards = Object.entries(S.state.own||{}).filter(([,o])=>!o.del).sort((a,b)=>(a[1].c||0)-(b[1].c||0))
+    .map(([id,o])=>({id:'hr-egna:'+id, cat:'hr-egna', kind:'flip', q:o.front, back:o.back, src:o.label||'', show:o.back}));
+  for (const k of OWN.cards) CARDS[k.id] = k;
+}
+function ownFor(src){ const o = S.state.own||{}; const id = Object.keys(o).find(k=>o[k].src===src && !o[k].del); return id ? Object.assign({id}, o[id]) : null; }
+function saveOwn(src, front, back, label){
+  front = String(front||'').trim(); back = String(back||'').trim();
+  if (!front || !back) return null;
+  S.state.own ||= {};
+  const old = ownFor(src), id = old?.id || 'o'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), now = Date.now();
+  S.state.own[id] = {src, front, back, label:label||'', c: old?.c || now, t: now};
+  syncOwn(); queueState(); return id;
+}
+function delOwn(src){
+  const old = ownFor(src); if (!old) return;
+  S.state.own[old.id] = {src, del:1, t:Date.now()};
+  delete S.state.cards['hr-egna:'+old.id];
+  syncOwn(); queueState();
+}
+const ownCount = () => OWN.cards.length;
 loadLocal();
+syncOwn();
 // för rutan Provdag: total tid i snabbräkningen och antal dagar i rad med minst ett svar
 function srTime(){ if (S.state.timeMs==null) S.state.timeMs = S.log.reduce((a,x)=>a+(x.ms||0),0); return S.state.timeMs; }
 function streak(){
@@ -1968,7 +2210,7 @@ function streak(){
   return n;
 }
 const summary = () => ({ms: srTime(), streak: streak(), today: S.log.some(a=>a.day===dayKey()), days: [...new Set(S.log.map(a=>a.day))]});
-return {render, attach, canLeave, summary, schedule, setCap, effDue, maxIvl, _test:{check, parse, ev, CATS, CARDS, makeInst, schedule, S, csv, backup}};
+return {render, attach, canLeave, summary, schedule, setCap, effDue, maxIvl, ownFor, saveOwn, delOwn, ownCount, _test:{check, parse, ev, CATS, CARDS, makeInst, schedule, S, csv, backup, startPass, answer, nextCard, mergeState, getPass:()=>pass}};
 })();
 </script>
 <script>
@@ -2510,7 +2752,34 @@ function errEditor(rec, onChange){
       sug ? el('button',{class:'link',type:'button',onclick:()=>{ rec.ftype = sug; save(); }}, `Förslag: ${sug}`) : null,
       el('button',{class:'link',type:'button','aria-expanded':notes.hidden?'false':'true',onclick:e=>{ notes.hidden=!notes.hidden; e.currentTarget.setAttribute('aria-expanded', notes.hidden?'false':'true'); }}, 'Anteckningar')),
     rec.ftype && FTACTION[rec.ftype] ? el('p',{class:'ftact'}, el('strong',{}, 'Gör så här: '), FTACTION[rec.ftype]) : null,
-    notes);
+    notes, ownCardBox(rec));
+}
+// Lärdom → eget vändkort i Huvudräkning. Framsidan föreslås från "Vad gick fel" eller ämnet, baksidan är lärdomen.
+const errSrc = rec => rec.key || ('err:'+rec.id);
+const errLabel = rec => rec.tk ? examShort(rec.tk.split('|')[0])+' · pass '+rec.tk.split('|')[1]+' · uppg. '+rec.n
+  : [rec.exam, rec.pass ? 'pass '+rec.pass : '', rec.n ? 'uppg. '+rec.n : ''].filter(Boolean).join(' · ');
+function ownCardBox(rec){
+  const box = el('div',{class:'owncard'}), src = errSrc(rec);
+  const draw = (editing) => {
+    const card = SR.ownFor(src);
+    if (!editing){
+      if (card) return put(box, el('div',{class:'row'}, el('span',{class:'tag ok'}, 'Eget kort i Huvudräkning'),
+        el('button',{class:'link',type:'button',onclick:()=>draw(true)}, 'Ändra kortet'),
+        el('button',{class:'link danger',type:'button',onclick:()=>{ if (!confirm('Ta bort kortet ur Huvudräkning? Felet och lärdomen finns kvar.')) return; SR.delOwn(src); draw(false); }}, 'Ta bort kortet')));
+      if (!rec.lesson) return put(box);
+      return put(box, el('div',{class:'row'}, el('button',{class:'btn small',type:'button',onclick:()=>draw(true)}, 'Gör ett kort av lärdomen'),
+        el('span',{class:'note'}, 'Kortet repeteras i Huvudräkning, och du betygsätter dig själv.')));
+    }
+    const topic = rec.tk ? topicOf(rec.tk, rec.n) : null;
+    const front = el('textarea',{rows:2,'aria-label':'Framsida'}, card?.front ?? (rec.what || (topic ? topicName(topic)+': vad ska jag tänka på?' : 'Vad ska jag tänka på?')));
+    const back = el('textarea',{rows:2,'aria-label':'Baksida'}, card?.back ?? rec.lesson ?? '');
+    put(box, el('div',{class:'errnotes'}, el('label',{}, 'Framsida (frågan du ser)', front), el('label',{}, 'Baksida (lärdomen)', back)),
+      el('div',{class:'row'},
+        el('button',{class:'btn primary small',type:'button',onclick:()=>{ if (!SR.saveOwn(src, front.value, back.value, errLabel(rec))){ toast('Skriv något på båda sidorna.'); return; } toast(card ? 'Kortet är ändrat.' : 'Kortet ligger nu i Huvudräkning.'); draw(false); }}, card ? 'Spara ändringen' : 'Spara kortet'),
+        el('button',{class:'link',type:'button',onclick:()=>draw(false)}, 'Avbryt')));
+  };
+  draw(false);
+  return box;
 }
 const fmtHP = v => v==null || v==='' || isNaN(v) ? '–' : Number(v).toLocaleString('sv-SE',{minimumFractionDigits:2, maximumFractionDigits:2});
 const parseHP = s => { const v = parseFloat(String(s).replace(',','.')); return isFinite(v) && v>=0 && v<=2 ? Math.round(v*100)/100 : null; };
