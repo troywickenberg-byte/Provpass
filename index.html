@@ -720,6 +720,25 @@ body.inpass .tabs,body.inpass .mast,body.inpass .appfoot{display:none}
 .sr i.w{background:var(--bad);border-color:var(--bad);color:transparent}
 .sr.nf i{border-style:dashed}
 .sr.cur{background:var(--hl-tint)}
+.sr.flag .n{color:var(--warn);font-weight:700}
+.sr.flag .n::after{content:'⚑';margin-left:1px}
+.cpline{display:grid;gap:4px}
+.cp{display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:4px 8px;border-radius:6px;background:var(--paper)}
+.cp.ok{background:var(--ok-tint);color:var(--ok)}
+.cp.late{background:var(--warn-tint);color:var(--warn)}
+.cp.miss{background:var(--bad-tint);color:var(--bad)}
+.guessbox{display:grid;gap:6px;padding:8px 10px;border-radius:8px;background:var(--warn-tint);color:var(--warn);font-size:13px}
+.guessbox .btn{justify-self:start}
+.todayplan{display:grid;gap:12px}
+.todaytask{display:grid;gap:6px}
+.todaytask h4{margin:0;font-size:18px}
+.todaytask .row{gap:8px;flex-wrap:wrap}
+.weekplan{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:0;padding:0;list-style:none}
+.weekplan li{display:grid;gap:2px;padding:6px;border-radius:8px;background:var(--paper);font-size:12px;line-height:1.3}
+.weekplan li b{font-size:11px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em}
+.weekplan li.nu{outline:2px solid var(--accent)}
+.weekplan li.done b::after{content:' ✓';color:var(--ok)}
+@media (max-width:640px){.weekplan{grid-template-columns:1fr}.weekplan li{grid-template-columns:3.5em 1fr;align-items:baseline}}
 .sr.cur .n{color:var(--bad);font-weight:700}
 .sr:hover{background:var(--accent-tint)}
 @media (min-width:981px){.side{max-height:calc(100vh - 24px);overflow:auto}}
@@ -2564,13 +2583,49 @@ function itemsFor(test, secFilter){
 function startSession(items, label, extra={}){
   if (!items.length){ toast('Det finns inga uppgifter att öva på här.'); return; }
   const now = Date.now();
-  session = Object.assign({label, items, chosen:{}, times:{}, lock:{}, cur:0, start:now, last:now, deadline: now + TIME_LIMIT}, extra);
+  session = Object.assign({label, items, chosen:{}, times:{}, lock:{}, flag:{}, cur:0, start:now, last:now, deadline: now + TIME_LIMIT}, extra);
   view='quiz'; render(); window.scrollTo(0,0);
   clearInterval(tick); tick = setInterval(onTick, 1000);
 }
 // tiden räknas inte vidare på en uppgift som redan är besvarad med "Visa svaret direkt"
 function accrue(){ const s=session, now=Date.now(); if (!s.lock?.[s.cur]) s.times[s.cur]=(s.times[s.cur]||0)+(now-s.last); s.last=now; }
-function goTo(i){ const s=session; if (i<0||i>=s.items.length||i===s.cur) return; accrue(); s.cur=i; renderQuiz(); window.scrollTo({top:0}); }
+function goTo(i){ const s=session; if (i<0||i>=s.items.length||i===s.cur) return; accrue(); s.cur=i; cpReach(s); renderQuiz(); window.scrollTo({top:0}); }
+// Kontrollpunkter i ett helt kvantpass (rapporten): KVA klart vid 22 min och NOG vid 32 min.
+// n = första uppgiften i nästa delprov; när du når den räknas delprovet före som klart.
+const CHECKPOINTS = [{n:23, at:22*60e3, done:'KVA', next:'NOG'}, {n:29, at:32*60e3, done:'NOG', next:'DTK'}];
+function cpReach(s){
+  if (!s.cp) return;
+  const it = s.items[s.cur], el_ = Date.now()-s.start;
+  for (const m of CHECKPOINTS) if (s.cp.reach[m.n]==null && it && it.n >= m.n) s.cp.reach[m.n] = el_;
+}
+// status för en kontrollpunkt: ok (i tid), late (nådd efter tiden), miss (tiden har gått, inte nådd), wait
+function cpState(cp, m, elapsed){
+  const r = cp.reach[m.n];
+  if (r!=null) return r <= m.at ? 'ok' : 'late';
+  return elapsed >= m.at ? 'miss' : 'wait';
+}
+function cpPanel(s){
+  const elapsed = Date.now()-s.start;
+  return el('div',{class:'cpline','aria-label':'Kontrollpunkter'}, CHECKPOINTS.map(m=>{
+    const st = cpState(s.cp, m, elapsed), r = s.cp.reach[m.n];
+    const txt = st==='ok' ? 'klart ✓ '+fmtTime(r) : st==='late' ? 'klart '+fmtTime(r) : st==='miss' ? 'gå vidare nu' : 'mål';
+    return el('div',{class:'cp '+st}, el('span',{}, `${m.done} klart vid ${Math.round(m.at/60e3)}:00`), el('span',{class:'mono'}, txt));
+  }));
+}
+// Gissa och markera efter dubbla riktmärket (rapporten). Inte vid "Visa svaret direkt", där du lär dig.
+const GUESS_AT = 2;
+function overBudget(s, i=s.cur){
+  if (s.rt?.instant || s.lock?.[i] || s.chosen[i]) return false;
+  const ms = (s.times[i]||0) + (i===s.cur ? Date.now()-s.last : 0);
+  return ms >= GUESS_AT*SEC[s.items[i].sec].pace*1000;
+}
+function guessBox(s){
+  const it = s.items[s.cur], pace = SEC[it.sec].pace*1000;
+  return el('div',{class:'guessbox',role:'status'},
+    el('strong',{}, `Du har lagt dubbla riktmärket (${fmtTime(GUESS_AT*pace)}).`),
+    el('span',{}, 'Gissa på det alternativ som verkar rimligast, markera uppgiften och gå vidare. Ett fel svar kostar inget.'),
+    s.cur < s.items.length-1 ? el('button',{class:'btn small',type:'button',onclick:()=>{ (s.flag ||= {})[s.cur] = true; goTo(s.cur+1); }}, 'Markera och gå vidare') : null);
+}
 function pick(L){
   const s=session;
   if (s.rt?.instant){ if (s.lock[s.cur]) return; accrue(); s.chosen[s.cur]=L; s.lock[s.cur]=true; renderSide(); return; }
@@ -2586,7 +2641,19 @@ function onTick(){
     c.classList.toggle('low', !session.rt && left < 5*60*1000); c.classList.toggle('over', !!session.rt && left < 0);
   }
   const q = $('#qtime'); if (q) q.textContent = 'Tid på uppgiften: ' + fmtTime((session.times[session.cur]||0) + (session.lock?.[session.cur] ? 0 : Date.now()-session.last));
-  if (left <= 0 && !session.rt){ toast('Tiden är slut. Passet har lämnats in.'); submit(); }
+  if (left <= 0 && !session.rt){ toast('Tiden är slut. Passet har lämnats in.'); submit(); return; }
+  const s = session;
+  // kontrollpunkt passerad utan att nästa delprov är nått: säg till en gång
+  if (s.cp){
+    const elapsed = Date.now()-s.start;
+    for (const m of CHECKPOINTS) if (!s.cp.warned[m.n] && cpState(s.cp, m, elapsed)==='miss'){
+      s.cp.warned[m.n] = true;
+      toast(`${Math.round(m.at/60e3)} minuter: ${m.done} borde vara klart. Gissa på resten av ${m.done}, markera och gå till ${m.next}.`);
+      renderSide();
+    }
+  }
+  // dubbla riktmärket på uppgiften: visa påminnelsen (en gång per uppgift)
+  if (overBudget(s) && !(s.guessShown ||= {})[s.cur]){ s.guessShown[s.cur] = true; renderSide(); }
 }
 function submit(){
   const s = session; if (!s) return;
@@ -2637,7 +2704,8 @@ function submit(){
   }
   P.sessions = P.sessions.slice(0,60);
   store.save();
-  result = {label:s.label, rows, correct, graded:graded.length, used, plan: s.deadline - s.start, rt: s.rt||null, nofacit: rows.filter(r=>r.status==='nofacit')};
+  result = {label:s.label, rows, correct, graded:graded.length, used, plan: s.deadline - s.start, rt: s.rt||null, nofacit: rows.filter(r=>r.status==='nofacit'), cp: s.cp ? Object.assign({}, s.cp.reach) : null, flagged: Object.keys(s.flag||{}).filter(i=>s.flag[i]).length};
+  if (s.cp && P.sessions[0] && P.sessions[0].tk===s.tk && !P.sessions[0].sec){ P.sessions[0].cp = result.cp; store.save(); }
   session = null; view='result'; render(); window.scrollTo(0,0);
   autoExplain();
 }
@@ -2811,6 +2879,76 @@ function daysLeft(){
   const d = new Date(P.examDate+'T08:00:00'); if (isNaN(d)) return null;
   return Math.ceil((d - new Date())/86400000);
 }
+// ================= Idag: rapportens veckoplan, anpassad efter veckorna kvar =================
+const WDAY = ['Sön','Mån','Tis','Ons','Tor','Fre','Lör'];
+function planPhase(dl){
+  if (dl==null || dl<0) return {id:'plan', name:'Veckoplanen', note:'Ange provdatum ovan, så anpassas planen efter hur många veckor som är kvar.'};
+  if (dl<=7) return {id:'last', name:'Sista veckan', note:'Inga nya ämnen. Korta pass, felbanken en sista gång och sömn före provet.'};
+  if (dl<=21) return {id:'end', name:'Slutfasen, sista tre veckorna', note:'Två fulla pass i veckan, och minst en gång två pass i följd för att träna uthålligheten. Appens intervall är nu bara några dagar.'};
+  if (dl<=56) return {id:'plan', name:'Huvudfasen, 8–3 veckor kvar', note:'Veckoplanen gäller rakt av.'};
+  return {id:'base', name:'Grundfasen, mer än 8 veckor kvar', note:'Lägg mer tid på genomgång av svaga ämnen på tisdagar och söndagar, och repetera glömda grunder. Appens intervall får växa till 1–2 veckor.'};
+}
+// Nästa hela kvantpass: ett reserverat (sparat för simulering) som inte är gjort, annars det nyaste ogjorda, annars det du gjort minst
+function nextFullPass(){
+  const ks = testsSorted().filter(t=>t.kind==='k' && t.facit);
+  if (!ks.length) return null;
+  const times = t => P.sessions.filter(x=>x.tk===t.key && !x.sec).length;
+  return ks.find(t=>isReserved(t.key) && !times(t)) || ks.find(t=>!times(t)) || ks.slice().sort((a,b)=>times(a)-times(b))[0];
+}
+// Ett dagspass: titel, vad du gör, ungefärlig tid, knappar och om det är gjort idag
+function dayPlan(dow, phase, c){
+  const A = (label, go, primary) => ({label, go, primary});
+  const appA = A('Huvudräkning', ()=>setTab('hr'));
+  const mixA = n => A(`Blandat set (${n})`, ()=>startMix(n), true);
+  const dueA = c.due ? A(`Felbanken (${c.due})`, ()=>startDue(), true) : null;
+  const fullA = c.full ? A(`Fullt pass: ${examShort(c.full.date)} pass ${c.full.pass}`, ()=>startPass(c.full), true) : null;
+  const topA = (w, fallbackN) => w ? A('Träna '+topicName(w.code), ()=>startTopic(w.code), true) : mixA(fallbackN);
+  const done = c.done;
+  if (phase==='last'){
+    if (c.dl<=1) return {title:'Vila', text:'Inga uppgifter idag. Gå igenom dina lärdomar i lugn takt om du vill, och sov ordentligt.', min:0, acts:[], done:true};
+    if (dow===5) return {title:'Vila', text:'Bara appen, 5–10 minuter.', min:10, acts:[appA], done:done.app};
+    return {title:'Kort pass', text:'Appen 10 minuter, sedan felbanken eller ett blandat set med 10 uppgifter. Inga nya ämnen.', min:30, acts:[dueA, mixA(10), appA].filter(Boolean), done:done.due || done.mix};
+  }
+  const base = phase==='base';
+  switch (dow){
+    case 1: return {title:'Blandat set', text:'Appen 10 minuter. Sedan 15 uppgifter ur XYZ, KVA och NOG från flera prov, omkastade, ungefär en minut per uppgift.', min:45, acts:[mixA(15), appA], done:done.mix};
+    case 2: return {title:'Svagt ämne 1', text:`Appen 10 minuter. Sedan ${c.w1 ? topicName(c.w1.code) : 'ditt svagaste ämne (visas när du har gjort några uppgifter)'}: läs 1–2 lösta exempel i förklaringarna, gör liknande uppgifter och till sist tre utan hjälp.`+(base ? ' Grundfasen: ta gärna två set och repetera grunderna i ämnet.' : ''), min: base ? 50 : 40, acts:[topA(c.w1, 15), appA], done:done.topic};
+    case 3: return phase==='end'
+      ? {title:'Fullt kvantpass', text:'Veckans första fulla pass: 55 minuter med kontrollpunkterna 22 och 32 minuter. Klassa felen direkt efteråt.', min:90, acts:[fullA].filter(Boolean), done:done.full}
+      : {title:'Felbanken', text:'Appen 10 minuter. Sedan alla omförsök som förfaller, från noll och med tid.'+(c.due ? '' : ' Inga fel förfaller idag, så gör ett blandat set i stället.'), min:30, acts:[dueA || mixA(10), appA], done:done.due || (!c.due && done.mix)};
+    case 4: return {title:'DTK-block', text:'Appen 10 minuter. Sedan 12 DTK-uppgifter på 23 minuter. Avsluta gärna med några KVA- eller NOG-uppgifter där du bara avgör svarsbokstaven.', min:40, acts:[A('DTK-block (12)', ()=>startRT('DTK','new',12,false), true), appA], done:done.dtk};
+    case 5: return {title:'Vila', text:'Bara appen, 5–10 minuter.', min:10, acts:[appA], done:done.app};
+    case 6: return {title: phase==='end' ? 'Två fulla pass' : 'Fullt kvantpass', text: phase==='end'
+        ? 'Två kvantpass i följd med en kort paus emellan, för att träna uthålligheten. Kontrollpunkterna 22 och 32 minuter gäller i båda. Klassa felen efteråt.'
+        : '55 minuter med ett av de nyare passen och kontrollpunkterna 22 och 32 minuter. Klassa felen direkt efteråt.', min: phase==='end' ? 150 : 90, acts:[fullA].filter(Boolean), done:done.full};
+    default: return {title:'Svagt ämne 2', text:`Appen 10 minuter. Sedan ${c.w2 ? topicName(c.w2.code) : 'ditt näst svagaste ämne'} och de omförsök som förfaller. Gör egna kort av veckans lärdomar i felloggen.`+(phase==='end' ? ' Ta felbanken extra noga, eftersom onsdagen nu är ett fullt pass.' : ''),
+      min:40, acts:[topA(c.w2, 10), dueA, A('Felloggen', ()=>setTab('fr'))].filter(Boolean), done:done.topic};
+  }
+}
+function todayContext(){
+  const today = isoDay(), dl = daysLeft();
+  const todays = P.sessions.filter(x=>localDay(x.d)===today);
+  const has = f => todays.some(f);
+  const wk = weakTopics(2).list;
+  return {dl, w1:wk[0]||null, w2:wk[1]||wk[0]||null, due:dueErrItems().length, full:nextFullPass(),
+    done:{mix:has(x=>/^Blandad träning/.test(x.label)), topic:has(x=>/^Ämnesträning/.test(x.label)), due:has(x=>x.label==='Felbanken'),
+      dtk:has(x=>/^Riktad träning · DTK/.test(x.label)), full:has(x=>x.tk && !x.sec), app:!!SR.summary().today}};
+}
+function todayPanel(){
+  const c = todayContext(), phase = planPhase(c.dl), dow = new Date().getDay();
+  const p = dayPlan(dow, phase.id, c);
+  const week = [1,2,3,4,5,6,0].map(d=>{ const q = d===dow ? p : dayPlan(d, phase.id, Object.assign({}, c, {done:{}}));
+    return el('li',{class:(d===dow?'nu':'')+(d===dow && p.done?' done':'')}, el('b',{}, WDAY[d]), el('span',{}, q.title)); });
+  return el('div',{class:'todayplan box'},
+    el('div',{class:'todaytask'},
+      el('span',{class:'label'}, `${['Söndag','Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag'][dow]} · ${phase.name}`),
+      el('h4',{}, p.title+(p.done ? ' ✓' : '')),
+      el('p',{class:'note',style:'margin:0;max-width:70ch'}, p.text+(p.min ? ` Cirka ${p.min} minuter.` : '')),
+      p.acts.length ? el('div',{class:'row'}, p.acts.map(a=>el('button',{class:'btn small'+(a.primary && !p.done ? ' primary' : ''),type:'button',onclick:a.go}, a.label))) : null,
+      !c.full && (dow===6 || (phase.id==='end' && dow===3)) ? el('p',{class:'note'}, 'Läs in ett kvantprov med facit för att kunna göra ett fullt pass.') : null),
+    el('ul',{class:'weekplan','aria-label':'Veckans plan'}, week),
+    el('p',{class:'note',style:'margin:0'}, phase.note));
+}
 function testsSorted(){ return Object.values(LIB.tests).sort((a,b)=> a.date===b.date ? a.pass-b.pass : b.date.localeCompare(a.date)); }
 // Mappval fungerar inte på iPhone/iPad/Android: där visas bara "Välj PDF-filer".
 const IS_MOBILE = /iPad|iPhone|iPod|Android/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
@@ -2979,6 +3117,7 @@ function renderHome(){
     el('div',{class:'hhead'}, fields, cta),
     el('section',{}, el('h3',{class:'hsec'}, roadTitle), road),
     !tests.length ? drop : null,
+    tests.length ? el('section',{}, el('h3',{class:'hsec'},'Idag enligt veckoplanen'), todayPanel()) : null,
     el('section',{}, el('h3',{class:'hsec'},'Dagens stig'), stig),
     el('div',{class:'hcols'},
       el('section',{}, el('h3',{class:'hsec'},'Delprov, andel rätt'), el('div',{class:'dplist box'}, CODES.map(dpRow)),
@@ -3426,6 +3565,20 @@ function startMix(n){
   tab==='rt' || setTab('rt');
   startSession(items, 'Blandad träning · XYZ, KVA och NOG', {rt:{sec:'MIX', mode:'mix', mix:true, n, instant:false}, sec:'MIX', deadline: Date.now()+plan});
 }
+// Felbanken: alla kvantfel som förfaller idag (även ur reserverade prov), från noll och med tid
+const KVANT_SECS = ['XYZ','KVA','NOG','DTK'];
+function dueErrItems(){
+  const T = tasks(), key = i => i.tk+'|'+i.n, end = new Date().setHours(23,59,59,999);
+  return KVANT_SECS.flatMap(sec=>availableItems(sec, true)).filter(i=>{ const t = T[key(i)]; return needsWork(t) && taskDue(t) <= end; })
+    .sort((a,b)=>taskDue(T[key(a)]) - taskDue(T[key(b)]));
+}
+function startDue(n=30){
+  const items = dueErrItems().slice(0, n);
+  if (!items.length){ toast('Inga fel förfaller idag.'); return; }
+  const plan = items.reduce((a,i)=>a+SEC[i.sec].pace*1000, 0);
+  tab==='rt' || setTab('rt');
+  startSession(interleave(items), 'Felbanken', {rt:{sec:'MIX', mode:'due', mix:true, due:true, n, instant:false}, sec:'MIX', deadline: Date.now()+plan});
+}
 // Ämnesträning: uppgifter ur ett ämne. Facit och förklaring visas direkt, eftersom det är inlärning av ett svagt ämne.
 function topicPool(code, withReserved=false){ return ['XYZ','KVA','NOG','DTK'].flatMap(s=>availableItems(s, withReserved)).filter(i=>topicOf(i.tk, i.n)===code); }
 function startTopic(code, n=8){
@@ -3521,6 +3674,17 @@ function instantVerdict(s, it){
     s.cur < s.items.length-1 ? el('button',{class:'btn primary small',type:'button',onclick:()=>goTo(s.cur+1)}, 'Nästa uppgift') : el('button',{class:'btn primary small',type:'button',onclick:submit}, 'Se resultatet'));
 }
 // tid per uppgift jämfört med riktmärket
+// Kontrollpunkterna efter ett helt kvantpass
+function cpResult(r){
+  const row = m => { const t = r.cp[m.n], ok = t!=null && t<=m.at;
+    return el('tr',{}, el('td',{}, `${m.done} klart`), el('td',{class:'n'}, fmtTime(m.at)), el('td',{class:'n'}, t==null ? 'inte nått' : fmtTime(t)),
+      el('td',{}, el('span',{class:'tag '+(ok?'ok':'bad')}, ok ? 'I tid' : t==null ? 'Missad' : 'Sent'))); };
+  const late = CHECKPOINTS.filter(m=>r.cp[m.n]==null || r.cp[m.n]>m.at);
+  return el('section',{class:'panel'}, el('h3',{}, 'Kontrollpunkter'),
+    el('div',{class:'tbl-wrap'}, el('table',{class:'log'}, el('thead',{}, el('tr',{}, el('th',{},'Kontrollpunkt'), el('th',{class:'n'},'Mål'), el('th',{class:'n'},'Du nådde'), el('th',{},''))), el('tbody',{}, CHECKPOINTS.map(row)))),
+    el('p',{class:'note'}, late.length ? 'Tid som går över i XYZ och KVA tas från DTK, som har mest tid per uppgift. Träna att gissa och markera efter dubbla riktmärket.' : 'Bra tempo: du låg i fas vid båda kontrollpunkterna.'),
+    r.flagged ? el('p',{class:'note'}, `Du markerade ${r.flagged} uppgifter under passet.`) : null);
+}
 function timePanel(rows){
   const W=640, H=200, L=34, R=8, T=14, B=30, n=rows.length, bw=(W-L-R)/Math.max(n,1);
   const max = Math.max(...rows.map(r=>r.ms), ...rows.map(r=>r.pace*1.6), 1);
@@ -3566,7 +3730,7 @@ function leastPractised(tests, c){
 function startPass(t){
   if (!t.facit) toast('Facit saknas för det här passet. Du kan göra det, men det kan inte rättas.');
   startSession(itemsFor(t), `${examShort(t.date)} · provpass ${t.pass}`);
-  if (session) session.tk = t.key;
+  if (session){ session.tk = t.key; if (t.kind==='k'){ session.cp = {reach:{}, warned:{}}; renderSide(); } }
 }
 function startSec(t, c){
   if (!t.facit) toast('Facit saknas för det här passet. Du kan göra det, men det kan inte rättas.');
@@ -3616,7 +3780,7 @@ function renderSide(){
     // i blandade set och ämnesträning byts delprovet hela tiden, så där visas inga delprovsrubriker
     if (x.sec!==lastSec && !s.rt?.mix && !s.rt?.topic){ sheet.append(el('span',{class:'secsep'}, x.sec)); lastSec=x.sec; }
     const shown = s.lock?.[i] && x.answer;   // "Visa svaret direkt": rätt ring blir grön, fel val rött
-    sheet.append(el('button',{type:'button',class:['sr', i===s.cur?'cur':'', x.answer?'':'nf'].join(' '),'aria-label':`Uppgift ${x.n}`+(s.chosen[i]?`, svar ${s.chosen[i]}`:', ej besvarad'),onclick:()=>goTo(i)},
+    sheet.append(el('button',{type:'button',class:['sr', i===s.cur?'cur':'', x.answer?'':'nf', s.flag?.[i]?'flag':''].join(' '),'aria-label':`Uppgift ${x.n}`+(s.chosen[i]?`, svar ${s.chosen[i]}`:', ej besvarad')+(s.flag?.[i]?', markerad':''),onclick:()=>goTo(i)},
       el('span',{class:'n'}, String(s.rt ? i+1 : x.n)),
       LET.slice(0,SEC[x.sec].opts).map(L=>el('i',{class: shown ? (L===x.answer ? 'r' : s.chosen[i]===L ? 'w' : '') : s.chosen[i]===L ? 'f' : ''}, L))));
   });
@@ -3625,6 +3789,7 @@ function renderSide(){
   put(side, 
     s.rt ? miniClock(s, left, sec)
       : el('div',{class:'clock'+(left<5*60*1000?' low':''),id:'clock'}, el('span',{class:'label'},'Tid kvar'), el('span',{class:'big'}, fmtTime(left))),
+    s.cp ? cpPanel(s) : null,
     el('div',{class:'qhead'}, el('span',{class:'chip '+sec.part}, it.sec), el('strong',{}, `Uppgift ${it.n}`), el('span',{class:'note'}, `${s.cur+1} av ${s.items.length}`+(s.rt ? ` · ${examShort(it.tk.split('|')[0])} pass ${it.tk.split('|')[1]}` : ''))),
     !it.answer ? el('span',{class:'chip missing'},'Facit saknas för den här uppgiften') : null,
     el('div',{class:'bubbles',role:'group','aria-label':'Ditt svar'}, LET.slice(0,opts).map(L=>{ const locked = s.lock?.[s.cur], mine = s.chosen[s.cur]===L;
@@ -3632,6 +3797,8 @@ function renderSide(){
       return el('button',{type:'button',class:'bub'+(mine?' on':'')+fbc,disabled:!!locked,'aria-pressed':mine?'true':'false',onclick:()=>pick(L)}, L); })),
     s.lock?.[s.cur] && it.answer ? instantVerdict(s, it) : null,
     el('span',{class:'qtime',id:'qtime'}, 'Tid på uppgiften: '+fmtTime((s.times[s.cur]||0)+(Date.now()-s.last))),
+    overBudget(s) ? guessBox(s) : null,
+    !s.rt?.instant ? el('button',{class:'link',type:'button','aria-pressed':s.flag?.[s.cur]?'true':'false',onclick:()=>{ (s.flag ||= {})[s.cur] = !s.flag[s.cur]; renderSide(); }}, s.flag?.[s.cur] ? '⚑ Markerad · ta bort markeringen' : 'Markera uppgiften') : null,
     el('div',{class:'row'},
       el('button',{class:'btn ghost small',type:'button',disabled:s.cur===0,onclick:()=>goTo(s.cur-1)},'Föregående'),
       el('button',{class:'btn primary small',type:'button',disabled:s.cur===s.items.length-1,onclick:()=>goTo(s.cur+1)},'Nästa')),
@@ -3676,13 +3843,14 @@ function renderResult(){
         el('p',{}, r.graded ? `${pct(r.correct,r.graded)} % rätt. Tid: ${fmtTime(r.used)} av ${r.rt ? fmtTime(r.plan) : '55:00'}.` : 'Inga uppgifter kunde rättas.'),
         r.nofacit.length ? el('p',{class:'chip missing'}, `Facit saknas för ${r.nofacit.length} uppgifter (${r.nofacit.map(x=>x.sec+' '+x.n).join(', ')}). De har inte rättats.`) : null,
         el('p',{class:'note'}, 'Alla fel och obesvarade uppgifter är sparade under "Sparade fel".'),
-        el('div',{class:'row'}, r.rt ? [el('button',{class:'btn primary',type:'button',onclick:()=> r.rt.mix ? startMix(r.rt.n) : r.rt.topic ? startTopic(r.rt.topic, r.rt.n) : startRT(r.rt.sec, r.rt.mode, r.rt.n, r.rt.instant)},'Ny omgång'),
+        el('div',{class:'row'}, r.rt ? [el('button',{class:'btn primary',type:'button',onclick:()=> r.rt.due ? startDue(r.rt.n) : r.rt.mix ? startMix(r.rt.n) : r.rt.topic ? startTopic(r.rt.topic, r.rt.n) : startRT(r.rt.sec, r.rt.mode, r.rt.n, r.rt.instant)},'Ny omgång'),
           el('button',{class:'btn ghost',type:'button',onclick:()=>{ if (r.rt.mix || r.rt.topic) rtPage = {sec:null, mode:'new'}; view='home'; render(); }}, r.rt.mix || r.rt.topic ? 'Tillbaka till Riktad träning' : `Tillbaka till ${r.rt.sec}`)] : el('button',{class:'btn primary',type:'button',onclick:()=>{view='home';render();}},'Till startsidan'))),
       el('div',{class:'panel'}, el('h3',{},'Per delprov'),
         el('div',{class:'tbl-wrap'}, el('table',{class:'log'},
           el('thead',{}, el('tr',{}, el('th',{},'Delprov'), el('th',{class:'n'},'Rätt'), el('th',{class:'n'},'Snitt / uppg'), el('th',{class:'n'},'Riktmärke'), el('th',{class:'n'},'Snabba fel'), el('th',{class:'n'},'Långsamma fel'))),
           el('tbody',{}, secs.map(b=>el('tr',{}, el('td',{}, b.sec), el('td',{class:'n'}, `${b.c}/${b.n}`), el('td',{class:'n'}, fmtTime(b.ms/b.n)), el('td',{class:'n'}, fmtTime(b.pace)), el('td',{class:'n'}, b.fast), el('td',{class:'n'}, b.slow)))))))),
     r.rt ? timePanel(r.rows) : null,
+    r.cp ? cpResult(r) : null,
     resultTopicPanel(r.rows),
     el('section',{class:'panel pattern'}, el('h3',{},'Mönster i felen'), el('ul',{class:'insights'}, out.map(t=>el('li',{},t))),
       el('p',{class:'note'}, 'Snabbt fel: mindre än halva riktmärket. Långsamt fel: mer än 1,5 gånger riktmärket. Riktmärket kommer från provhäftenas rekommenderade provtid per delprov.')),
